@@ -1,0 +1,13 @@
+owner_org: "ocha-fts"
+maintainer: "mcarans"
+maintainer_email: "rans@un.org"
+license_id: "cc-by-igo"
+subnational: 1  # has to be 0 or 1
+notes: "Contains data from OCHA's [Financial Tracking Service](https://fts.unocha.org/) on the financial requirements and current funding levels for appeals. Data is encoded as utf-8.  The second row of the CSV contains [HXL](http://hxlstandard.org) tags."
+caveats: "Please see the [About FTS](https://fts.unocha.org/content/about-fts-1)"
+methodology: "Registry"
+dataset_source: "OCHA Financial Tracking Service"
+package_creator: "mcarans"
+private: False  # has to be True or False
+url: ~
+state: "active"  # always "active".
