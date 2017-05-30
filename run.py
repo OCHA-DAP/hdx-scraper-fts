@@ -25,15 +25,20 @@ logger = logging.getLogger(__name__)
 def main():
     '''Generate dataset and create it in HDX'''
 
-    url = '%slocation' % Configuration.read()['base_url']
-    folder = gettempdir()
+    base_url = Configuration.read()['base_url']
+    url = '%sglobal-cluster' % base_url
     downloader = Download(auth=('ocha_hdx', 'bfeR432ujm'))
     response = downloader.download(url)
     json = response.json()
+    clusters = json['data']
+    url = '%slocation' % base_url
+    response = downloader.download(url)
+    json = response.json()
+    folder = gettempdir()
     for country in json['data']:
         countryname = country['name']
         logger.info('Adding FTS data for %s' % countryname)
-        dataset = generate_dataset(folder, downloader, country['iso3'], countryname)
+        dataset = generate_dataset(folder, downloader, clusters, country['iso3'], countryname)
         if dataset is not None:
             dataset.update_from_yaml()
             dataset.create_in_hdx()

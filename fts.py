@@ -18,19 +18,21 @@ from pandas.io.json import json_normalize
 from slugify import slugify
 
 hxl_names = {
+    'id': '#activity+appeal+id+fts_internal',
     'country': '#country+name',
-    'id': '#x_appeal+id',
-    'name': '#x_appeal+name',
-    'code': '#x_appeal+code',
-    'revisedRequirements': '#x_requirement+x_usd+x_current',
-    'endDate': '#date+end',
-    'totalFunding': '#x_funding+x_usd',
+    'name': '#activity+appeal+name',
+    'code': '#activity+appeal+id+external',
+    'revisedRequirements': '#value+funding+required+usd',
+    'totalFunding': '#value+funding+total+usd',
     'startDate': '#date+start',
+    'endDate': '#date+end',
     'year': '#date+year',
-    'percentFunded': '#x_requirement+x_met+x_percent'
+    'percentFunded': '#value+funding+pct',
+    'sector': '#sector'
 }
 
-columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements', 'totalFunding']
+country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements', 'totalFunding']
+sector_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'totalFunding']
 
 
 def drop_stuff(df, columns_to_keep):
@@ -47,7 +49,12 @@ def hxlate(df, hxl_names):
     return df
 
 
-def generate_dataset(folder, downloader, countryiso, countryname):
+def remove_nonenan(df, colname):
+    df[colname] = df[colname].astype(str)
+    df[colname].replace(['nan', 'none'], ['', ''], inplace=True)
+
+
+def generate_dataset(folder, downloader, clusters, countryiso, countryname):
     '''
     api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
     '''
@@ -66,46 +73,43 @@ def generate_dataset(folder, downloader, countryiso, countryname):
     dataset.add_tags(['cash'])
 
 
-    requirements_url = '%splan/country/' % base_url
-    funding_url = '%sfts/flow?groupby=plan&countryISO3=' % base_url
-    r = downloader.download('%s%s' % (requirements_url, countryiso))
+    requirements_url = '%splan/country/%s' % (base_url, countryiso)
+    funding_url = '%sfts/flow?groupby=plan&countryISO3=%s' % (base_url, countryiso)
+    r = downloader.download(requirements_url)
     req_data = r.json()['data']
     if len(req_data) == 0:
         return None
-    sorted_req_data = sorted(req_data, key=lambda d: d['endDate'])
-    dfreq_norm = json_normalize(sorted_req_data)
-    dfreq_norm = dfreq_norm[dfreq_norm.revisedRequirements > 0]
-    dfreq_norm['id'].fillna('missing')
-    dfreq_loc = json_normalize(sorted_req_data, 'locations')
+    dfreq_norm = json_normalize(req_data)
+    dfreq_loc = json_normalize(req_data, 'locations')
     dfreq_loc.rename(columns={'name': 'country'}, inplace=True)
     del dfreq_loc['id']
     dfreq_norm_loc = dfreq_norm.join(dfreq_loc)
-    dfreq_year = json_normalize(sorted_req_data, 'years')
+    dfreq_year = json_normalize(req_data, 'years')
     del dfreq_year['id']
     dfreq = dfreq_norm_loc.join(dfreq_year)
-    r = downloader.download('%s%s' % (funding_url, countryiso))
+    r = downloader.download(funding_url)
     fund_data = r.json()['data']['report3']['fundingTotals']['objects'][0]['singleFundingObjects']
     dffund = json_normalize(fund_data)
-    df = dfreq.merge(dffund, on='id')
-    df = df[df.totalFunding > 0]
-    df.rename(columns={'name_x': 'name'}, inplace=True)
-    df = drop_stuff(df, columns_to_keep)
-    df.startDate = df.startDate.str[:10]
-    df.endDate = df.endDate.str[:10]
-    df['percentFunded'] = (to_numeric(df.totalFunding) / to_numeric(
-        df.revisedRequirements)) * 100
-    df.dropna()
-
-    # add HXL tags
-    df = hxlate(df, hxl_names)
-
+    dffundreq = dfreq.merge(dffund, on='id')
+    dffundreq.rename(columns={'name_x': 'name'}, inplace=True)
+    dffundreq = drop_stuff(dffundreq, country_columns_to_keep)
+    dffundreq.sort_values('endDate', ascending=False, inplace=True)
+    dffundreq.startDate = dffundreq.startDate.str[:10]
+    dffundreq.endDate = dffundreq.endDate.str[:10]
+    dffundreq['percentFunded'] = (to_numeric(dffundreq.totalFunding) / to_numeric(
+        dffundreq.revisedRequirements) * 100).astype(str)
     # convert floats to string and trim ( formatters don't work on columns with mixed types)
-    df['percentFunded'] = df['percentFunded'].astype(str)
-    df['percentFunded'].loc[df['percentFunded'].str.contains('.')].str.split('.').str[0]
+    remove_nonenan(dffundreq, 'revisedRequirements')
+    remove_nonenan(dffundreq, 'totalFunding')
+    dffundreq['percentFunded'] = \
+    dffundreq.percentFunded.loc[dffundreq.percentFunded.str.contains('.')].str.split('.').str[0]
+    remove_nonenan(dffundreq, 'percentFunded')
+    # add HXL tags
+    dffundreq = hxlate(dffundreq, hxl_names)
 
     filename = 'fts_funding_requirements_%s.csv' % countryiso
     file_to_upload = join(folder, filename)
-    df.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
+    dffundreq.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
     resource_data = {
         'name': filename.lower(),
@@ -115,4 +119,40 @@ def generate_dataset(folder, downloader, countryiso, countryname):
     resource = Resource(resource_data)
     resource.set_file_to_upload(file_to_upload)
     dataset.add_update_resource(resource)
+
+    funding_url = '%sfts/flow?groupby=plan&countryISO3=%s&filterBy=destinationGlobalClusterId:' % (base_url, countryiso)
+    combined = DataFrame()
+    for cluster in clusters:
+        r = downloader.download('%s%s' % (funding_url, cluster['id']))
+        fund_data_toplevel = r.json()['data']['report3']['fundingTotals']['objects']
+        if not fund_data_toplevel:
+            continue
+        fund_data = fund_data_toplevel[0]['singleFundingObjects']
+        df = json_normalize(fund_data)
+        df = df.merge(dffundreq, on='id')
+        df['id'] = df.id.astype(int)
+        df.rename(columns={'name_x': 'name', 'totalFunding_x': 'totalFunding'}, inplace=True)
+        df = drop_stuff(df, sector_columns_to_keep)
+        sector = cluster['code']
+        if not sector:
+            sector = cluster['name']
+        df['sector'] = sector
+        remove_nonenan(df, 'totalFunding')
+        combined = combined.append(df, ignore_index=True)
+    combined.sort_values(['endDate', 'id'], ascending=[False, True], inplace=True)
+    df = hxlate(combined, hxl_names)
+
+    filename = 'fts_funding_sector_%s.csv' % countryiso
+    file_to_upload = join(folder, filename)
+    df.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
+
+    resource_data = {
+        'name': filename.lower(),
+        'description': '%s by sector' % title,
+        'format': 'csv'
+    }
+    resource = Resource(resource_data)
+    resource.set_file_to_upload(file_to_upload)
+    dataset.add_update_resource(resource)
+
     return dataset
