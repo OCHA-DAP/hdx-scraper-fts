@@ -1,4 +1,6 @@
 ### Collector for FTS's Datasets
+[![Build Status](https://travis-ci.org/OCHA-DAP/hdxscraper-fts.svg?branch=master&ts=1)](https://travis-ci.org/OCHA-DAP/hdxscraper-fts) [![Coverage Status](https://coveralls.io/repos/github/OCHA-DAP/hdxscraper-fts/badge.svg?branch=master&ts=1)](https://coveralls.io/github/OCHA-DAP/hdxscraper-fts?branch=master)
+
 Collector designed to collect the FTS datasets from the [FTS](https://fts.unocha.org/) website.
 
 ### Usage
