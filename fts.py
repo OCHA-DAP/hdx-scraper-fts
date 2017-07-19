@@ -115,7 +115,7 @@ def generate_dataset_and_showcase(base_url, folder, downloader, clusters, countr
     try:
         dataset.add_country_location(countryiso)
     except HDXError as e:
-        logger.exception('%s has a problem! %s' % (title, e))
+        logger.error('%s has a problem! %s' % (title, e))
         return None, None
 
     tags = ['cash', 'FTS']
@@ -133,7 +133,7 @@ def generate_dataset_and_showcase(base_url, folder, downloader, clusters, countr
         return {'id': '', 'name': '', 'organizationTypes': ''}
 
     if 'sourceObjects' not in dffund:
-        logger.exception('No sourceObjects column for %s' % title)
+        logger.error('No sourceObjects column for %s' % title)
         return None, None
 
     tmp = dffund['sourceObjects'].apply(get_organization)
@@ -185,7 +185,7 @@ def generate_dataset_and_showcase(base_url, folder, downloader, clusters, countr
     r = downloader.download(requirements_url)
     req_data = r.json()['data']
     if len(req_data) == 0:
-        logger.exception('No requirements data for %s' % title)
+        logger.error('No requirements data for %s' % title)
         return dataset, showcase
     dfreq = json_normalize(req_data)
     dfreq['country'] = dfreq['locations'].apply(lambda x: x[0]['name'])
@@ -194,7 +194,7 @@ def generate_dataset_and_showcase(base_url, folder, downloader, clusters, countr
     fund_data = r.json()['data']['report3']['fundingTotals']['objects'][0]['singleFundingObjects']
     dffund = json_normalize(fund_data)
     if 'id' not in dffund:
-        logger.exception('No id column for %s' % title)
+        logger.error('No id column for %s' % title)
         return dataset, showcase
     dffundreq = dfreq.merge(dffund, on='id')
     dffundreq.rename(columns={'name_x': 'name'}, inplace=True)
