@@ -36,6 +36,7 @@ def main():
         countryname = country['name']
         if countryname == 'World':
             logger.info('Ignoring  %s' % countryname)
+            continue
         logger.info('Adding FTS data for %s' % countryname)
         dataset, showcase = generate_dataset_and_showcase(base_url, folder, downloader, clusters, country['iso3'], countryname, locationid, today)
         if dataset is None:
