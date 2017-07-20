@@ -15,6 +15,7 @@ from tempfile import gettempdir
 
 from hdx.hdx_configuration import Configuration
 from hdx.facades import logging_kwargs
+logging_kwargs['smtp_config_yaml'] = join('config', 'smtp_configuration.yml')
 from hdx.facades.hdx_scraperwiki import facade
 from hdx.utilities.downloader import Download
 
@@ -49,6 +50,5 @@ def main():
             showcase.add_dataset(dataset)
 
 if __name__ == '__main__':
-    logging_kwargs['smtp_config_yaml'] = join('config', 'smtp_configuration.yml')
     facade(main, hdx_site='feature', project_config_yaml=join('config', 'project_configuration.yml'))
 
