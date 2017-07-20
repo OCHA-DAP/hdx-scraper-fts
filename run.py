@@ -14,11 +14,11 @@ from os.path import join, expanduser
 from tempfile import gettempdir
 
 from hdx.hdx_configuration import Configuration
-from hdx.facades import logging_kwargs
 from hdx.utilities.downloader import Download
 
 from fts import generate_dataset_and_showcase, get_clusters, get_countries
 
+from hdx.facades import logging_kwargs
 logging_kwargs['smtp_config_yaml'] = join('config', 'smtp_configuration.yml')
 from hdx.facades.hdx_scraperwiki import facade
 
