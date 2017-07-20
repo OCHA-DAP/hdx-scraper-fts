@@ -49,6 +49,6 @@ def main():
             showcase.add_dataset(dataset)
 
 if __name__ == '__main__':
-    logging_kwargs.update(smtp_config_yaml=join('config', 'smtp_configuration.yml'))
+    logging_kwargs['smtp_config_yaml'] = join('config', 'smtp_configuration.yml')
     facade(main, hdx_site='feature', project_config_yaml=join('config', 'project_configuration.yml'))
 
