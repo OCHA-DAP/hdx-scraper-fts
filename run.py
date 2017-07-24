@@ -41,7 +41,7 @@ def main():
             logger.info('Ignoring  %s' % countryname)
             continue
         logger.info('Adding FTS data for %s' % countryname)
-        dataset, showcase = generate_dataset_and_showcase(base_url, folder, downloader, clusters, country['iso3'], countryname, locationid, today)
+        dataset, showcase = generate_dataset_and_showcase(base_url, downloader, folder, clusters, country['iso3'], countryname, locationid, today)
         if dataset is None:
             logger.info('No data for %s' % countryname)
         else:

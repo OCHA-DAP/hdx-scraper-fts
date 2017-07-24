@@ -140,7 +140,7 @@ class TestFTS:
     def test_generate_dataset_and_showcase(self, configuration, downloader):
         folder = gettempdir()
         today = datetime.strptime('01062017', '%d%m%Y').date()
-        dataset, showcase = generate_dataset_and_showcase('http://lala/', folder, downloader, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        dataset, showcase = generate_dataset_and_showcase('http://lala/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
         assert dataset == {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
                            'title': 'FTS Requirements and Funding Data for Afghanistan',
                            'tags': [{'name': 'cash'}, {'name': 'FTS'}], 'dataset_date': '06/01/2017',

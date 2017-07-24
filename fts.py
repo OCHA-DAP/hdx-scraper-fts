@@ -98,7 +98,7 @@ def get_countries(base_url, downloader):
     return json['data']
 
 
-def generate_dataset_and_showcase(base_url, folder, downloader, clusters, countryiso, countryname, locationid, today):
+def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countryiso, countryname, locationid, today):
     '''
     api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
     '''
