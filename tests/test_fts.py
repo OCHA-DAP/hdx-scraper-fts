@@ -82,38 +82,38 @@ class TestFTS:
 
     @pytest.fixture(scope='function')
     def downloader(self):
-        class Request:
+        class Response:
             def json(self):
                 pass
 
         class Download:
             @staticmethod
             def download(url):
-                request = Request()
+                response = Response()
                 if url == 'http://lala/global-cluster':
                     def fn():
                         return {'data': TestFTS.clusters}
-                    request.json = fn
+                    response.json = fn
                 elif url == 'http://lala/location':
                     def fn():
                         return {'data': TestFTS.countries}
-                    request.json = fn
+                    response.json = fn
                 elif url == 'http://lala/fts/flow?countryISO3=AFG&year=2017':
                     def fn():
                         return {'data': {'flows':  TestFTS.flows}}
-                    request.json = fn
+                    response.json = fn
                 elif url == 'http://lala/plan/country/AFG':
                     def fn():
                         return {'data': TestFTS.requirements}
-                    request.json = fn
+                    response.json = fn
                 elif url == 'http://lala/fts/flow?groupby=plan&countryISO3=AFG':
                     def fn():
                         return {'data': {'report3': {'fundingTotals': {'objects': [{'singleFundingObjects': TestFTS.funding_objects}]}}}}
-                    request.json = fn
+                    response.json = fn
                 elif url == 'http://lala/fts/flow?groupby=plan&countryISO3=AFG&filterBy=destinationGlobalClusterId:1':
                     def fn():
                         return {'data': {'report3': {'fundingTotals': {'objects': list()}}}}
-                    request.json = fn
+                    response.json = fn
                 elif url == 'http://lala/fts/flow?groupby=plan&countryISO3=AFG&filterBy=destinationGlobalClusterId:12':
                     def fn():
                         return {'data': {'report3': {'fundingTotals': {
@@ -125,8 +125,8 @@ class TestFTS:
                                                                    'direction': 'destination',
                                                                    'name': 'Not specified'}],
                                          'direction': 'destination'}]}}}}
-                    request.json = fn
-                return request
+                    response.json = fn
+                return response
         return Download()
 
     def test_get_clusters(self, downloader):
