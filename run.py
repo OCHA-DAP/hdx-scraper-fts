@@ -29,7 +29,7 @@ def main():
     '''Generate dataset and create it in HDX'''
 
     base_url = Configuration.read()['base_url']
-    downloader = Download(basicauthfile=join(expanduser("~"), '.ftskey'))
+    downloader = Download(basic_auth_file=join(expanduser("~"), '.ftskey'))
     clusters = get_clusters(base_url, downloader)
     countries = get_countries(base_url, downloader)
     folder = gettempdir()
