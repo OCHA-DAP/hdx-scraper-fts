@@ -143,7 +143,7 @@ class TestFTS:
         dataset, showcase = generate_dataset_and_showcase('http://lala/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
         assert dataset == {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
                            'title': 'FTS Requirements and Funding Data for Afghanistan',
-                           'tags': [{'name': 'cash'}, {'name': 'FTS'}], 'dataset_date': '06/01/2017',
+                           'tags': [{'name': 'HXL'}, {'name': 'cash'}, {'name': 'FTS'}], 'dataset_date': '06/01/2017',
                            'data_update_frequency': '1'}
         resources = dataset.get_resources()
         assert resources == [{'name': 'fts_funding_afg.csv', 'description': 'FTS Funding Data for Afghanistan for 2017', 'format': 'csv'},
@@ -153,5 +153,5 @@ class TestFTS:
                             'name': 'fts-requirements-and-funding-data-for-afghanistan-showcase',
                             'notes': 'Click the image on the right to go to the FTS funding summary page for Afghanistan',
                             'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Afghanistan Summary Page',
-                            'tags': [{'name': 'cash'}, {'name': 'FTS'}]}
+                            'tags': [{'name': 'HXL'}, {'name': 'cash'}, {'name': 'FTS'}]}
 

@@ -118,7 +118,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         logger.error('%s has a problem! %s' % (title, e))
         return None, None
 
-    tags = ['cash', 'FTS']
+    tags = ['HXL', 'cash', 'FTS']
     dataset.add_tags(tags)
 
     funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
