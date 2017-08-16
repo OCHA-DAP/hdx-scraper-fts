@@ -7,5 +7,3 @@ methodology_other: "FTS is open to all government and private donors, funds, rec
 dataset_source: "OCHA Financial Tracking Service"
 package_creator: "mcarans"
 private: False  # has to be True or False
-url: ~
-state: "active"  # always "active".
