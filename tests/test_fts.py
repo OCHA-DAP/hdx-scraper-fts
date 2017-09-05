@@ -143,7 +143,7 @@ class TestFTS:
         today = datetime.strptime('01062017', '%d%m%Y').date()
         dataset, showcase = generate_dataset_and_showcase('http://lala/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
         assert dataset == {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
-                           'title': 'FTS Requirements and Funding Data for Afghanistan',
+                           'title': 'Afghanistan - Requirements and Funding Data',
                            'tags': [{'name': 'HXL'}, {'name': 'cash'}, {'name': 'FTS'}], 'dataset_date': '06/01/2017',
                            'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
                            'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e'}

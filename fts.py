@@ -103,8 +103,8 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
     '''
     latestyear = str(today.year)
-    title = 'FTS Requirements and Funding Data for %s' % countryname
-    slugified_name = slugify(title).lower()
+    title = '%s - Requirements and Funding Data' % countryname
+    slugified_name = slugify('FTS Requirements and Funding Data for %s' % countryname).lower()
 
     dataset = Dataset({
         'name': slugified_name,
@@ -221,7 +221,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
 
     resource_data = {
         'name': filename.lower(),
-        'description': title,
+        'description': 'FTS Requirements and Funding Data for %s' % countryname,
         'format': 'csv'
     }
     resource = Resource(resource_data)
