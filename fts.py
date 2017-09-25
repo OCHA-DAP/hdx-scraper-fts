@@ -193,7 +193,11 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     dfreq['country'] = dfreq['locations'].apply(lambda x: x[0]['name'])
     dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
     r = downloader.download(funding_url)
-    fund_data = r.json()['data']['report3']['fundingTotals']['objects'][0]['singleFundingObjects']
+    data = r.json()['data']['report3']['fundingTotals']['objects'][0]
+    fund_data = data.get('singleFundingObjects')
+    if not fund_data:
+        logger.error('No singleFundingObjects data for %s' % title)
+        return dataset, showcase
     dffund = json_normalize(fund_data)
     if 'id' not in dffund:
         logger.error('No id column for %s' % title)
