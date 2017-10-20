@@ -239,7 +239,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         fund_data_toplevel = r.json()['data']['report3']['fundingTotals']['objects']
         if not fund_data_toplevel:
             continue
-        fund_data = fund_data_toplevel[0]['singleFundingObjects']
+        fund_data = fund_data_toplevel[0].get('singleFundingObjects')
+        if fund_data is None:
+            logger.warning('Missing %s cluster data for %s' % (cluster['name'], title))
+            continue
         df = json_normalize(fund_data)
         if 'id' not in df:
             continue
