@@ -29,26 +29,26 @@ def main():
     '''Generate dataset and create it in HDX'''
 
     base_url = Configuration.read()['base_url']
-    downloader = Download(basic_auth_file=join(expanduser("~"), '.ftskey'))
-    clusters = get_clusters(base_url, downloader)
-    countries = get_countries(base_url, downloader)
-    folder = gettempdir()
-    today = datetime.now()
-    for country in countries:
-        locationid = country['id']
-        countryname = country['name']
-        if countryname == 'World':
-            logger.info('Ignoring  %s' % countryname)
-            continue
-        logger.info('Adding FTS data for %s' % countryname)
-        dataset, showcase = generate_dataset_and_showcase(base_url, downloader, folder, clusters, country['iso3'], countryname, locationid, today)
-        if dataset is None:
-            logger.info('No data for %s' % countryname)
-        else:
-            dataset.update_from_yaml()
-            dataset.create_in_hdx()
-            showcase.create_in_hdx()
-            showcase.add_dataset(dataset)
+    with Download(basic_auth_file=join(expanduser("~"), '.ftskey')) as downloader:
+        clusters = get_clusters(base_url, downloader)
+        countries = get_countries(base_url, downloader)
+        folder = gettempdir()
+        today = datetime.now()
+        for country in countries:
+            locationid = country['id']
+            countryname = country['name']
+            if countryname == 'World':
+                logger.info('Ignoring  %s' % countryname)
+                continue
+            logger.info('Adding FTS data for %s' % countryname)
+            dataset, showcase = generate_dataset_and_showcase(base_url, downloader, folder, clusters, country['iso3'], countryname, locationid, today)
+            if dataset is None:
+                logger.info('No data for %s' % countryname)
+            else:
+                dataset.update_from_yaml()
+                dataset.create_in_hdx()
+                showcase.create_in_hdx()
+                showcase.add_dataset(dataset)
 
 
 if __name__ == '__main__':
