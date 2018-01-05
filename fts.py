@@ -14,7 +14,7 @@ from hdx.data.hdxobject import HDXError
 from hdx.data.showcase import Showcase
 from hdx.data.dataset import Dataset
 from hdx.data.resource import Resource
-from pandas import DataFrame, concat, to_numeric, Series
+from pandas import DataFrame, concat, to_numeric
 from pandas.io.json import json_normalize
 from slugify import slugify
 
