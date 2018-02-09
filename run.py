@@ -47,7 +47,7 @@ def main():
                 logger.info('No data for %s' % countryname)
             else:
                 dataset.update_from_yaml()
-                dataset.create_in_hdx()
+                dataset.create_in_hdx(update_resources_by_name=False)
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
