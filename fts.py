@@ -173,7 +173,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         # add HXL tags
         dffund = hxlate(dffund, funding_hxl_names)
 
-        filename = 'fts_funding_%s.csv' % countryiso
+        filename = 'fts_funding_%s.csv' % countryiso.lower()
         file_to_upload = join(folder, filename)
         dffund.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
@@ -234,7 +234,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     # add HXL tags
     hxldffundreq = hxlate(dffundreq, hxl_names)
 
-    filename = 'fts_requirements_funding_%s.csv' % countryiso
+    filename = 'fts_requirements_funding_%s.csv' % countryiso.lower()
     file_to_upload = join(folder, filename)
     hxldffundreq.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
@@ -298,7 +298,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     df['clusterName'].replace('zzz', 'Shared Funding', inplace=True)
     df = hxlate(df, hxl_names)
 
-    filename = 'fts_requirements_funding_cluster_%s.csv' % countryiso
+    filename = 'fts_requirements_funding_cluster_%s.csv' % countryiso.lower()
     file_to_upload = join(folder, filename)
     df.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 

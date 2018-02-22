@@ -4,6 +4,7 @@
 Unit tests for fts.
 
 '''
+import filecmp
 from datetime import datetime
 from os.path import join
 from tempfile import gettempdir
@@ -151,6 +152,12 @@ class TestFTS:
         assert resources == [{'name': 'fts_funding_afg.csv', 'description': 'FTS Funding Data for Afghanistan for 2017', 'format': 'csv'},
                              {'name': 'fts_requirements_funding_afg.csv', 'description': 'FTS Requirements and Funding Data for Afghanistan', 'format': 'csv'},
                              {'name': 'fts_requirements_funding_cluster_afg.csv', 'description': 'FTS Requirements and Funding Data by Cluster for Afghanistan', 'format': 'csv'}]
+        for resource in resources:
+            resource_name = resource['name']
+            expected_file = join('tests', 'fixtures', resource_name)
+            actual_file = join(folder, resource_name)
+            assert filecmp.cmp(expected_file, actual_file)
+
         assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
                             'name': 'fts-requirements-and-funding-data-for-afghanistan-showcase',
                             'notes': 'Click the image on the right to go to the FTS funding summary page for Afghanistan',
