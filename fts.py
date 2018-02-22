@@ -61,7 +61,7 @@ hxl_names = {
 }
 
 country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'organizationName', 'organizationTypes', 'organizationId', 'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate', 'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
-country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements', 'totalFunding']
+country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements', 'totalFunding', 'percentFunded']
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
 cluster_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
 
@@ -124,6 +124,16 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     tags = ['HXL', 'cash', 'FTS']
     dataset.add_tags(tags)
 
+    showcase = Showcase({
+        'name': '%s-showcase' % slugified_name,
+        'title': 'FTS %s Summary Page' % countryname,
+        'notes': 'Click the image on the right to go to the FTS funding summary page for %s' % countryname,
+        'url': 'https://fts.unocha.org/countries/%s/flows/2017' % locationid,
+        'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg'
+    })
+    showcase.add_tags(tags)
+
+    nodata = True
     funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
     r = downloader.download(funding_url)
     fund_data = r.json()['data']['flows']
@@ -135,90 +145,91 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                 return infodict
         return {'id': '', 'name': '', 'organizationTypes': ''}
 
-    if 'sourceObjects' not in dffund:
-        logger.error('No sourceObjects column for %s' % title)
-        return None, None
+    if 'sourceObjects' in dffund:
+        tmp = dffund['sourceObjects'].apply(get_organization)
+        dffund['organizationId'] = tmp.apply(lambda x: x['id'])
+        dffund['organizationName'] = tmp.apply(lambda x: x['name'])
+        dffund['organizationTypes'] = tmp.apply(lambda x: ','.join(x['organizationTypes']))
 
-    tmp = dffund['sourceObjects'].apply(get_organization)
-    dffund['organizationId'] = tmp.apply(lambda x: x['id'])
-    dffund['organizationName'] = tmp.apply(lambda x: x['name'])
-    dffund['organizationTypes'] = tmp.apply(lambda x: ','.join(x['organizationTypes']))
+        def get_keywords(x):
+            if x:
+                return ','.join(x)
+            else:
+                return ''
 
-    def get_keywords(x):
-        if x:
-            return ','.join(x)
-        else:
-            return ''
+        dffund['keywords'] = dffund.keywords.apply(get_keywords)
+        if not 'originalAmount' in dffund:
+            dffund['originalAmount'] = ''
+            dffund['originalCurrency'] = ''
+        if not 'refCode' in dffund:
+            dffund['refCode'] = ''
+        dffund = drop_stuff(dffund, country_all_columns_to_keep)
+        dffund.sort_values('date', ascending=False, inplace=True)
+        dffund.date = dffund.date.str[:10]
+        dffund.firstReportedDate = dffund.firstReportedDate.str[:10]
+        dffund.decisionDate = dffund.decisionDate.str[:10]
+        dffund.createdAt = dffund.createdAt.str[:10]
+        dffund.updatedAt = dffund.updatedAt.str[:10]
+        # add HXL tags
+        dffund = hxlate(dffund, funding_hxl_names)
 
-    dffund['keywords'] = dffund.keywords.apply(get_keywords)
-    dffund = drop_stuff(dffund, country_all_columns_to_keep)
-    dffund.sort_values('date', ascending=False, inplace=True)
-    dffund.date = dffund.date.str[:10]
-    dffund.firstReportedDate = dffund.firstReportedDate.str[:10]
-    dffund.decisionDate = dffund.decisionDate.str[:10]
-    dffund.createdAt = dffund.createdAt.str[:10]
-    dffund.updatedAt = dffund.updatedAt.str[:10]
-    # add HXL tags
-    dffund = hxlate(dffund, funding_hxl_names)
+        filename = 'fts_funding_%s.csv' % countryiso
+        file_to_upload = join(folder, filename)
+        dffund.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
-    filename = 'fts_funding_%s.csv' % countryiso
-    file_to_upload = join(folder, filename)
-    dffund.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
-
-    resource_data = {
-        'name': filename.lower(),
-        'description': 'FTS Funding Data for %s for %s' % (countryname, latestyear),
-        'format': 'csv'
-    }
-    resource = Resource(resource_data)
-    resource.set_file_to_upload(file_to_upload)
-    dataset.add_update_resource(resource)
-
-    showcase = Showcase({
-        'name': '%s-showcase' % slugified_name,
-        'title': 'FTS %s Summary Page' % countryname,
-        'notes': 'Click the image on the right to go to the FTS funding summary page for %s' % countryname,
-        'url': 'https://fts.unocha.org/countries/%s/flows/2017' % locationid,
-        'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg'
-    })
-    showcase.add_tags(tags)
+        resource_data = {
+            'name': filename.lower(),
+            'description': 'FTS Funding Data for %s for %s' % (countryname, latestyear),
+            'format': 'csv'
+        }
+        resource = Resource(resource_data)
+        resource.set_file_to_upload(file_to_upload)
+        dataset.add_update_resource(resource)
+        nodata = False
 
     requirements_url = '%splan/country/%s' % (base_url, countryiso)
     funding_url = '%sfts/flow?groupby=plan&countryISO3=%s' % (base_url, countryiso)
     r = downloader.download(requirements_url)
     req_data = r.json()['data']
     if len(req_data) == 0:
-        logger.error('No requirements data for %s' % title)
-        return dataset, showcase
+        if nodata:
+            return None, None
+        else:
+            logger.error('No requirements data for %s' % title)
+            return dataset, showcase
     dfreq = json_normalize(req_data)
     dfreq['country'] = dfreq['locations'].apply(lambda x: x[0]['name'])
     dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
     r = downloader.download(funding_url)
     data = r.json()['data']['report3']['fundingTotals']['objects'][0]
     fund_data = data.get('objectsBreakdown')
-    if not fund_data:
-        logger.error('No objectsBreakdown data for %s' % title)
-        return dataset, showcase
-    dffund = json_normalize(fund_data)
-    if 'id' not in dffund:
-        logger.error('No id column for %s' % title)
-        return dataset, showcase
-    dffundreq = dfreq.merge(dffund, on='id')
+    if fund_data:
+        dffund = json_normalize(fund_data)
+        if 'id' in dffund:
+            dffundreq = dfreq.merge(dffund, on='id')
+            dffundreq.totalFunding += dffundreq.onBoundaryFunding
+            dffundreq['percentFunded'] = (to_numeric(dffundreq.totalFunding) / to_numeric(
+                dffundreq.revisedRequirements) * 100).astype(str)
+        else:
+            dffundreq = dfreq
+            dffundreq['totalFunding'] = ''
+            dffundreq['percentFunded'] = '0'
+    else:
+        dffundreq = dfreq
+        dffundreq['totalFunding'] = ''
+        dffundreq['percentFunded'] = '0'
     dffundreq.rename(columns={'name_x': 'name'}, inplace=True)
-    dffundreq.totalFunding += dffundreq.onBoundaryFunding
     dffundreq = drop_stuff(dffundreq, country_columns_to_keep)
     dffundreq.sort_values('endDate', ascending=False, inplace=True)
     dffundreq.startDate = dffundreq.startDate.str[:10]
     dffundreq.endDate = dffundreq.endDate.str[:10]
-    dffundreq['percentFunded'] = (to_numeric(dffundreq.totalFunding) / to_numeric(
-        dffundreq.revisedRequirements) * 100).astype(str)
     # convert floats to string and trim ( formatters don't work on columns with mixed types)
     remove_nonenan(dffundreq, 'revisedRequirements')
     remove_nonenan(dffundreq, 'totalFunding')
     dffundreq['percentFunded'] = \
     dffundreq.percentFunded.loc[dffundreq.percentFunded.str.contains('.')].str.split('.').str[0]
     remove_nonenan(dffundreq, 'percentFunded')
-    #sort
+    # sort
     dffundreq.sort_values(['endDate'], ascending=[False], inplace=True)
     # add HXL tags
     hxldffundreq = hxlate(dffundreq, hxl_names)
@@ -242,16 +253,22 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         r = downloader.download(funding_url)
         data = r.json()['data']
         fund_data = data['report3']['fundingTotals']['objects'][0]['objectsBreakdown']
-        dffund = json_normalize(fund_data)
         req_data = data['requirements']['objects']
         if req_data:
             dfreq = json_normalize(req_data)
-            df = dffund.merge(dfreq, on='id', how='outer')
-            df.rename(columns={'name_x': 'clusterName'}, inplace=True)
-            df.clusterName.fillna(df.name_y, inplace=True)
-            del df['name_y']
+            if fund_data:
+                dffund = json_normalize(fund_data)
+                if not 'id' in dffund:
+                    dffund['id'] = ''
+                df = dffund.merge(dfreq, on='id', how='outer')
+                df.rename(columns={'name_x': 'clusterName'}, inplace=True)
+                df.clusterName.fillna(df.name_y, inplace=True)
+                del df['name_y']
+            else:
+                df = dfreq
+                df['totalFunding'] = ''
         else:
-            df = dffund
+            df = json_normalize(fund_data)
             df['revisedRequirements'] = ''
             df.rename(columns={'name': 'clusterName'}, inplace=True)
         df.rename(columns={'id': 'clusterCode'}, inplace=True)
@@ -264,6 +281,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         df['id'] = planid
 
         combined = combined.append(df, ignore_index=True)
+    if len(combined) == 0:
+        logger.error('No cluster data for %s' % title)
+        return dataset, showcase
+
     df = combined.merge(dffundreq, on='id')
     df.rename(columns={'name_x': 'name', 'revisedRequirements_x': 'revisedRequirements', 'totalFunding_x': 'totalFunding'}, inplace=True)
     df = drop_stuff(df, cluster_columns_to_keep)
@@ -271,7 +292,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     remove_nonenan(df, 'totalFunding')
     df['percentFunded'] = (to_numeric(df.totalFunding) / to_numeric(
         df.revisedRequirements) * 100).astype(str)
-    df.percentFunded.loc[df.percentFunded.str.contains('.')].str.split('.').str[0]
+    df['percentFunded'] = df.percentFunded.loc[df.percentFunded.str.contains('.')].str.split('.').str[0]
     remove_nonenan(df, 'percentFunded')
     df.sort_values(['endDate', 'name', 'clusterName'], ascending=[False, True, True], inplace=True)
     df['clusterName'].replace('zzz', 'Shared Funding', inplace=True)
