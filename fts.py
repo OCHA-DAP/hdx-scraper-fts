@@ -14,6 +14,7 @@ from hdx.data.hdxobject import HDXError
 from hdx.data.showcase import Showcase
 from hdx.data.dataset import Dataset
 from hdx.data.resource import Resource
+from hdx.utilities.downloader import DownloadError
 from pandas import DataFrame, concat, to_numeric
 from pandas.io.json import json_normalize
 from slugify import slugify
@@ -206,7 +207,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     if fund_data:
         dffund = json_normalize(fund_data)
         if 'id' in dffund:
-            dffundreq = dfreq.merge(dffund, on='id')
+            dffundreq = dfreq.merge(dffund, on='id', how='outer', validate='1:1')
+            dffundreq.country.fillna(method='ffill', inplace=True)
+            dffundreq.name_x.fillna(dffundreq.name_y, inplace=True)
+            dffundreq.fillna('', inplace=True)
             dffundreq.totalFunding += dffundreq.onBoundaryFunding
             dffundreq['percentFunded'] = (to_numeric(dffundreq.totalFunding) / to_numeric(
                 dffundreq.revisedRequirements) * 100).astype(str)
@@ -226,8 +230,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     # convert floats to string and trim ( formatters don't work on columns with mixed types)
     remove_nonenan(dffundreq, 'revisedRequirements')
     remove_nonenan(dffundreq, 'totalFunding')
-    dffundreq['percentFunded'] = \
-    dffundreq.percentFunded.loc[dffundreq.percentFunded.str.contains('.')].str.split('.').str[0]
+    dffundreq['id'] = dffundreq['id'].astype(str)
+    dffundreq['id'] = dffundreq.id.loc[dffundreq.id.str.contains('.')].str.split('.').str[0]
+    remove_nonenan(dffundreq, 'id')
+    dffundreq['percentFunded'] = dffundreq.percentFunded.loc[dffundreq.percentFunded.str.contains('.')].str.split('.').str[0]
     remove_nonenan(dffundreq, 'percentFunded')
     # sort
     dffundreq.sort_values(['endDate'], ascending=[False], inplace=True)
@@ -248,11 +254,26 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     dataset.add_update_resource(resource)
 
     combined = DataFrame()
-    for planid in dffundreq['id']:
+    for _, row in dffundreq.iterrows():
+        planid = row['id']
+        if planid == '':
+            planname = row['name']
+            if planname == 'Not specified':
+                continue
+            raise ValueError('Plan Name: %s is invalid!' % planname)
         funding_url = '%sfts/flow?planid=%s&groupby=globalcluster' % (base_url, planid)
-        r = downloader.download(funding_url)
-        data = r.json()['data']
-        fund_data = data['report3']['fundingTotals']['objects'][0]['objectsBreakdown']
+        try:
+            r = downloader.download(funding_url)
+            data = r.json()['data']
+            fund_objects = data['report3']['fundingTotals']['objects']
+            if len(fund_objects) == 0:
+                logger.error('%s has no funding objects!' % funding_url)
+                fund_data = None
+            else:
+                fund_data = fund_objects[0]['objectsBreakdown']
+        except DownloadError:
+            logger.error('Problem with downloading %s!' % funding_url)
+            continue
         req_data = data['requirements']['objects']
         if req_data:
             dfreq = json_normalize(req_data)
@@ -260,13 +281,16 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                 dffund = json_normalize(fund_data)
                 if not 'id' in dffund:
                     dffund['id'] = ''
-                df = dffund.merge(dfreq, on='id', how='outer')
+                if not 'id' in dfreq:
+                    dfreq['id'] = ''
+                df = dffund.merge(dfreq, on='id', how='outer', validate='1:1')
                 df.rename(columns={'name_x': 'clusterName'}, inplace=True)
                 df.clusterName.fillna(df.name_y, inplace=True)
                 del df['name_y']
             else:
                 df = dfreq
                 df['totalFunding'] = ''
+                df.rename(columns={'name': 'clusterName'}, inplace=True)
         else:
             df = json_normalize(fund_data)
             df['revisedRequirements'] = ''
@@ -274,7 +298,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         df.rename(columns={'id': 'clusterCode'}, inplace=True)
         df = drop_stuff(df, plan_columns_to_keep)
         remove_nonenan(df, 'clusterCode')
-        shared_funding = data['report3']['fundingTotals']['objects'][0]['totalBreakdown']['sharedFunding']
+        if fund_data is None:
+            shared_funding = None
+        else:
+            shared_funding = data['report3']['fundingTotals']['objects'][0]['totalBreakdown']['sharedFunding']
         if shared_funding:
             row = {'clusterCode': '', 'clusterName': 'zzz', 'revisedRequirements': '', 'totalFunding': shared_funding}
             df.loc[len(df)] = row
@@ -294,6 +321,9 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         df.revisedRequirements) * 100).astype(str)
     df['percentFunded'] = df.percentFunded.loc[df.percentFunded.str.contains('.')].str.split('.').str[0]
     remove_nonenan(df, 'percentFunded')
+    df['id'] = df.id.astype(str)
+    df['id'] = df.id.loc[df.id.str.contains('.')].str.split('.').str[0]
+    remove_nonenan(df, 'id')
     df.sort_values(['endDate', 'name', 'clusterName'], ascending=[False, True, True], inplace=True)
     df['clusterName'].replace('zzz', 'Shared Funding', inplace=True)
     df = hxlate(df, hxl_names)

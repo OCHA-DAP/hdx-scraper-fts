@@ -12,6 +12,7 @@ from tempfile import gettempdir
 import pytest
 from hdx.hdx_configuration import Configuration
 from hdx.hdx_locations import Locations
+from hdx.utilities.downloader import DownloadError
 
 from fts import generate_dataset_and_showcase, get_clusters, get_countries
 
@@ -78,7 +79,14 @@ class TestFTS:
                          'singleFunding': 2500000, 'type': 'Plan'},
                         {'sharedFunding': 0, 'onBoundaryFunding': 1489197, 'direction': 'destination',
                          'totalFunding': 318052952, 'name': 'Afghanistan 2017', 'overlapFunding': 0, 'id': 544,
-                         'singleFunding': 318052952, 'type': 'Plan'}]
+                         'singleFunding': 318052952, 'type': 'Plan'},
+                        {'sharedFunding': '', 'onBoundaryFunding': 3391, 'direction': '',
+                        'totalFunding': 3121940000, 'name': 'Not specified', 'overlapFunding': '', 'id': '',
+                        'singleFunding': '', 'type': 'Plan'}]
+
+    objectsBreakdownnoid = [{'sharedFunding': '', 'onBoundaryFunding': 3391, 'direction': '',
+                             'totalFunding': 3121940000, 'name': 'Not specified', 'overlapFunding': '',
+                             'singleFunding': '', 'type': 'Plan'}]
 
     cluster_objectsBreakdown = [{'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Protection', 'id': 10, 'totalFunding': 12152422, 'singleFunding': 12152422, 'type': 'GlobalCluster', 'direction': 'destination'}, {'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Emergency Shelter and NFI', 'id': 4, 'totalFunding': 33904754, 'singleFunding': 33904754, 'type': 'GlobalCluster', 'direction': 'destination'}, {'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Food Security', 'id': 6, 'totalFunding': 498462845, 'singleFunding': 498462845, 'type': 'GlobalCluster', 'direction': 'destination'}, {'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Education', 'id': 3, 'totalFunding': 65668317, 'singleFunding': 65668317, 'type': 'GlobalCluster', 'direction': 'destination'}, {'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Multi-sector', 'id': 26479, 'totalFunding': 317252284, 'singleFunding': 317252284, 'type': 'GlobalCluster', 'direction': 'destination'}, {'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Coordination and support services', 'id': 26480, 'totalFunding': 58076793, 'singleFunding': 58076793, 'type': 'GlobalCluster', 'direction': 'destination'}, {'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Health', 'id': 7, 'totalFunding': 76050805, 'singleFunding': 76050805, 'type': 'GlobalCluster', 'direction': 'destination'}, {'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Agriculture', 'id': 26512, 'totalFunding': 61347440, 'singleFunding': 61347440, 'type': 'GlobalCluster', 'direction': 'destination'}, {'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Mine Action', 'id': 15, 'totalFunding': 27771389, 'singleFunding': 27771389, 'type': 'GlobalCluster', 'direction': 'destination'}, {'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Water Sanitation Hygiene', 'id': 11, 'totalFunding': 11933249, 'singleFunding': 11933249, 'type': 'GlobalCluster', 'direction': 'destination'}, {'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0, 'name': 'Early Recovery', 'id': 2, 'totalFunding': 34073658, 'singleFunding': 34073658, 'type': 'GlobalCluster', 'direction': 'destination'}]
 
@@ -102,31 +110,54 @@ class TestFTS:
             @staticmethod
             def download(url):
                 response = Response()
-                if url == 'http://lala/global-cluster':
+                if 'global-cluster' in url:
                     def fn():
                         return {'data': TestFTS.clusters}
                     response.json = fn
-                elif url == 'http://lala/location':
+                elif 'location' in url:
                     def fn():
                         return {'data': TestFTS.countries}
                     response.json = fn
-                elif url == 'http://lala/fts/flow?countryISO3=AFG&year=2017':
+                elif 'fts/flow?countryISO3=AFG&year=2017' in url:
                     def fn():
-                        return {'data': {'flows':  TestFTS.flows}}
+                        if 'jaja' in url:
+                            return {'data': {'flows': {}}}
+                        else:
+                            return {'data': {'flows': TestFTS.flows}}
                     response.json = fn
-                elif url == 'http://lala/plan/country/AFG':
+                elif 'plan/country/AFG' in url:
                     def fn():
-                        return {'data': TestFTS.requirements}
+                        if 'jaja' in url:
+                            return {'data': []}
+                        else:
+                            return {'data': TestFTS.requirements}
                     response.json = fn
-                elif url == 'http://lala/fts/flow?groupby=plan&countryISO3=AFG':
+                elif 'fts/flow?groupby=plan&countryISO3=AFG' in url:
                     def fn():
-                        return {'data': {'report3': {'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.objectsBreakdown}]}}}}
+                        if 'gaga' in url:
+                            return {'data': {'report3': {'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.objectsBreakdownnoid}]}}}}
+                        elif 'haha' in url:
+                            return {'data': {'report3': {'fundingTotals': {'objects': [{'objectsBreakdown': None}]}}}}
+                        else:
+                            return {'data': {
+                                'report3': {'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.objectsBreakdown}]}}}}
                     response.json = fn
-                elif 'http://lala/fts/flow?planid=' in url:
+                elif 'fts/flow?planid=' in url:
                     def fn():
-                        return {'data': {'report3': {'fundingTotals': {'objects': [{'totalBreakdown': {'sharedFunding': 0},
-                                                                                    'objectsBreakdown': TestFTS.cluster_objectsBreakdown}]}},
-                                         'requirements': {'objects': TestFTS.cluster_objects}}}
+                        if 'sasa' in url:
+                            raise DownloadError()
+                        elif 'baba' in url:
+                            return {'data': {'report3': {'fundingTotals': {'objects': []}},
+                                             'requirements': {'objects': TestFTS.cluster_objects}}}
+                        elif 'dada' in url:
+                            return {'data': {'report3': {'fundingTotals': {'objects': [{'totalBreakdown': {'sharedFunding': 0},
+                                                                                        'objectsBreakdown': TestFTS.cluster_objectsBreakdown}]}},
+                                             'requirements': {'objects': {}}}}
+                        else:
+                            return {'data': {'report3': {'fundingTotals': {'objects': [{'totalBreakdown': {'sharedFunding': 0},
+                                                                                        'objectsBreakdown': TestFTS.cluster_objectsBreakdown}]}},
+                                             'requirements': {'objects': TestFTS.cluster_objects}}}
+
                     response.json = fn
                 return response
         return Download()
@@ -163,4 +194,11 @@ class TestFTS:
                             'notes': 'Click the image on the right to go to the FTS funding summary page for Afghanistan',
                             'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Afghanistan Summary Page',
                             'tags': [{'name': 'HXL'}, {'name': 'cash'}, {'name': 'FTS'}]}
+        dataset, showcase = generate_dataset_and_showcase('http://haha/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        dataset, showcase = generate_dataset_and_showcase('http://jaja/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        dataset, showcase = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        dataset, showcase = generate_dataset_and_showcase('http://gaga/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        dataset, showcase = generate_dataset_and_showcase('http://sasa/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        dataset, showcase = generate_dataset_and_showcase('http://baba/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        dataset, showcase = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
 
