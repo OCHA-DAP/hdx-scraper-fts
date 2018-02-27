@@ -38,8 +38,6 @@ def main():
         for country in countries:
             locationid = country['id']
             countryname = country['name']
-            if countryname != 'Afghanistan':
-                continue
             if countryname == 'World':
                 logger.info('Ignoring  %s' % countryname)
                 continue
