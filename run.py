@@ -38,6 +38,8 @@ def main():
         for country in countries:
             locationid = country['id']
             countryname = country['name']
+            if countryname != 'Afghanistan':
+                continue
             if countryname == 'World':
                 logger.info('Ignoring  %s' % countryname)
                 continue
@@ -48,6 +50,9 @@ def main():
             else:
                 dataset.update_from_yaml()
                 dataset.create_in_hdx(update_resources_by_name=False)
+                resources = reversed(dataset.get_resources())
+                resource_ids = [x['id'] for x in resources]
+                dataset.reorder_resources(resource_ids)
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
