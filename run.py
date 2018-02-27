@@ -47,7 +47,10 @@ def main():
                 logger.info('No data for %s' % countryname)
             else:
                 dataset.update_from_yaml()
-                dataset.create_in_hdx(update_resources_by_name=False)
+                dataset.create_in_hdx()
+                resources = dataset.get_resources()
+                resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
+                dataset.reorder_resources(resource_ids)
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
