@@ -159,10 +159,11 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                 return ''
 
         dffund['keywords'] = dffund.keywords.apply(get_keywords)
-        if not 'originalAmount' in dffund:
+        if 'originalAmount' not in dffund:
             dffund['originalAmount'] = ''
+        if 'originalCurrency' not in dffund:
             dffund['originalCurrency'] = ''
-        if not 'refCode' in dffund:
+        if 'refCode' not in dffund:
             dffund['refCode'] = ''
         dffund = drop_stuff(dffund, country_all_columns_to_keep)
         dffund.sort_values('date', ascending=False, inplace=True)
@@ -279,9 +280,9 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
             dfreq = json_normalize(req_data)
             if fund_data:
                 dffund = json_normalize(fund_data)
-                if not 'id' in dffund:
+                if 'id' not in dffund:
                     dffund['id'] = ''
-                if not 'id' in dfreq:
+                if 'id' not in dfreq:
                     dfreq['id'] = ''
                 df = dffund.merge(dfreq, on='id', how='outer', validate='1:1')
                 df.rename(columns={'name_x': 'clusterName'}, inplace=True)

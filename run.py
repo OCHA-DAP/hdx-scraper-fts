@@ -13,6 +13,7 @@ from datetime import datetime
 from os.path import join, expanduser
 from tempfile import gettempdir
 
+from hdx.data.resource_view import ResourceView
 from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
 
@@ -51,6 +52,11 @@ def main():
                 resources = dataset.get_resources()
                 resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
                 dataset.reorder_resources(resource_ids)
+                for resource_id in resource_ids:
+                    resource_views = ResourceView.get_all_for_resource(resource_id)
+                    for resource_view in resource_views:
+                        if resource_view['view_type'] == 'hdx_hxl_preview':
+                            resource_view.delete_from_hdx()
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
