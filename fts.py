@@ -67,6 +67,11 @@ plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'to
 cluster_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
 
 
+def remove_fractions(df, colname):
+    df[colname] = df[colname].astype(str)
+    df[colname] = df[colname].loc[df[colname].str.contains('.')].str.split('.').str[0]
+
+
 def drop_stuff(df, columns_to_keep):
     # Drop unwanted columns.  Note that I confirmed that the two date columns are always equal.
     df = df.loc[:,columns_to_keep]
@@ -229,12 +234,14 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     dffundreq.startDate = dffundreq.startDate.str[:10]
     dffundreq.endDate = dffundreq.endDate.str[:10]
     # convert floats to string and trim ( formatters don't work on columns with mixed types)
+    remove_fractions(dffundreq, 'revisedRequirements')
     remove_nonenan(dffundreq, 'revisedRequirements')
+    remove_fractions(dffundreq, 'totalFunding')
     remove_nonenan(dffundreq, 'totalFunding')
     dffundreq['id'] = dffundreq['id'].astype(str)
-    dffundreq['id'] = dffundreq.id.loc[dffundreq.id.str.contains('.')].str.split('.').str[0]
+    remove_fractions(dffundreq, 'id')
     remove_nonenan(dffundreq, 'id')
-    dffundreq['percentFunded'] = dffundreq.percentFunded.loc[dffundreq.percentFunded.str.contains('.')].str.split('.').str[0]
+    remove_fractions(dffundreq, 'percentFunded')
     remove_nonenan(dffundreq, 'percentFunded')
     # sort
     dffundreq.sort_values(['endDate'], ascending=[False], inplace=True)
@@ -316,15 +323,18 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     df = combined.merge(dffundreq, on='id')
     df.rename(columns={'name_x': 'name', 'revisedRequirements_x': 'revisedRequirements', 'totalFunding_x': 'totalFunding'}, inplace=True)
     df = drop_stuff(df, cluster_columns_to_keep)
+    remove_fractions(df, 'revisedRequirements')
     remove_nonenan(df, 'revisedRequirements')
+    remove_fractions(df, 'totalFunding')
     remove_nonenan(df, 'totalFunding')
-    df['percentFunded'] = (to_numeric(df.totalFunding) / to_numeric(
-        df.revisedRequirements) * 100).astype(str)
-    df['percentFunded'] = df.percentFunded.loc[df.percentFunded.str.contains('.')].str.split('.').str[0]
+    df['percentFunded'] = (to_numeric(df.totalFunding) / to_numeric(df.revisedRequirements) * 100).astype(str)
+    remove_fractions(df, 'percentFunded')
     remove_nonenan(df, 'percentFunded')
     df['id'] = df.id.astype(str)
-    df['id'] = df.id.loc[df.id.str.contains('.')].str.split('.').str[0]
+    remove_fractions(df, 'id')
     remove_nonenan(df, 'id')
+    remove_fractions(df, 'clusterCode')
+    remove_nonenan(df, 'clusterCode')
     df.sort_values(['endDate', 'name', 'clusterName'], ascending=[False, True, True], inplace=True)
     df['clusterName'].replace('zzz', 'Shared Funding', inplace=True)
     df = hxlate(df, hxl_names)

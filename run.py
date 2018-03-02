@@ -48,10 +48,10 @@ def main():
                 logger.info('No data for %s' % countryname)
             else:
                 dataset.update_from_yaml()
-                dataset.create_in_hdx(remove_additional_resources=True)
+                dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False)
                 resources = dataset.get_resources()
                 resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
-                dataset.reorder_resources(resource_ids)
+                dataset.reorder_resources(resource_ids, hxl_update=False)
                 for resource_id in resource_ids:
                     resource_views = ResourceView.get_all_for_resource(resource_id)
                     for resource_view in resource_views:
