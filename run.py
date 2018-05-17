@@ -13,7 +13,6 @@ from datetime import datetime
 from os.path import join, expanduser
 from tempfile import gettempdir
 
-from hdx.data.resource_view import ResourceView
 from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
 
