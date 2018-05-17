@@ -43,7 +43,7 @@ def main():
                 logger.info('Ignoring  %s' % countryname)
                 continue
             logger.info('Adding FTS data for %s' % countryname)
-            dataset, showcase = generate_dataset_and_showcase(base_url, downloader, folder, clusters, country['iso3'], countryname, locationid, today)
+            dataset, showcase, hxl_update = generate_dataset_and_showcase(base_url, downloader, folder, clusters, country['iso3'], countryname, locationid, today)
             if dataset is None:
                 logger.info('No data for %s' % countryname)
             else:
@@ -51,16 +51,11 @@ def main():
                 dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False)
                 resources = dataset.get_resources()
                 resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
-                dataset.reorder_resources(resource_ids, hxl_update=False)
-                for resource_id in resource_ids:
-                    resource_views = ResourceView.get_all_for_resource(resource_id)
-                    for resource_view in resource_views:
-                        if resource_view['view_type'] == 'hdx_hxl_preview':
-                            resource_view.delete_from_hdx()
+                dataset.reorder_resources(resource_ids, hxl_update=hxl_update)
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
 
 if __name__ == '__main__':
-    facade(main, hdx_site='feature', user_agent_config_yaml=join(expanduser('~'), '.ftsuseragent.yml'), project_config_yaml=join('config', 'project_configuration.yml'))
+    facade(main, hdx_site='test', user_agent_config_yaml=join(expanduser('~'), '.ftsuseragent.yml'), project_config_yaml=join('config', 'project_configuration.yml'))
 

@@ -61,6 +61,13 @@ hxl_names = {
     'clusterName': '#sector+name'
 }
 
+rename_columns = {
+    'totalFunding': 'Funding',
+    'revisedRequirements': 'Requirements',
+    'percentFunded': 'Percent Funded',
+    'clusterName': 'Cluster'
+}
+
 country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'organizationName', 'organizationTypes', 'organizationId', 'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate', 'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
 country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements', 'totalFunding', 'percentFunded']
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
@@ -125,10 +132,12 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         dataset.add_country_location(countryiso)
     except HDXError as e:
         logger.error('%s has a problem! %s' % (title, e))
-        return None, None
+        return None, None, False
 
     tags = ['HXL', 'cash', 'FTS']
     dataset.add_tags(tags)
+
+    dataset['dataset_preview'] = 'no_preview'
 
     showcase = Showcase({
         'name': '%s-showcase' % slugified_name,
@@ -179,6 +188,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         dffund.updatedAt = dffund.updatedAt.str[:10]
         # add HXL tags
         dffund = hxlate(dffund, funding_hxl_names)
+        dffund.rename(index=str, columns=rename_columns, inplace=True)
 
         filename = 'fts_funding_%s.csv' % countryiso.lower()
         file_to_upload = join(folder, filename)
@@ -200,10 +210,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     req_data = r.json()['data']
     if len(req_data) == 0:
         if nodata:
-            return None, None
+            return None, None, False
         else:
             logger.error('No requirements data for %s' % title)
-            return dataset, showcase
+            return dataset, showcase, False
     dfreq = json_normalize(req_data)
     dfreq['country'] = dfreq['locations'].apply(lambda x: x[0]['name'])
     dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
@@ -247,6 +257,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     dffundreq.sort_values(['endDate'], ascending=[False], inplace=True)
     # add HXL tags
     hxldffundreq = hxlate(dffundreq, hxl_names)
+    hxldffundreq.rename(index=str, columns=rename_columns, inplace=True)
 
     filename = 'fts_requirements_funding_%s.csv' % countryiso.lower()
     file_to_upload = join(folder, filename)
@@ -318,7 +329,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         combined = combined.append(df, ignore_index=True)
     if len(combined) == 0:
         logger.error('No cluster data for %s' % title)
-        return dataset, showcase
+        return dataset, showcase, False
 
     df = combined.merge(dffundreq, on='id')
     df.rename(columns={'name_x': 'name', 'revisedRequirements_x': 'revisedRequirements', 'totalFunding_x': 'totalFunding'}, inplace=True)
@@ -337,7 +348,15 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     remove_nonenan(df, 'clusterCode')
     df.sort_values(['endDate', 'name', 'clusterName'], ascending=[False, True, True], inplace=True)
     df['clusterName'].replace('zzz', 'Shared Funding', inplace=True)
+    s = df['clusterName']
+    hxl_update = False
+    if not s[~s.isin(['Shared Funding', 'Multi-sector', 'Not specified'])].empty:
+        s = df['percentFunded'] == ''
+        if not s[~s.isin([True])].empty:
+            dataset['dataset_preview'] = 'first_resource'
+            hxl_update = True
     df = hxlate(df, hxl_names)
+    df.rename(index=str, columns=rename_columns, inplace=True)
 
     filename = 'fts_requirements_funding_cluster_%s.csv' % countryiso.lower()
     file_to_upload = join(folder, filename)
@@ -352,4 +371,4 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     resource.set_file_to_upload(file_to_upload)
     dataset.add_update_resource(resource)
 
-    return dataset, showcase
+    return dataset, showcase, hxl_update

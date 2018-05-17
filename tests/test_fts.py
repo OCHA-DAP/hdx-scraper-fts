@@ -12,6 +12,7 @@ from tempfile import gettempdir
 import pytest
 from hdx.hdx_configuration import Configuration
 from hdx.hdx_locations import Locations
+from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import DownloadError
 
 from fts import generate_dataset_and_showcase, get_clusters, get_countries
@@ -173,12 +174,12 @@ class TestFTS:
     def test_generate_dataset_and_showcase(self, configuration, downloader):
         folder = gettempdir()
         today = datetime.strptime('01062017', '%d%m%Y').date()
-        dataset, showcase = generate_dataset_and_showcase('http://lala/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        dataset, showcase, hxlupdate = generate_dataset_and_showcase('http://lala/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
         assert dataset == {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
                            'title': 'Afghanistan - Requirements and Funding Data',
                            'tags': [{'name': 'HXL'}, {'name': 'cash'}, {'name': 'FTS'}], 'dataset_date': '06/01/2017',
                            'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
-                           'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e'}
+                           'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'dataset_preview': 'first_resource'}
         resources = dataset.get_resources()
         assert resources == [{'name': 'fts_funding_afg.csv', 'description': 'FTS Funding Data for Afghanistan for 2017', 'format': 'csv'},
                              {'name': 'fts_requirements_funding_afg.csv', 'description': 'FTS Requirements and Funding Data for Afghanistan', 'format': 'csv'},
@@ -187,18 +188,26 @@ class TestFTS:
             resource_name = resource['name']
             expected_file = join('tests', 'fixtures', resource_name)
             actual_file = join(folder, resource_name)
-            assert filecmp.cmp(expected_file, actual_file)
+            assert_files_same(expected_file, actual_file)
 
         assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
                             'name': 'fts-requirements-and-funding-data-for-afghanistan-showcase',
                             'notes': 'Click the image on the right to go to the FTS funding summary page for Afghanistan',
                             'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Afghanistan Summary Page',
                             'tags': [{'name': 'HXL'}, {'name': 'cash'}, {'name': 'FTS'}]}
-        dataset, showcase = generate_dataset_and_showcase('http://haha/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        dataset, showcase = generate_dataset_and_showcase('http://jaja/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        dataset, showcase = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        dataset, showcase = generate_dataset_and_showcase('http://gaga/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        dataset, showcase = generate_dataset_and_showcase('http://sasa/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        dataset, showcase = generate_dataset_and_showcase('http://baba/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        dataset, showcase = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        assert hxlupdate is True
+        _, _, hxlupdate = generate_dataset_and_showcase('http://haha/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        assert hxlupdate is True
+        _, _, hxlupdate = generate_dataset_and_showcase('http://jaja/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        assert hxlupdate is False
+        _, _, hxlupdate = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        assert hxlupdate is False
+        _, _, hxlupdate = generate_dataset_and_showcase('http://gaga/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        assert hxlupdate is True
+        _, _, hxlupdate = generate_dataset_and_showcase('http://sasa/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        assert hxlupdate is False
+        _, _, hxlupdate = generate_dataset_and_showcase('http://baba/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        assert hxlupdate is False
+        _, _, hxlupdate = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+        assert hxlupdate is True
 
