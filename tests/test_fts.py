@@ -209,5 +209,5 @@ class TestFTS:
         _, _, hxlupdate = generate_dataset_and_showcase('http://baba/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
         assert hxlupdate is False
         _, _, hxlupdate = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        assert hxlupdate is True
+        assert hxlupdate is False
 
