@@ -177,7 +177,7 @@ class TestFTS:
         dataset, showcase, hxlupdate = generate_dataset_and_showcase('http://lala/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
         assert dataset == {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
                            'title': 'Afghanistan - Requirements and Funding Data',
-                           'tags': [{'name': 'HXL'}, {'name': 'cash'}, {'name': 'FTS'}], 'dataset_date': '06/01/2017',
+                           'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}], 'dataset_date': '06/01/2017',
                            'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
                            'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'dataset_preview': 'first_resource'}
         resources = dataset.get_resources()
@@ -194,7 +194,7 @@ class TestFTS:
                             'name': 'fts-requirements-and-funding-data-for-afghanistan-showcase',
                             'notes': 'Click the image on the right to go to the FTS funding summary page for Afghanistan',
                             'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Afghanistan Summary Page',
-                            'tags': [{'name': 'HXL'}, {'name': 'cash'}, {'name': 'FTS'}]}
+                            'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}]}
         assert hxlupdate is True
         _, _, hxlupdate = generate_dataset_and_showcase('http://haha/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
         assert hxlupdate is True

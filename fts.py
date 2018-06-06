@@ -134,7 +134,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         logger.error('%s has a problem! %s' % (title, e))
         return None, None, False
 
-    tags = ['HXL', 'cash', 'FTS']
+    tags = ['HXL', 'cash assistance', 'financial tracking service - fts', 'funding']
     dataset.add_tags(tags)
 
     dataset['dataset_preview'] = 'no_preview'
