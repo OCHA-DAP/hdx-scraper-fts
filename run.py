@@ -42,11 +42,17 @@ def main():
                 logger.info('Ignoring  %s' % countryname)
                 continue
             logger.info('Adding FTS data for %s' % countryname)
-            dataset, showcase, hxl_update = generate_dataset_and_showcase(base_url, downloader, folder, clusters, country['iso3'], countryname, locationid, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, clusters, country['iso3'], countryname, locationid, today)
             if dataset is None:
                 logger.info('No data for %s' % countryname)
             else:
                 dataset.update_from_yaml()
+                if hxl_resource is None:
+                    dataset.preview_off()
+                    hxl_update = False
+                else:
+                    dataset.set_quickchart_resource(hxl_resource)
+                    hxl_update = True
                 dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False)
                 resources = dataset.get_resources()
                 resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
@@ -56,5 +62,5 @@ def main():
 
 
 if __name__ == '__main__':
-    facade(main, hdx_site='feature', user_agent_config_yaml=join(expanduser('~'), '.ftsuseragent.yml'), project_config_yaml=join('config', 'project_configuration.yml'))
+    facade(main, hdx_site='demo', user_agent_config_yaml=join(expanduser('~'), '.ftsuseragent.yml'), project_config_yaml=join('config', 'project_configuration.yml'))
 

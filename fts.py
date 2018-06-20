@@ -132,12 +132,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         dataset.add_country_location(countryiso)
     except HDXError as e:
         logger.error('%s has a problem! %s' % (title, e))
-        return None, None, False
+        return None, None, None
 
     tags = ['HXL', 'cash assistance', 'financial tracking service - fts', 'funding']
     dataset.add_tags(tags)
-
-    dataset['dataset_preview'] = 'no_preview'
 
     showcase = Showcase({
         'name': '%s-showcase' % slugified_name,
@@ -196,7 +194,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
 
         resource_data = {
             'name': filename.lower(),
-            'description': 'FTS Funding Data for %s for %s' % (countryname, latestyear),
+            'description': 'FTS Detailed Funding Data for %s for %s' % (countryname, latestyear),
             'format': 'csv'
         }
         resource = Resource(resource_data)
@@ -210,13 +208,14 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     req_data = r.json()['data']
     if len(req_data) == 0:
         if nodata:
-            return None, None, False
+            return None, None, None
         else:
             logger.error('No requirements data for %s' % title)
-            return dataset, showcase, False
+            return dataset, showcase, None
     dfreq = json_normalize(req_data)
     dfreq['country'] = dfreq['locations'].apply(lambda x: x[0]['name'])
     dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
+    dfreq['id'] = dfreq.id.astype(str)
     r = downloader.download(funding_url)
     data = r.json()['data']['report3']['fundingTotals']['objects'][0]
     fund_data = data.get('objectsBreakdown')
@@ -265,7 +264,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
 
     resource_data = {
         'name': filename.lower(),
-        'description': 'FTS Requirements and Funding Data for %s' % countryname,
+        'description': 'FTS Annual Requirements and Funding Data for %s' % countryname,
         'format': 'csv'
     }
     resource = Resource(resource_data)
@@ -296,6 +295,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         req_data = data['requirements']['objects']
         if req_data:
             dfreq = json_normalize(req_data)
+            dfreq['id'] = dfreq.id.astype(str)
             if fund_data:
                 dffund = json_normalize(fund_data)
                 if 'id' not in dffund:
@@ -329,16 +329,16 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         combined = combined.append(df, ignore_index=True)
     if len(combined) == 0:
         logger.error('No cluster data for %s' % title)
-        return dataset, showcase, False
+        return dataset, showcase, None
 
     df = combined.merge(dffundreq, on='id')
     df.rename(columns={'name_x': 'name', 'revisedRequirements_x': 'revisedRequirements', 'totalFunding_x': 'totalFunding'}, inplace=True)
     df = drop_stuff(df, cluster_columns_to_keep)
+    df['percentFunded'] = (to_numeric(df.totalFunding) / to_numeric(df.revisedRequirements) * 100).astype(str)
     remove_fractions(df, 'revisedRequirements')
     remove_nonenan(df, 'revisedRequirements')
     remove_fractions(df, 'totalFunding')
     remove_nonenan(df, 'totalFunding')
-    df['percentFunded'] = (to_numeric(df.totalFunding) / to_numeric(df.revisedRequirements) * 100).astype(str)
     remove_fractions(df, 'percentFunded')
     remove_nonenan(df, 'percentFunded')
     df['id'] = df.id.astype(str)
@@ -349,26 +349,26 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     df.sort_values(['endDate', 'name', 'clusterName'], ascending=[False, True, True], inplace=True)
     df['clusterName'].replace('zzz', 'Shared Funding', inplace=True)
     s = df['clusterName']
-    hxl_update = False
+    hxl_resource = None
+    filename = 'fts_requirements_funding_cluster_%s.csv' % countryiso.lower()
+    resource_name = filename.lower()
     if not s[~s.isin(['Shared Funding', 'Multi-sector', 'Not specified'])].empty:
         s = df['percentFunded'] == ''
         if not s[~s.isin([True])].empty:
-            dataset['dataset_preview'] = 'first_resource'
-            hxl_update = True
+            hxl_resource = resource_name
     df = hxlate(df, hxl_names)
     df.rename(index=str, columns=rename_columns, inplace=True)
 
-    filename = 'fts_requirements_funding_cluster_%s.csv' % countryiso.lower()
     file_to_upload = join(folder, filename)
     df.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
     resource_data = {
-        'name': filename.lower(),
-        'description': 'FTS Requirements and Funding Data by Cluster for %s' % countryname,
+        'name': resource_name,
+        'description': 'FTS Annual Requirements and Funding Data by Cluster for %s' % countryname,
         'format': 'csv'
     }
     resource = Resource(resource_data)
     resource.set_file_to_upload(file_to_upload)
     dataset.add_update_resource(resource)
 
-    return dataset, showcase, hxl_update
+    return dataset, showcase, hxl_resource
