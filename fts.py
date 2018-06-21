@@ -215,7 +215,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     dfreq = json_normalize(req_data)
     dfreq['country'] = dfreq['locations'].apply(lambda x: x[0]['name'])
     dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
-    dfreq['id'] = dfreq.id.astype(str)
+    dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
     r = downloader.download(funding_url)
     data = r.json()['data']['report3']['fundingTotals']['objects'][0]
     fund_data = data.get('objectsBreakdown')
@@ -295,13 +295,14 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         req_data = data['requirements']['objects']
         if req_data:
             dfreq = json_normalize(req_data)
-            dfreq['id'] = dfreq.id.astype(str)
+            if 'id' not in dfreq:
+                dfreq['id'] = ''
+            else:
+                dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
             if fund_data:
                 dffund = json_normalize(fund_data)
                 if 'id' not in dffund:
                     dffund['id'] = ''
-                if 'id' not in dfreq:
-                    dfreq['id'] = ''
                 df = dffund.merge(dfreq, on='id', how='outer', validate='1:1')
                 df.rename(columns={'name_x': 'clusterName'}, inplace=True)
                 df.clusterName.fillna(df.name_y, inplace=True)
