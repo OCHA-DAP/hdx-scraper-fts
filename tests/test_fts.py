@@ -179,7 +179,7 @@ class TestFTS:
                            'title': 'Afghanistan - Requirements and Funding Data',
                            'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}], 'dataset_date': '06/01/2017',
                            'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
-                           'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e'}
+                           'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0'}
 
         resources = dataset.get_resources()
         assert resources == [{'name': 'fts_funding_afg.csv', 'description': 'FTS Detailed Funding Data for Afghanistan for 2017', 'format': 'csv'},

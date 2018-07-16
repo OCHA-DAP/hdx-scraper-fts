@@ -128,6 +128,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     dataset.set_organization('fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e')
     dataset.set_dataset_date_from_datetime(today)
     dataset.set_expected_update_frequency('Every day')
+    dataset.set_subnational(False)
     try:
         dataset.add_country_location(countryiso)
     except HDXError as e:
