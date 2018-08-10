@@ -313,9 +313,14 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                 df['totalFunding'] = ''
                 df.rename(columns={'name': 'clusterName'}, inplace=True)
         else:
-            df = json_normalize(fund_data)
-            df['revisedRequirements'] = ''
-            df.rename(columns={'name': 'clusterName'}, inplace=True)
+            if fund_data:
+                df = json_normalize(fund_data)
+                df['revisedRequirements'] = ''
+                df.rename(columns={'name': 'clusterName'}, inplace=True)
+            else:
+                logger.error('No data in %s!' % funding_url)
+                continue
+
         df.rename(columns={'id': 'clusterCode'}, inplace=True)
         df = drop_stuff(df, plan_columns_to_keep)
         remove_nonenan(df, 'clusterCode')
