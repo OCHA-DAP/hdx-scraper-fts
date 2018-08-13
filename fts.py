@@ -79,9 +79,16 @@ def remove_fractions(df, colname):
     df[colname] = df[colname].loc[df[colname].str.contains('.')].str.split('.').str[0]
 
 
-def drop_stuff(df, columns_to_keep):
-    # Drop unwanted columns.  Note that I confirmed that the two date columns are always equal.
+def drop_columns_except(df, columns_to_keep):
+    # Drop unwanted columns.
     df = df.loc[:,columns_to_keep]
+    return df
+
+
+def drop_rows_with_col_word(df, columnname, word):
+    # Drop unwanted rows
+    pattern = r'\b%s\b' % word
+    df = df[~df[columnname].str.contains(pattern, case=False)]
     return df
 
 
@@ -178,7 +185,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
             dffund['originalCurrency'] = ''
         if 'refCode' not in dffund:
             dffund['refCode'] = ''
-        dffund = drop_stuff(dffund, country_all_columns_to_keep)
+        dffund = drop_columns_except(dffund, country_all_columns_to_keep)
         dffund.sort_values('date', ascending=False, inplace=True)
         dffund.date = dffund.date.str[:10]
         dffund.firstReportedDate = dffund.firstReportedDate.str[:10]
@@ -239,7 +246,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         dffundreq['totalFunding'] = ''
         dffundreq['percentFunded'] = '0'
     dffundreq.rename(columns={'name_x': 'name'}, inplace=True)
-    dffundreq = drop_stuff(dffundreq, country_columns_to_keep)
+    dffundreq = drop_columns_except(dffundreq, country_columns_to_keep)
     dffundreq.sort_values('endDate', ascending=False, inplace=True)
     dffundreq.startDate = dffundreq.startDate.str[:10]
     dffundreq.endDate = dffundreq.endDate.str[:10]
@@ -255,6 +262,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     remove_nonenan(dffundreq, 'percentFunded')
     # sort
     dffundreq.sort_values(['endDate'], ascending=[False], inplace=True)
+    dffundreq = drop_rows_with_col_word(dffundreq, 'name', 'test')
     # add HXL tags
     hxldffundreq = hxlate(dffundreq, hxl_names)
     hxldffundreq.rename(index=str, columns=rename_columns, inplace=True)
@@ -322,7 +330,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                 continue
 
         df.rename(columns={'id': 'clusterCode'}, inplace=True)
-        df = drop_stuff(df, plan_columns_to_keep)
+        df = drop_columns_except(df, plan_columns_to_keep)
         remove_nonenan(df, 'clusterCode')
         if fund_data is None:
             shared_funding = None
@@ -340,7 +348,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
 
     df = combined.merge(dffundreq, on='id')
     df.rename(columns={'name_x': 'name', 'revisedRequirements_x': 'revisedRequirements', 'totalFunding_x': 'totalFunding'}, inplace=True)
-    df = drop_stuff(df, cluster_columns_to_keep)
+    df = drop_columns_except(df, cluster_columns_to_keep)
     df['percentFunded'] = (to_numeric(df.totalFunding) / to_numeric(df.revisedRequirements) * 100).astype(str)
     remove_fractions(df, 'revisedRequirements')
     remove_nonenan(df, 'revisedRequirements')
