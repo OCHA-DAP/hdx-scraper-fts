@@ -1,7 +1,7 @@
 ### Collector for FTS's Datasets
 [![Build Status](https://travis-ci.org/OCHA-DAP/hdxscraper-fts.svg?branch=master&ts=1)](https://travis-ci.org/OCHA-DAP/hdxscraper-fts) [![Coverage Status](https://coveralls.io/repos/github/OCHA-DAP/hdxscraper-fts/badge.svg?branch=master&ts=1)](https://coveralls.io/github/OCHA-DAP/hdxscraper-fts?branch=master)
 
-This collector connects to the [FTS API](https://api.hpc.tools/docs/v1/) and extracts requirements and funding data country by country creating a dataset per country in HDX. It makes in the order of 2500 reads from FTS and 1000 read/writes to HDX in a one hour period. It saves 3 temporary files per country each less than 5Kb and these are what are uploaded to HDX. 
+This collector connects to the [FTS API](https://api.hpc.tools/docs/v1/) and extracts requirements and funding data country by country creating a dataset per country in HDX. It makes in the order of 2500 reads from FTS and 1000 read/writes (API calls) to HDX in a one hour period. It saves 3 temporary files per country each less than 5Kb and these are what are uploaded to HDX. It runs daily. 
 
 
 ### Usage
