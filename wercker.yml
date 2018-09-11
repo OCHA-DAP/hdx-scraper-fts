@@ -45,7 +45,7 @@ build:
     - script:
         name: copy private data
         code: |
-            curl -H "Authorization: token $KEY" -L https://api.github.com/repos/UN-OCHA/hdxscraper-docker-private/tarball/master | tar xz -C . --strip-components=1
+            curl -H "Authorization: token $KEY" -L https://api.github.com/repos/UN-OCHA/hdxscraper-docker-private/tarball/master | tar xz -C ~ --strip-components=1
 
     - script:
         name: Run scraper
