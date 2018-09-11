@@ -43,6 +43,11 @@ build:
             pip install --upgrade -r requirements.txt
 
     - script:
-        name: Run fts
+        name: copy private data
+        code: |
+            curl -H "Authorization: token $KEY" -L https://api.github.com/repos/UN-OCHA/hdxscraper-docker-private/tarball/master | tar xz -C . --strip-components=1
+
+    - script:
+        name: Run scraper
         code: |
             python run.py
