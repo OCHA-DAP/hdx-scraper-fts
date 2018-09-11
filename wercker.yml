@@ -42,9 +42,7 @@ build:
         code: |
             pip install --upgrade -r requirements.txt
 
-    # A custom script step, name value is used in the UI
-    # and the code value contains the command that get executed
     - script:
         name: Run fts
         code: |
-          echo "python version $(python --version) running"
+            python run.py
