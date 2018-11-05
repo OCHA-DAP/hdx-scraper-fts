@@ -1,0 +1,11 @@
+# development docker-compose file
+version: '2.1'
+
+services:
+
+  scraper:
+    image: unocha/hdx-scraper-base:stable
+    volumes:
+      - "./:/srv"
+    working_dir: /srv
+    command: ./run-dev.sh
