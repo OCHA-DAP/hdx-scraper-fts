@@ -1,11 +1,9 @@
-FROM mcarans/hdxscraper-docker-base
+FROM unocha/hdx-scraper-baseimage:stable
 
-MAINTAINER Michael Rans <rans@email.com>
+WORKDIR /srv
 
-RUN apk add --no-cache --upgrade git && \
-    cd /root && \
-    git clone https://github.com/OCHA-DAP/hdxscraper-fts && \
-    apk del git && \
-    rm -rf /var/lib/apk/*
+COPY . .
 
-CMD ["python", "/root/hdxscraper-fts/run.py"
+RUN pip install -r requirements.txt
+
+CMD ["python3", "run.py"]
