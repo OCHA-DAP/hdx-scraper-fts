@@ -11,10 +11,10 @@ that register datasets in HDX.
 import logging
 from datetime import datetime
 from os.path import join, expanduser
-from tempfile import gettempdir
 
 from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
+from hdx.utilities.path import temp_dir
 
 from fts import generate_dataset_and_showcase, get_clusters, get_countries
 
@@ -35,7 +35,7 @@ def main():
     with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup) as downloader:
         clusters = get_clusters(base_url, downloader)
         countries = get_countries(base_url, downloader)
-        folder = gettempdir()
+        folder = temp_dir()
         today = datetime.now()
         for country in countries:
             locationid = country['id']
