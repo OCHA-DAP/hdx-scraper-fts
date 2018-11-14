@@ -9,3 +9,5 @@ services:
       - "./:/srv"
     working_dir: /srv
     command: ./run-dev.sh
+    env_file:
+      - run_env
