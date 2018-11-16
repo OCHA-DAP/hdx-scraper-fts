@@ -4,10 +4,10 @@ version: '2.1'
 services:
 
   scraper:
-    image: unocha/hdx-scraper-base:stable
+    image: unocha/hdx-scraper-fts:1.2
     volumes:
       - "./:/srv"
     working_dir: /srv
-    command: ./run-dev.sh
+    command: sh ./run-dev.sh
     env_file:
       - run_env
