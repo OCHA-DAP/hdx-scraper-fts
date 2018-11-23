@@ -1,5 +1,5 @@
 #!/bin/sh
 
 # run, dev! :)
-mkdir tmp
+mkdir -p tmp
 python3 run.py
