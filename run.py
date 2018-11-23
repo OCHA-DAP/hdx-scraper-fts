@@ -11,6 +11,7 @@ that register datasets in HDX.
 import logging
 from datetime import datetime
 from os.path import join, expanduser
+from shutil import rmtree
 
 from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
@@ -35,7 +36,7 @@ def main():
     with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup) as downloader:
         clusters = get_clusters(base_url, downloader)
         countries = get_countries(base_url, downloader)
-        folder = temp_dir()
+        folder = join(temp_dir(), 'fts')
         today = datetime.now()
         for country in countries:
             locationid = country['id']
@@ -61,6 +62,7 @@ def main():
                 dataset.reorder_resources(resource_ids, hxl_update=hxl_update)
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
+        rmtree(folder)
 
 
 if __name__ == '__main__':
