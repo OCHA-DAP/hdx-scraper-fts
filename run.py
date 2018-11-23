@@ -10,7 +10,8 @@ that register datasets in HDX.
 '''
 import logging
 from datetime import datetime
-from os.path import join, expanduser
+from os import mkdir
+from os.path import join, expanduser, exists
 from shutil import rmtree
 
 from hdx.hdx_configuration import Configuration
@@ -37,6 +38,8 @@ def main():
         clusters = get_clusters(base_url, downloader)
         countries = get_countries(base_url, downloader)
         folder = join(temp_dir(), 'fts')
+        if not exists(folder):
+            mkdir(folder)
         today = datetime.now()
         for country in countries:
             locationid = country['id']
