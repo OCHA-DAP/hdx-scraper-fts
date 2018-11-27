@@ -4,16 +4,15 @@
 Unit tests for fts.
 
 '''
-import filecmp
 from datetime import datetime
 from os.path import join
-from tempfile import gettempdir
 
 import pytest
 from hdx.hdx_configuration import Configuration
 from hdx.hdx_locations import Locations
 from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import DownloadError
+from hdx.utilities.path import temp_dir
 
 from fts import generate_dataset_and_showcase, get_clusters, get_countries
 
@@ -172,44 +171,44 @@ class TestFTS:
         assert countries == TestFTS.countries
 
     def test_generate_dataset_and_showcase(self, configuration, downloader):
-        folder = gettempdir()
-        today = datetime.strptime('01062017', '%d%m%Y').date()
-        dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://lala/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        assert dataset == {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
-                           'title': 'Afghanistan - Requirements and Funding Data',
-                           'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}], 'dataset_date': '06/01/2017',
-                           'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
-                           'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0'}
+        with temp_dir('wfp-foodsecurity') as folder:
+            today = datetime.strptime('01062017', '%d%m%Y').date()
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://lala/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            assert dataset == {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
+                               'title': 'Afghanistan - Requirements and Funding Data',
+                               'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}], 'dataset_date': '06/01/2017',
+                               'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
+                               'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0'}
 
-        resources = dataset.get_resources()
-        assert resources == [{'name': 'fts_funding_afg.csv', 'description': 'FTS Detailed Funding Data for Afghanistan for 2017', 'format': 'csv'},
-                             {'name': 'fts_requirements_funding_afg.csv', 'description': 'FTS Annual Requirements and Funding Data for Afghanistan', 'format': 'csv'},
-                             {'name': 'fts_requirements_funding_cluster_afg.csv', 'description': 'FTS Annual Requirements and Funding Data by Cluster for Afghanistan', 'format': 'csv'}]
-        for resource in resources:
-            resource_name = resource['name']
-            expected_file = join('tests', 'fixtures', resource_name)
-            actual_file = join(folder, resource_name)
-            assert_files_same(expected_file, actual_file)
+            resources = dataset.get_resources()
+            assert resources == [{'name': 'fts_funding_afg.csv', 'description': 'FTS Detailed Funding Data for Afghanistan for 2017', 'format': 'csv'},
+                                 {'name': 'fts_requirements_funding_afg.csv', 'description': 'FTS Annual Requirements and Funding Data for Afghanistan', 'format': 'csv'},
+                                 {'name': 'fts_requirements_funding_cluster_afg.csv', 'description': 'FTS Annual Requirements and Funding Data by Cluster for Afghanistan', 'format': 'csv'}]
+            for resource in resources:
+                resource_name = resource['name']
+                expected_file = join('tests', 'fixtures', resource_name)
+                actual_file = join(folder, resource_name)
+                assert_files_same(expected_file, actual_file)
 
-        assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
-                            'name': 'fts-requirements-and-funding-data-for-afghanistan-showcase',
-                            'notes': 'Click the image on the right to go to the FTS funding summary page for Afghanistan',
-                            'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Afghanistan Summary Page',
-                            'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}]}
-        assert hxl_resource == 'fts_requirements_funding_cluster_afg.csv'
+            assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
+                                'name': 'fts-requirements-and-funding-data-for-afghanistan-showcase',
+                                'notes': 'Click the image on the right to go to the FTS funding summary page for Afghanistan',
+                                'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Afghanistan Summary Page',
+                                'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}]}
+            assert hxl_resource == 'fts_requirements_funding_cluster_afg.csv'
 
-        _, _, hxl_resource = generate_dataset_and_showcase('http://haha/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        assert hxl_resource == 'fts_requirements_funding_cluster_afg.csv'
-        _, _, hxl_resource = generate_dataset_and_showcase('http://jaja/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        assert hxl_resource is None
-        _, _, hxl_resource = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        assert hxl_resource is None
-        _, _, hxl_resource = generate_dataset_and_showcase('http://gaga/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        assert hxl_resource == 'fts_requirements_funding_cluster_afg.csv'
-        _, _, hxl_resource = generate_dataset_and_showcase('http://sasa/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        assert hxl_resource is None
-        _, _, hxl_resource = generate_dataset_and_showcase('http://baba/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        assert hxl_resource is None
-        _, _, hxl_resource = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
-        assert hxl_resource is None
+            _, _, hxl_resource = generate_dataset_and_showcase('http://haha/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            assert hxl_resource == 'fts_requirements_funding_cluster_afg.csv'
+            _, _, hxl_resource = generate_dataset_and_showcase('http://jaja/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            assert hxl_resource is None
+            _, _, hxl_resource = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            assert hxl_resource is None
+            _, _, hxl_resource = generate_dataset_and_showcase('http://gaga/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            assert hxl_resource == 'fts_requirements_funding_cluster_afg.csv'
+            _, _, hxl_resource = generate_dataset_and_showcase('http://sasa/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            assert hxl_resource is None
+            _, _, hxl_resource = generate_dataset_and_showcase('http://baba/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            assert hxl_resource is None
+            _, _, hxl_resource = generate_dataset_and_showcase('http://dada/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            assert hxl_resource is None
 
