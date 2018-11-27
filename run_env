@@ -1,5 +1,5 @@
 TEMP_DIR=/srv/tmp
-LOG_FILE_ONLY=true
+LOG_FILE_ONLY=false
 USER_AGENT=fts-user-agent
 HDX_KEY=hdx-key-id
 PREPREFIX=preprefix-id

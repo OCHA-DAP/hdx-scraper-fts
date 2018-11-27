@@ -10,9 +10,7 @@ that register datasets in HDX.
 '''
 import logging
 from datetime import datetime
-from os import mkdir
-from os.path import join, expanduser, exists
-from shutil import rmtree
+from os.path import join, expanduser
 
 from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
@@ -27,7 +25,7 @@ from hdx.facades.hdx_scraperwiki import facade
 
 logger = logging.getLogger(__name__)
 
-lookup = 'hdxscraper-fts'
+lookup = 'hdx-scraper-fts'
 
 
 def main():

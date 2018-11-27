@@ -41,9 +41,12 @@ funding_hxl_names = {
     'refCode': '#activity+code',
     'status': '#status+text',
     'updatedAt': '#date+updated',
-    'organizationId': '#org+id',
-    'organizationName': '#org+name',
-    'organizationTypes': '#org+type'
+    'sourceOrganizationId': '#org+id+funder',
+    'sourceOrganizationName': '#org+name+funder',
+    'sourceOrganizationTypes': '#org+type+funder',
+    'destinationOrganizationId': '#org+id+impl',
+    'destinationOrganizationName': '#org+name+impl',
+    'destinationOrganizationTypes': '#org+type+impl'
 }
 
 hxl_names = {
@@ -68,7 +71,7 @@ rename_columns = {
     'clusterName': 'Cluster'
 }
 
-country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'organizationName', 'organizationTypes', 'organizationId', 'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate', 'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
+country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'sourceOrganizationName', 'sourceOrganizationTypes', 'sourceOrganizationId', 'destinationOrganizationName', 'destinationOrganizationTypes', 'destinationOrganizationId', 'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate', 'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
 country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements', 'totalFunding', 'percentFunded']
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
 cluster_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
@@ -168,9 +171,15 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
 
     if 'sourceObjects' in dffund:
         tmp = dffund['sourceObjects'].apply(get_organization)
-        dffund['organizationId'] = tmp.apply(lambda x: x['id'])
-        dffund['organizationName'] = tmp.apply(lambda x: x['name'])
-        dffund['organizationTypes'] = tmp.apply(lambda x: ','.join(x['organizationTypes']))
+        dffund['sourceOrganizationId'] = tmp.apply(lambda x: x['id'])
+        dffund['sourceOrganizationName'] = tmp.apply(lambda x: x['name'])
+        dffund['sourceOrganizationTypes'] = tmp.apply(lambda x: ','.join(x['organizationTypes']))
+
+        if 'destinationObjects' in dffund:
+            tmp = dffund['destinationObjects'].apply(get_organization)
+            dffund['destinationOrganizationId'] = tmp.apply(lambda x: x['id'])
+            dffund['destinationOrganizationName'] = tmp.apply(lambda x: x['name'])
+            dffund['destinationOrganizationTypes'] = tmp.apply(lambda x: ','.join(x['organizationTypes']) if 'organizationTypes' in x else '')
 
         def get_keywords(x):
             if x:
