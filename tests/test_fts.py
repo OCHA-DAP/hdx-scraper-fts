@@ -46,14 +46,14 @@ class TestFTS:
               'createdAt': '2017-05-15T15:20:52.142Z', 'budgetYear': '2016', 'date': '2017-04-17T00:00:00Z',
               'childFlowIds': None, 'amountUSD': 10250000, 'method': 'Traditional aid', 'exchangeRate': None,
               'updatedAt': '2017-05-15T15:20:52.142Z', 'keywords': ['USA/BPRM'],
-              'sourceObjects': [{'type': 'Organization', 'organizationTypes': ['Government', 'National government'],
-                                 'id': '2933', 'name': 'United States of America, Government of'},
-                                {'type': 'Location', 'id': '237', 'name': 'United States'},
+              'sourceObjects': [{'type': 'Organization',  'id': '2933', 'name': 'United States of America, Government of',
+                                 'organizationTypes': ['Government', 'National government']},
+                                {'type': 'Location', 'id': '237', 'name': 'United States'}, {'type': 'Location', 'id': '237', 'name': 'Bermuda'},
                                 {'type': 'UsageYear', 'id': '38', 'name': '2017'}], 'refCode': 'FS # 2 FY 2017',
-              'destinationObjects': [{'type': 'Organization', 'organizationTypes': ['Red Cross/Red Crescent'],
-                                      'id': '2967', 'name': 'International Committee of the Red Cross'},
+              'destinationObjects': [{'type': 'Organization', 'id': '2967', 'name': 'International Committee of the Red Cross',
+                                     'organizationTypes': ['Red Cross/Red Crescent']},
                                      {'type': 'Location', 'id': '1', 'name': 'Afghanistan'},
-                                     {'type': 'UsageYear', 'id': '38', 'name': '2017'}], 'flowType': 'Standard',
+                                     {'type': 'UsageYear', 'id': '38', 'name': '2017'}, {'type': 'UsageYear', 'id': '38', 'name': '2018'}], 'flowType': 'Standard',
               'reportDetails': [{'date': '2017-04-18T00:00:00.000Z',
                                  'organization': 'United States of America, Government of', 'sourceType': 'Primary',
                                  'reportChannel': 'Email'}], 'parentFlowId': None, 'originalCurrency': 'USD',
@@ -171,7 +171,7 @@ class TestFTS:
         assert countries == TestFTS.countries
 
     def test_generate_dataset_and_showcase(self, configuration, downloader):
-        with temp_dir('wfp-foodsecurity') as folder:
+        with temp_dir('fts') as folder:
             today = datetime.strptime('01062017', '%d%m%Y').date()
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://lala/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
             assert dataset == {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',

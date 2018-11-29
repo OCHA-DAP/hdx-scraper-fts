@@ -8,14 +8,18 @@ Generates FTS datasets.
 
 '''
 import logging
+from collections import OrderedDict
 from os.path import join
 
 from hdx.data.hdxobject import HDXError
 from hdx.data.showcase import Showcase
 from hdx.data.dataset import Dataset
 from hdx.data.resource import Resource
+from hdx.location.country import Country
+from hdx.utilities.dictandlist import dict_of_lists_add
 from hdx.utilities.downloader import DownloadError
-from pandas import DataFrame, concat, to_numeric
+from hdx.utilities.text import multiple_replace
+from pandas import DataFrame, concat, to_numeric, Series, Index
 from pandas.io.json import json_normalize
 from slugify import slugify
 
@@ -41,12 +45,14 @@ funding_hxl_names = {
     'refCode': '#activity+code',
     'status': '#status+text',
     'updatedAt': '#date+updated',
-    'sourceOrganizationId': '#org+id+funder',
-    'sourceOrganizationName': '#org+name+funder',
-    'sourceOrganizationTypes': '#org+type+funder',
-    'destinationOrganizationId': '#org+id+impl',
-    'destinationOrganizationName': '#org+name+impl',
-    'destinationOrganizationTypes': '#org+type+impl'
+    'srcOrganizations': '#org+name+funder+list',
+    'srcOrganizationTypes': '#org+type+funder+list',
+    'srcLocations': '#country+iso3+funder+list',
+    'srcUsageYears': '#date+year+funder+list',
+    'destOrganizations': '#org+name+impl+list',
+    'destOrganizationTypes': '#org+type+impl+list',
+    'destLocations': '#country+iso3+impl+list',
+    'destUsageYears': '#date+year+impl+list'
 }
 
 hxl_names = {
@@ -71,7 +77,7 @@ rename_columns = {
     'clusterName': 'Cluster'
 }
 
-country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'sourceOrganizationName', 'sourceOrganizationTypes', 'sourceOrganizationId', 'destinationOrganizationName', 'destinationOrganizationTypes', 'destinationOrganizationId', 'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate', 'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
+country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'srcOrganizations', 'srcOrganizationTypes', 'srcLocations', 'srcUsageYears', 'destOrganizations', 'destOrganizationTypes', 'destLocations', 'destUsageYears', 'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate', 'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
 country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements', 'totalFunding', 'percentFunded']
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
 cluster_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
@@ -163,23 +169,46 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     fund_data = r.json()['data']['flows']
     dffund = json_normalize(fund_data)
 
-    def get_organization(x):
-        for infodict in x:
-            if infodict['type'] == 'Organization':
-                return infodict
-        return {'id': '', 'name': '', 'organizationTypes': ''}
+    def add_objects(name):
+        def flatten_objects(x):
+            outputdicts = OrderedDict()
+            typedicts = OrderedDict()
+            for infodict in x:
+                infodicttype = infodict['type']
+                typedict = typedicts.get(infodicttype, OrderedDict())
+                for key in infodict:
+                    if key not in ['type', 'behaviour', 'id']:
+                        value = infodict[key]
+                        if isinstance(value, list):
+                            for element in value:
+                                dict_of_lists_add(typedict, key, element)
+                        else:
+                            dict_of_lists_add(typedict, key, value)
+                typedicts[infodicttype] = typedict
+            for objectType in typedicts:
+                prefix = '%s%s' % (name, objectType)
+                for key in typedicts[objectType]:
+                    keyname = '%s%s' % (prefix, key.capitalize())
+                    values = typedicts[objectType][key]
+                    replacements = {'OrganizationOrganization': 'Organization', 'Name': '', 'types': 'Types',
+                                    'source': 'src', 'destination': 'dest'}
+                    keyname = multiple_replace(keyname, replacements)
+                    if keyname[-1] != 's':
+                        keyname = '%ss' % keyname
+                    if 'Location' in keyname:
+                        iso3s = list()
+                        for country in values:
+                            iso3s.append(Country.get_iso3_country_code_fuzzy(country)[0])
+                        values = iso3s
+                    outputdicts[keyname] = ','.join(values)
+            return outputdicts
+
+        typedicts = DataFrame(list(dffund['%sObjects' % name].apply(flatten_objects)))
+        return dffund.join(typedicts)
 
     if 'sourceObjects' in dffund:
-        tmp = dffund['sourceObjects'].apply(get_organization)
-        dffund['sourceOrganizationId'] = tmp.apply(lambda x: x['id'])
-        dffund['sourceOrganizationName'] = tmp.apply(lambda x: x['name'])
-        dffund['sourceOrganizationTypes'] = tmp.apply(lambda x: ','.join(x['organizationTypes']))
-
-        if 'destinationObjects' in dffund:
-            tmp = dffund['destinationObjects'].apply(get_organization)
-            dffund['destinationOrganizationId'] = tmp.apply(lambda x: x['id'])
-            dffund['destinationOrganizationName'] = tmp.apply(lambda x: x['name'])
-            dffund['destinationOrganizationTypes'] = tmp.apply(lambda x: ','.join(x['organizationTypes']) if 'organizationTypes' in x else '')
+        dffund = add_objects('source')
+        dffund = add_objects('destination')
 
         def get_keywords(x):
             if x:
