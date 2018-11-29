@@ -55,6 +55,7 @@ class TestFTS:
                                      {'type': 'GlobalCluster', 'id': '4', 'name': 'Emergency Shelter and NFI', 'behavior': 'single'},
                                      {'type': 'GlobalCluster', 'id': '11', 'name': 'Water Sanitation Hygiene', 'behavior': 'single'},
                                      {'type': 'Location', 'id': '1', 'name': 'Afghanistan'},
+                                     {'type': 'Project', 'id': '54621', 'name': 'Cholera and other water borne diseases Shield WASH Project', 'behavior': 'single', 'code': 'HTI-18/WS/125105/124'},
                                      {'type': 'UsageYear', 'id': '38', 'name': '2018'}, {'type': 'UsageYear', 'id': '38', 'name': '2017'}], 'flowType': 'Standard',
               'reportDetails': [{'date': '2017-04-18T00:00:00.000Z',
                                  'organization': 'United States of America, Government of', 'sourceType': 'Primary',

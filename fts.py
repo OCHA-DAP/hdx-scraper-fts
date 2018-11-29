@@ -51,8 +51,10 @@ funding_hxl_names = {
     'srcUsageYears': '#date+year+funder+list',
     'destOrganizations': '#org+name+impl+list',
     'destOrganizationTypes': '#org+type+impl+list',
-    'destClusters': '#sector+cluster+name+funder+list',
+    'destClusters': '#sector+cluster+name+impl+list',
     'destLocations': '#country+iso3+impl+list',
+    'destProjects': '#activity+project+name+impl+list',
+    'destProjectCodes': '#activity+project+code+impl+list',
     'destUsageYears': '#date+year+impl+list'
 }
 
@@ -81,9 +83,10 @@ rename_columns = {
 country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'srcOrganizations',
                                'srcOrganizationTypes', 'srcLocations', 'srcUsageYears',
                                'destOrganizations', 'destOrganizationTypes', 'destClusters', 'destLocations',
-                               'destUsageYears', 'contributionType', 'flowType', 'method', 'boundary', 'status',
-                               'firstReportedDate', 'decisionDate', 'keywords', 'originalAmount', 'originalCurrency',
-                               'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
+                               'destProjects', 'destProjectCodes', 'destUsageYears', 'contributionType', 'flowType',
+                               'method', 'boundary', 'status', 'firstReportedDate', 'decisionDate', 'keywords',
+                               'originalAmount', 'originalCurrency', 'exchangeRate', 'id', 'refCode', 'createdAt',
+                               'updatedAt']
 country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements',
                            'totalFunding', 'percentFunded']
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
@@ -199,7 +202,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                     keyname = '%s%s' % (prefix, key.capitalize())
                     values = typedicts[objectType][key]
                     replacements = {'OrganizationOrganization': 'Organization', 'Name': '', 'types': 'Types',
-                                    'GlobalCluster': 'Cluster', 'source': 'src', 'destination': 'dest'}
+                                    'code': 'Code', 'GlobalCluster': 'Cluster', 'source': 'src', 'destination': 'dest'}
                     keyname = multiple_replace(keyname, replacements)
                     if keyname[-1] != 's':
                         keyname = '%ss' % keyname
