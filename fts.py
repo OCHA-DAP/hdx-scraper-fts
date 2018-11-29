@@ -51,6 +51,7 @@ funding_hxl_names = {
     'srcUsageYears': '#date+year+funder+list',
     'destOrganizations': '#org+name+impl+list',
     'destOrganizationTypes': '#org+type+impl+list',
+    'destClusters': '#sector+cluster+name+funder+list',
     'destLocations': '#country+iso3+impl+list',
     'destUsageYears': '#date+year+impl+list'
 }
@@ -77,10 +78,17 @@ rename_columns = {
     'clusterName': 'Cluster'
 }
 
-country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'srcOrganizations', 'srcOrganizationTypes', 'srcLocations', 'srcUsageYears', 'destOrganizations', 'destOrganizationTypes', 'destLocations', 'destUsageYears', 'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate', 'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
-country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements', 'totalFunding', 'percentFunded']
+country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'srcOrganizations',
+                               'srcOrganizationTypes', 'srcLocations', 'srcUsageYears',
+                               'destOrganizations', 'destOrganizationTypes', 'destClusters', 'destLocations',
+                               'destUsageYears', 'contributionType', 'flowType', 'method', 'boundary', 'status',
+                               'firstReportedDate', 'decisionDate', 'keywords', 'originalAmount', 'originalCurrency',
+                               'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
+country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements',
+                           'totalFunding', 'percentFunded']
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
-cluster_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
+cluster_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode',
+                           'clusterName', 'revisedRequirements', 'totalFunding']
 
 
 def remove_fractions(df, colname):
@@ -177,7 +185,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                 infodicttype = infodict['type']
                 typedict = typedicts.get(infodicttype, OrderedDict())
                 for key in infodict:
-                    if key not in ['type', 'behaviour', 'id']:
+                    if key not in ['type', 'behavior', 'id']:
                         value = infodict[key]
                         if isinstance(value, list):
                             for element in value:
@@ -191,7 +199,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                     keyname = '%s%s' % (prefix, key.capitalize())
                     values = typedicts[objectType][key]
                     replacements = {'OrganizationOrganization': 'Organization', 'Name': '', 'types': 'Types',
-                                    'source': 'src', 'destination': 'dest'}
+                                    'GlobalCluster': 'Cluster', 'source': 'src', 'destination': 'dest'}
                     keyname = multiple_replace(keyname, replacements)
                     if keyname[-1] != 's':
                         keyname = '%ss' % keyname
@@ -200,11 +208,13 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                         for country in values:
                             iso3s.append(Country.get_iso3_country_code_fuzzy(country)[0])
                         values = iso3s
+                    if 'UsageYear' in keyname:
+                        values = sorted(values)
                     outputdicts[keyname] = ','.join(values)
             return outputdicts
 
-        typedicts = DataFrame(list(dffund['%sObjects' % name].apply(flatten_objects)))
-        return dffund.join(typedicts)
+        typedicts = dffund['%sObjects' % name].apply(flatten_objects)
+        return dffund.join(DataFrame(list(typedicts)))
 
     if 'sourceObjects' in dffund:
         dffund = add_objects('source')
