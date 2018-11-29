@@ -211,9 +211,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                         for country in values:
                             iso3s.append(Country.get_iso3_country_code_fuzzy(country)[0])
                         values = iso3s
-                    if 'UsageYear' in keyname:
-                        values = sorted(values)
-                    outputdicts[keyname] = ','.join(values)
+                    outputdicts[keyname] = ','.join(sorted(values))
             return outputdicts
 
         typedicts = dffund['%sObjects' % name].apply(flatten_objects)
