@@ -1,5 +1,5 @@
 country,id,name,code,startDate,endDate,year,clusterCode,Cluster,Requirements,Funding,Percent Funded
-#country+name,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#sector+code,#sector+name,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
+#country+name,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#sector+cluster+code,#sector+cluster+name,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
 Afghanistan,645,Afghanistan 2018,HAFG18,2018-01-01,2018-12-31,2018,26512,Agriculture,85670595,61347440,71
 Afghanistan,645,Afghanistan 2018,HAFG18,2018-01-01,2018-12-31,2018,26480,Coordination and support services,64933280,58076793,89
 Afghanistan,645,Afghanistan 2018,HAFG18,2018-01-01,2018-12-31,2018,2,Early Recovery,171088509,34073658,19

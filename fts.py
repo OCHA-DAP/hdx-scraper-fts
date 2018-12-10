@@ -16,7 +16,7 @@ from hdx.data.showcase import Showcase
 from hdx.data.dataset import Dataset
 from hdx.data.resource import Resource
 from hdx.location.country import Country
-from hdx.utilities.dictandlist import dict_of_lists_add
+from hdx.utilities.dictandlist import dict_of_lists_add, dict_of_sets_add
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.text import multiple_replace
 from pandas import DataFrame, concat, to_numeric, Series, Index
@@ -27,35 +27,37 @@ logger = logging.getLogger(__name__)
 
 funding_hxl_names = {
     'amountUSD': '#value+funding+total+usd',
-    'boundary': '#value+funding+direction',
-    'budgetYear': '#date+year',
-    'contributionType': '#value+funding+contribution+type',
+    'boundary': '#financial+direction',
+    'budgetYear': '#date+year+budget',
+    'contributionType': '#financial+contribution+type',
     'createdAt': '#date+created',
     'date': '#date',
     'decisionDate': '#date+decision',
     'description': '#description+notes',
-    'exchangeRate': '#value+funding+fx',
+    'exchangeRate': '#financial+fx',
     'firstReportedDate': '#date+reported',
-    'flowType': '#value+funding+contribution+type',
+    'flowType': '#financial+contribution+type',
     'id': '#activity+id+fts_internal',
     'keywords': '#description+keywords',
-    'method': '#value+funding+method',
+    'method': '#financial+method',
     'originalAmount': '#value+funding+total',
     'originalCurrency': '#value+funding+total+currency',
     'refCode': '#activity+code',
     'status': '#status+text',
     'updatedAt': '#date+updated',
-    'srcOrganizations': '#org+name+funder+list',
+    'srcOrganization': '#org+name+funder',
     'srcOrganizationTypes': '#org+type+funder+list',
     'srcLocations': '#country+iso3+funder+list',
-    'srcUsageYears': '#date+year+funder+list',
-    'destOrganizations': '#org+name+impl+list',
+    'srcUsageYearStart': '#date+year+start+funder',
+    'srcUsageYearEnd': '#date+year+end+funder',
+    'destOrganization': '#org+name+impl',
     'destOrganizationTypes': '#org+type+impl+list',
     'destClusters': '#sector+cluster+name+impl+list',
     'destLocations': '#country+iso3+impl+list',
-    'destProjects': '#activity+project+name+impl+list',
-    'destProjectCodes': '#activity+project+code+impl+list',
-    'destUsageYears': '#date+year+impl+list'
+    'destProject': '#activity+project+name+impl',
+    'destProjectCode': '#activity+project+code+impl',
+    'destUsageYearStart': '#date+year+start+impl',
+    'destUsageYearEnd': '#date+year+end+impl'
 }
 
 hxl_names = {
@@ -69,8 +71,8 @@ hxl_names = {
     'endDate': '#date+end',
     'year': '#date+year',
     'percentFunded': '#value+funding+pct',
-    'clusterCode': '#sector+code',
-    'clusterName': '#sector+name'
+    'clusterCode': '#sector+cluster+code',
+    'clusterName': '#sector+cluster+name'
 }
 
 rename_columns = {
@@ -80,13 +82,13 @@ rename_columns = {
     'clusterName': 'Cluster'
 }
 
-country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'srcOrganizations',
-                               'srcOrganizationTypes', 'srcLocations', 'srcUsageYears',
-                               'destOrganizations', 'destOrganizationTypes', 'destClusters', 'destLocations',
-                               'destProjects', 'destProjectCodes', 'destUsageYears', 'contributionType', 'flowType',
-                               'method', 'boundary', 'status', 'firstReportedDate', 'decisionDate', 'keywords',
-                               'originalAmount', 'originalCurrency', 'exchangeRate', 'id', 'refCode', 'createdAt',
-                               'updatedAt']
+country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'srcOrganization',
+                               'srcOrganizationTypes', 'srcLocations', 'srcUsageYearStart', 'srcUsageYearEnd',
+                               'destOrganization', 'destOrganizationTypes', 'destClusters', 'destLocations',
+                               'destProject', 'destProjectCode', 'destUsageYearStart', 'destUsageYearEnd',
+                               'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate',
+                               'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id',
+                               'refCode', 'createdAt', 'updatedAt']
 country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements',
                            'totalFunding', 'percentFunded']
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
@@ -204,14 +206,27 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                     replacements = {'OrganizationOrganization': 'Organization', 'Name': '', 'types': 'Types',
                                     'code': 'Code', 'GlobalCluster': 'Cluster', 'source': 'src', 'destination': 'dest'}
                     keyname = multiple_replace(keyname, replacements)
-                    if keyname[-1] != 's':
-                        keyname = '%ss' % keyname
-                    if 'Location' in keyname:
-                        iso3s = list()
-                        for country in values:
-                            iso3s.append(Country.get_iso3_country_code_fuzzy(country)[0])
-                        values = iso3s
-                    outputdicts[keyname] = ','.join(sorted(values))
+                    if 'UsageYear' in keyname:
+                        values = sorted(values)
+                        outputdicts['%sStart' % keyname] = values[0]
+                        outputstr = values[-1]
+                        keyname = '%sEnd' % keyname
+                    elif any(x in keyname for x in ['Cluster', 'Location', 'OrganizationTypes']):
+                        if keyname[-1] != 's':
+                            keyname = '%ss' % keyname
+                        if 'Location' in keyname:
+                            iso3s = list()
+                            for country in values:
+                                iso3s.append(Country.get_iso3_country_code_fuzzy(country)[0])
+                            values = iso3s
+                        outputstr = ','.join(sorted(values))
+                    else:
+                        if len(values) > 1:
+                            outputstr = 'Multiple'
+                            logger.error('Multiple used instead of %s for %s in %s' % (values, keyname, countryname))
+                        else:
+                            outputstr = values[0]
+                    outputdicts[keyname] = outputstr
             return outputdicts
 
         typedicts = dffund['%sObjects' % name].apply(flatten_objects)
