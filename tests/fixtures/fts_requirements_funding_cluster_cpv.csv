@@ -1,0 +1,12 @@
+countryCode,id,name,code,startDate,endDate,year,clusterCode,Cluster,Requirements,Funding,Percent Funded
+#country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#sector+cluster+code,#sector+cluster+name,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,26512,Agriculture,26582420,5403364,20
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,26480,Coordination and support services,17763017,8478913,47
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,6,Food Security,173029390,143193602,82
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,7,Health,59740170,21925347,36
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,15,Mine Action,286125,,
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,26479,Multi-sector,63983519,41590301,65
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,,Not specified,,-17722648,
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,,Not specified,533809,,
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,10,Protection,17107095,1876756,10
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,11,Water Sanitation Hygiene,2001345,735967,36

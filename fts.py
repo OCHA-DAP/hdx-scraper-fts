@@ -103,7 +103,7 @@ class FTSException(Exception):
 
 def remove_fractions(df, colname):
     df[colname] = df[colname].astype(str)
-    df[colname] = df[colname].loc[df[colname].str.contains('.')].str.split('.').str[0]
+    df[colname] = df[colname].str.split('.').str[0]
 
 
 def drop_columns_except(df, columns_to_keep):
@@ -308,6 +308,11 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
             dffundreq = dfreq
             dffundreq['totalFunding'] = ''
             dffundreq['percentFunded'] = '0'
+            dffund.totalFunding += dffund.onBoundaryFunding
+            dffund = drop_columns_except(dffund, country_columns_to_keep)
+            dffund['percentFunded'] = '0'
+            dffund.fillna('', inplace=True)
+            dffundreq = dffundreq.append(dffund)
     else:
         dffundreq = dfreq
         dffundreq['totalFunding'] = ''
