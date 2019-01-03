@@ -63,7 +63,7 @@ funding_hxl_names = {
 
 hxl_names = {
     'id': '#activity+appeal+id+fts_internal',
-    'country': '#country+name',
+    'countryCode': '#country+code',
     'name': '#activity+appeal+name',
     'code': '#activity+appeal+id+external',
     'revisedRequirements': '#value+funding+required+usd',
@@ -90,11 +90,15 @@ country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD',
                                'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate',
                                'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id',
                                'refCode', 'createdAt', 'updatedAt']
-country_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements',
+country_columns_to_keep = ['countryCode', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements',
                            'totalFunding', 'percentFunded']
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
-cluster_columns_to_keep = ['country', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode',
+cluster_columns_to_keep = ['countryCode', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode',
                            'clusterName', 'revisedRequirements', 'totalFunding']
+
+
+class FTSException(Exception):
+    pass
 
 
 def remove_fractions(df, colname):
@@ -286,7 +290,6 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
             logger.error('No requirements data for %s' % title)
             return dataset, showcase, None
     dfreq = json_normalize(req_data)
-    dfreq['country'] = dfreq['locations'].apply(lambda x: x[0]['name'])
     dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
     dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
     r = downloader.download(funding_url)
@@ -296,7 +299,6 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         dffund = json_normalize(fund_data)
         if 'id' in dffund:
             dffundreq = dfreq.merge(dffund, on='id', how='outer', validate='1:1')
-            dffundreq.country.fillna(method='ffill', inplace=True)
             dffundreq.name_x.fillna(dffundreq.name_y, inplace=True)
             dffundreq.fillna('', inplace=True)
             dffundreq.totalFunding += dffundreq.onBoundaryFunding
@@ -310,6 +312,43 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         dffundreq = dfreq
         dffundreq['totalFunding'] = ''
         dffundreq['percentFunded'] = '0'
+
+    # if len(req_data) == 0:
+    #     if not fund_data:
+    #         if not nodata:
+    #             raise FTSException('This should not happen!! We have latest year funding data but not funding data for %s' % title)
+    #         return None, None, None
+    #     dffund = json_normalize(fund_data)
+    #     if 'id' not in dffund:
+    #         if not nodata:
+    #             raise FTSException('This should not happen!! We have latest year funding data but not funding data for %s' % title)
+    #         return None, None, None
+    #     dffundreq = dffund
+    # else:
+    #     dfreq = json_normalize(req_data)
+    #     dfreq['country'] = dfreq['locations'].apply(lambda x: x[0]['name'])
+    #     dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
+    #     dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
+    #     if fund_data:
+    #         dffund = json_normalize(fund_data)
+    #         if 'id' in dffund:
+    #             dffundreq = dfreq.merge(dffund, on='id', how='outer', validate='1:1')
+    #             dffundreq.country.fillna(method='ffill', inplace=True)
+    #             dffundreq.name_x.fillna(dffundreq.name_y, inplace=True)
+    #             dffundreq.fillna('', inplace=True)
+    #             dffundreq.totalFunding += dffundreq.onBoundaryFunding
+    #             dffundreq['percentFunded'] = (to_numeric(dffundreq.totalFunding) / to_numeric(
+    #                 dffundreq.revisedRequirements) * 100).astype(str)
+    #         else:
+    #             dffundreq = dfreq
+    #             dffundreq['totalFunding'] = ''
+    #             dffundreq['percentFunded'] = '0'
+    #     else:
+    #         dffundreq = dfreq
+    #         dffundreq['totalFunding'] = ''
+    #         dffundreq['percentFunded'] = '0'
+
+    dffundreq['countryCode'] = countryiso
     dffundreq.rename(columns={'name_x': 'name'}, inplace=True)
     dffundreq = drop_columns_except(dffundreq, country_columns_to_keep)
     dffundreq.sort_values('endDate', ascending=False, inplace=True)
@@ -352,7 +391,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
             planname = row['name']
             if planname == 'Not specified':
                 continue
-            raise ValueError('Plan Name: %s is invalid!' % planname)
+            raise FTSException('Plan Name: %s is invalid!' % planname)
         funding_url = '%sfts/flow?planid=%s&groupby=globalcluster' % (base_url, planid)
         try:
             r = downloader.download(funding_url)
