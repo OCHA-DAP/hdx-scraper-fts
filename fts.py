@@ -283,76 +283,56 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     funding_url = '%sfts/flow?groupby=plan&countryISO3=%s' % (base_url, countryiso)
     r = downloader.download(requirements_url)
     req_data = r.json()['data']
-    if len(req_data) == 0:
-        if nodata:
-            return None, None, None
-        else:
-            logger.error('No requirements data for %s' % title)
-            return dataset, showcase, None
-    dfreq = json_normalize(req_data)
-    dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
-    dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
     r = downloader.download(funding_url)
-    data = r.json()['data']['report3']['fundingTotals']['objects'][0]
-    fund_data = data.get('objectsBreakdown')
-    if fund_data:
+    data = r.json()['data']['report3']['fundingTotals']['objects']
+    if len(data) == 0:
+        fund_data = None
+    else:
+        fund_data = data[0].get('objectsBreakdown')
+    if len(req_data) == 0:
+        if not fund_data:
+            if not nodata:
+                raise FTSException('This should not happen!! We have latest year funding data but no overall funding data for %s' % title)
+            logger.warning('No requirements or funding data available')
+            return None, None, None
+        logger.warning('No requirements data, only funding data available')
+        dfreq = None
         dffund = json_normalize(fund_data)
-        if 'id' in dffund:
-            dffundreq = dfreq.merge(dffund, on='id', how='outer', validate='1:1')
-            dffundreq.name_x.fillna(dffundreq.name_y, inplace=True)
-            dffundreq.fillna('', inplace=True)
-            dffundreq.totalFunding += dffundreq.onBoundaryFunding
-            dffundreq['percentFunded'] = (to_numeric(dffundreq.totalFunding) / to_numeric(
-                dffundreq.revisedRequirements) * 100).astype(str)
+        dffund.totalFunding += dffund.onBoundaryFunding
+        dffund = drop_columns_except(dffund, country_columns_to_keep)
+        dffund['percentFunded'] = ''
+        dffund.fillna('', inplace=True)
+        dffundreq = dffund
+    else:
+        dfreq = json_normalize(req_data)
+        dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
+        if bool(dfreq['years'].apply(lambda x: len(x) != 1).any()) is True:
+            logger.error('More than one year listed in a plan for %s!' % countryname)
+        dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
+        if fund_data:
+            dffund = json_normalize(fund_data)
+            if 'id' in dffund:
+                dffundreq = dfreq.merge(dffund, on='id', how='outer', validate='1:1')
+                dffundreq.name_x.fillna(dffundreq.name_y, inplace=True)
+                dffundreq.fillna('', inplace=True)
+                dffundreq.totalFunding += dffundreq.onBoundaryFunding
+                dffundreq['percentFunded'] = (to_numeric(dffundreq.totalFunding) / to_numeric(
+                    dffundreq.revisedRequirements) * 100).astype(str)
+            else:
+                logger.info('Funding data lacks plan ids')
+                dffundreq = dfreq
+                dffundreq['totalFunding'] = ''
+                dffundreq['percentFunded'] = '0'
+                dffund.totalFunding += dffund.onBoundaryFunding
+                dffund = drop_columns_except(dffund, country_columns_to_keep)
+                dffund['percentFunded'] = ''
+                dffund.fillna('', inplace=True)
+                dffundreq = dffundreq.append(dffund)
         else:
+            logger.warning('No funding data, only requirements data available')
             dffundreq = dfreq
             dffundreq['totalFunding'] = ''
             dffundreq['percentFunded'] = '0'
-            dffund.totalFunding += dffund.onBoundaryFunding
-            dffund = drop_columns_except(dffund, country_columns_to_keep)
-            dffund['percentFunded'] = '0'
-            dffund.fillna('', inplace=True)
-            dffundreq = dffundreq.append(dffund)
-    else:
-        dffundreq = dfreq
-        dffundreq['totalFunding'] = ''
-        dffundreq['percentFunded'] = '0'
-
-    # if len(req_data) == 0:
-    #     if not fund_data:
-    #         if not nodata:
-    #             raise FTSException('This should not happen!! We have latest year funding data but not funding data for %s' % title)
-    #         return None, None, None
-    #     dffund = json_normalize(fund_data)
-    #     if 'id' not in dffund:
-    #         if not nodata:
-    #             raise FTSException('This should not happen!! We have latest year funding data but not funding data for %s' % title)
-    #         return None, None, None
-    #     dffundreq = dffund
-    # else:
-    #     dfreq = json_normalize(req_data)
-    #     dfreq['country'] = dfreq['locations'].apply(lambda x: x[0]['name'])
-    #     dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
-    #     dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
-    #     if fund_data:
-    #         dffund = json_normalize(fund_data)
-    #         if 'id' in dffund:
-    #             dffundreq = dfreq.merge(dffund, on='id', how='outer', validate='1:1')
-    #             dffundreq.country.fillna(method='ffill', inplace=True)
-    #             dffundreq.name_x.fillna(dffundreq.name_y, inplace=True)
-    #             dffundreq.fillna('', inplace=True)
-    #             dffundreq.totalFunding += dffundreq.onBoundaryFunding
-    #             dffundreq['percentFunded'] = (to_numeric(dffundreq.totalFunding) / to_numeric(
-    #                 dffundreq.revisedRequirements) * 100).astype(str)
-    #         else:
-    #             dffundreq = dfreq
-    #             dffundreq['totalFunding'] = ''
-    #             dffundreq['percentFunded'] = '0'
-    #     else:
-    #         dffundreq = dfreq
-    #         dffundreq['totalFunding'] = ''
-    #         dffundreq['percentFunded'] = '0'
-
     dffundreq['countryCode'] = countryiso
     dffundreq.rename(columns={'name_x': 'name'}, inplace=True)
     dffundreq = drop_columns_except(dffundreq, country_columns_to_keep)
@@ -378,7 +358,6 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
 
     filename = 'fts_requirements_funding_%s.csv' % countryiso.lower()
     file_to_upload = join(folder, filename)
-    hxldffundreq.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
     resource_data = {
         'name': filename.lower(),
@@ -389,49 +368,94 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
     resource.set_file_to_upload(file_to_upload)
     dataset.add_update_resource(resource)
 
+    def fill_row(planid, row):
+        plan_url = '%splan/id/%s' % (base_url, planid)
+        r = downloader.download(plan_url)
+        data = r.json()['data']
+        row['code'] = data['code']
+        row['startDate'] = str(data['startDate'])[:10]
+        row['endDate'] = str(data['endDate'])[:10]
+        years = data['years']
+        if len(years) > 0:
+            logger.error('More than one year listed in plan %s for %s!' % (planid, countryname))
+        row['year'] = years[0]['year']
+
+    if dfreq is None:
+        reqplanids = None
+    else:
+        reqplanids = drop_columns_except(dfreq, ['id', 'locations'])
     combined = DataFrame()
-    for _, row in dffundreq.iterrows():
+    for i, row in hxldffundreq.iterrows():
+        if i == '0':
+            continue
         planid = row['id']
-        if planid == '':
+        if planid == '' or planid == 'undefined':
             planname = row['name']
             if planname == 'Not specified':
                 continue
             raise FTSException('Plan Name: %s is invalid!' % planname)
+        else:
+            if reqplanids is not None:
+                planlocations = reqplanids.loc[reqplanids['id'] == planid].squeeze()
+                if len(planlocations) == 0:
+                    pass
+                    #fill_row(planid, row)
+                else:
+                    if len(planlocations['locations']) > 1:
+                        logger.warning('Plan spans multiple locations - ignoring in cluster breakdown!')
+                        continue
+            else:
+                pass
+                #fill_row(planid, row)
+
         funding_url = '%sfts/flow?planid=%s&groupby=globalcluster' % (base_url, planid)
         try:
             r = downloader.download(funding_url)
             data = r.json()['data']
             fund_objects = data['report3']['fundingTotals']['objects']
             if len(fund_objects) == 0:
-                logger.error('%s has no funding objects!' % funding_url)
-                fund_data = None
+                logger.warning('%s has no funding objects!' % funding_url)
+                fund_data_cluster = None
             else:
-                fund_data = fund_objects[0]['objectsBreakdown']
+                fund_data_cluster = fund_objects[0]['objectsBreakdown']
+                newtotalfunding = fund_objects[0]['totalBreakdown']['totalFunding']
+                if isinstance(newtotalfunding, int):
+                    try:
+                        curtotalfunding = int(row['Funding'])
+                    except ValueError:
+                        curtotalfunding = None
+                    if newtotalfunding != curtotalfunding:
+                        row['Funding'] = newtotalfunding
+                        try:
+                            requirements = int(row['Requirements'])
+                            row['Percent Funded'] = int(newtotalfunding / requirements * 100)
+                        except ValueError:
+                            row['Percent Funded'] = ''
         except DownloadError:
             logger.error('Problem with downloading %s!' % funding_url)
             continue
-        req_data = data['requirements']['objects']
-        if req_data:
-            dfreq = json_normalize(req_data)
-            if 'id' not in dfreq:
-                dfreq['id'] = ''
+        req_data_cluster = data['requirements']['objects']
+        if req_data_cluster:
+            dfreq_cluster = json_normalize(req_data_cluster)
+            if 'id' not in dfreq_cluster:
+                dfreq_cluster['id'] = ''
             else:
-                dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
-            if fund_data:
-                dffund = json_normalize(fund_data)
+                dfreq_cluster['id'] = dfreq_cluster.id.astype(str).str.replace('\\.0', '')
+            if fund_data_cluster:
+                dffund_cluster = json_normalize(fund_data_cluster)
                 if 'id' not in dffund:
-                    dffund['id'] = ''
-                df = dffund.merge(dfreq, on='id', how='outer', validate='1:1')
+                    dffund_cluster['id'] = ''
+                df = dffund_cluster.merge(dfreq_cluster, on='id', how='outer', validate='1:1')
                 df.rename(columns={'name_x': 'clusterName'}, inplace=True)
                 df.clusterName.fillna(df.name_y, inplace=True)
                 del df['name_y']
             else:
-                df = dfreq
+                df = dfreq_cluster
                 df['totalFunding'] = ''
                 df.rename(columns={'name': 'clusterName'}, inplace=True)
         else:
-            if fund_data:
-                df = json_normalize(fund_data)
+            if fund_data_cluster:
+                df = json_normalize(fund_data_cluster)
                 df['revisedRequirements'] = ''
                 df.rename(columns={'name': 'clusterName'}, inplace=True)
             else:
@@ -451,8 +475,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
         df['id'] = planid
 
         combined = combined.append(df, ignore_index=True)
+
+    hxldffundreq.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
     if len(combined) == 0:
-        logger.error('No cluster data for %s' % title)
+        logger.warning('No cluster data available')
         return dataset, showcase, None
 
     df = combined.merge(dffundreq, on='id')

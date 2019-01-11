@@ -31,7 +31,7 @@ lookup = 'hdx-scraper-fts'
 def main():
     '''Generate dataset and create it in HDX'''
 
-    with temp_dir('fts') as folder:
+    with temp_dir('fts', False) as folder:
         with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup) as downloader:
             base_url = Configuration.read()['base_url']
             clusters = get_clusters(base_url, downloader)
@@ -40,30 +40,32 @@ def main():
             for country in countries:
                 locationid = country['id']
                 countryname = country['name']
+                if countryname != 'Albania':
+                    continue
                 if countryname == 'World':
                     logger.info('Ignoring  %s' % countryname)
                     continue
                 logger.info('Adding FTS data for %s' % countryname)
                 dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, clusters, country['iso3'], countryname, locationid, today)
-                if dataset is None:
-                    logger.info('No data for %s' % countryname)
-                else:
-                    dataset.update_from_yaml()
-                    if hxl_resource is None:
-                        dataset.preview_off()
-                        hxl_update = False
-                    else:
-                        dataset.set_quickchart_resource(hxl_resource)
-                        hxl_update = True
-                    dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False)
-                    resources = dataset.get_resources()
-                    resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
-                    dataset.reorder_resources(resource_ids, hxl_update=hxl_update)
-                    if hxl_update:
-                        resource_view = generate_resource_view(dataset)
-                        resource_view.create_in_hdx()
-                    showcase.create_in_hdx()
-                    showcase.add_dataset(dataset)
+                # if dataset is None:
+                #     logger.info('No data for %s' % countryname)
+                # else:
+                #     dataset.update_from_yaml()
+                #     if hxl_resource is None:
+                #         dataset.preview_off()
+                #         hxl_update = False
+                #     else:
+                #         dataset.set_quickchart_resource(hxl_resource)
+                #         hxl_update = True
+                #     dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False)
+                #     resources = dataset.get_resources()
+                #     resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
+                #     dataset.reorder_resources(resource_ids, hxl_update=hxl_update)
+                #     if hxl_update:
+                #         resource_view = generate_resource_view(dataset)
+                #         resource_view.create_in_hdx()
+                #     showcase.create_in_hdx()
+                #     showcase.add_dataset(dataset)
 
 
 if __name__ == '__main__':
