@@ -134,6 +134,12 @@ class TestFTS:
 
     albcluster_objects = [{'name': 'Not specified', 'objectType': 'Cluster', 'revisedRequirements': 212686531, 'origRequirements': 236654801}]
 
+    plan645 = {'id': 645, 'name': 'Afghanistan 2018', 'code': 'HAFG18', 'startDate': '2018-01-01T00:00:00.000Z', 'endDate': '2018-12-31T00:00:00.000Z', 'isForHPCProjects': False, 'emergencies': [], 'years': [{'id': 39, 'year': '2018'}], 'locations': [{'id': 1, 'name': 'Afghanistan', 'iso3': 'AFG', 'adminlevel': 0}], 'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}], 'revisedRequirements': 598923998, 'meta': {'language': 'en'}}
+
+    plan544 = {'id': 544, 'name': 'Afghanistan 2017', 'code': 'HAFG17', 'startDate': '2017-01-01T00:00:00.000Z', 'endDate': '2017-12-31T00:00:00.000Z', 'isForHPCProjects': False, 'emergencies': [], 'years': [{'id': 38, 'year': '2017'}], 'locations': [{'id': 1, 'name': 'Afghanistan', 'iso3': 'AFG', 'adminlevel': 0}, {'id': 25799575, 'name': 'Capital', 'iso3': None, 'adminlevel': 1}, {'id': 25799574, 'name': 'Central Highland', 'iso3': None, 'adminlevel': 1}], 'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}], 'revisedRequirements': 409413812, 'meta': {'language': 'en'}}
+
+    plan90 = {'id': 90, 'name': 'Southeastern Europe 2002', 'code': 'CXSEUR02', 'startDate': '2002-01-01T00:00:00.000Z', 'endDate': '2002-12-31T00:00:00.000Z', 'isForHPCProjects': False, 'emergencies': [{'id': 10, 'name': 'Southeastern Europe 2000 - 2002'}], 'years': [{'id': 23, 'year': '2002'}], 'locations': [], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 236654801, 'revisedRequirements': 212686531, 'meta': {'language': 'en'}}
+
     @pytest.fixture(scope='function')
     def configuration(self):
         Configuration._create(hdx_read_only=True, user_agent='test',
@@ -237,14 +243,27 @@ class TestFTS:
                         return {'data': {'report3': {'fundingTotals': {'objects': funddata}},
                                          'requirements': {'objects': reqdata}}}
                     response.json = fn
+                elif 'plan/id/' in url:
+                    if '645' in url:
+                        plandata = TestFTS.plan645
+                    elif '544' in url:
+                        plandata = TestFTS.plan544
+                    elif '90' in url:
+                        plandata = TestFTS.plan90
+                    else:
+                        plandata = None
+
+                    def fn():
+                        return {'data': plandata}
+                    response.json = fn
                 return response
         return Download()
 
-    def _test_get_countries(self, downloader):
+    def test_get_countries(self, downloader):
         countries = get_countries('http://afgsite/', downloader)
         assert countries == TestFTS.countries
 
-    def _test_generate_afg_dataset_and_showcase(self, configuration, downloader):
+    def test_generate_afg_dataset_and_showcase(self, configuration, downloader):
         afgdataset = {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
                       'title': 'Afghanistan - Requirements and Funding Data',
                       'tags': [{'name': 'HXL'}, {'name': 'cash assistance'},
@@ -296,8 +315,8 @@ class TestFTS:
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, 'AFG', 'Afghanistan', 1, today)
             compare_afg(dataset, showcase, hxl_resource)
 
-    def _test_generate_cpv_dataset_and_showcase(self, configuration, downloader):
-        with temp_dir('fts', False) as folder:
+    def test_generate_cpv_dataset_and_showcase(self, configuration, downloader):
+        with temp_dir('fts') as folder:
             today = datetime.strptime('01062018', '%d%m%Y').date()
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, 'CPV', 'Cape Verde', 1, today)
             assert dataset == {'groups': [{'name': 'cpv'}], 'name': 'fts-requirements-and-funding-data-for-cape-verde',
@@ -324,7 +343,7 @@ class TestFTS:
             assert hxl_resource == 'fts_requirements_funding_cluster_cpv.csv'
 
     def test_generate_alb_dataset_and_showcase(self, configuration, downloader):
-        with temp_dir('fts', False) as folder:
+        with temp_dir('fts') as folder:
             today = datetime.strptime('01062018', '%d%m%Y').date()
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://albsite/', downloader, folder, 'ALB', 'Albania', 1, today)
             assert dataset == {'groups': [{'name': 'alb'}], 'name': 'fts-requirements-and-funding-data-for-albania',
@@ -335,8 +354,7 @@ class TestFTS:
 
             resources = dataset.get_resources()
             assert resources == [{'name': 'fts_funding_alb.csv', 'description': 'FTS Detailed Funding Data for Albania for 2018', 'format': 'csv'},
-                                 {'name': 'fts_requirements_funding_alb.csv', 'description': 'FTS Annual Requirements and Funding Data for Albania', 'format': 'csv'},
-                                 {'name': 'fts_requirements_funding_cluster_alb.csv', 'description': 'FTS Annual Requirements and Funding Data by Cluster for Albania', 'format': 'csv'}]
+                                 {'name': 'fts_requirements_funding_alb.csv', 'description': 'FTS Annual Requirements and Funding Data for Albania', 'format': 'csv'}]
             for resource in resources:
                 resource_name = resource['name']
                 expected_file = join('tests', 'fixtures', resource_name)

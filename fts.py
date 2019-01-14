@@ -372,12 +372,20 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         if len(years) > 0:
             logger.error('More than one year listed in plan %s for %s!' % (planid, countryname))
         row['year'] = years[0]['year']
+        locations = data['locations']
+        if len(locations) == 0:
+            return True
+        for location in data['locations']:
+            if location['adminlevel'] == 0 and location['iso3'] != countryiso:
+                return True
+        return False
 
     if dfreq is None:
         reqplanids = None
     else:
         reqplanids = drop_columns_except(dfreq, ['id', 'locations'])
     combined = DataFrame()
+    multilocwarning = 'Plan spans multiple locations - ignoring in cluster breakdown!'
     for i, row in hxldffundreq.iterrows():
         if i == '0':
             continue
@@ -391,15 +399,17 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
             if reqplanids is not None:
                 planlocations = reqplanids.loc[reqplanids['id'] == planid].squeeze()
                 if len(planlocations) == 0:
-                    pass
-                    #fill_row(planid, row)
+                    if fill_row(planid, row):
+                        logger.warning(multilocwarning)
+                        continue
                 else:
                     if len(planlocations['locations']) > 1:
-                        logger.warning('Plan spans multiple locations - ignoring in cluster breakdown!')
+                        logger.warning(multilocwarning)
                         continue
             else:
-                pass
-                #fill_row(planid, row)
+                if fill_row(planid, row):
+                    logger.warning(multilocwarning)
+                    continue
 
         funding_url = '%sfts/flow?planid=%s&groupby=cluster' % (base_url, planid)
         try:
