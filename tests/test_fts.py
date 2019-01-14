@@ -204,7 +204,7 @@ class TestFTS:
         countries = get_countries('http://afgsite/', downloader)
         assert countries == TestFTS.countries
 
-    def test_generate_dataset_and_showcase(self, configuration, downloader):
+    def test_generate_afg_dataset_and_showcase(self, configuration, downloader):
         afgdataset = {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
                       'title': 'Afghanistan - Requirements and Funding Data',
                       'tags': [{'name': 'HXL'}, {'name': 'cash assistance'},
@@ -240,7 +240,7 @@ class TestFTS:
             assert showcase == afgshowcase
             assert hxl_resource == expected_hxl_resource
 
-        with temp_dir('fts', False) as folder:
+        with temp_dir('fts') as folder:
             today = datetime.strptime('01062017', '%d%m%Y').date()
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://nofundnoreq/', downloader, folder, 'AFG', 'Afghanistan', 1, today)
             assert dataset is None
@@ -256,6 +256,8 @@ class TestFTS:
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, 'AFG', 'Afghanistan', 1, today)
             compare_afg(dataset, showcase, hxl_resource)
 
+    def test_generate_cpv_dataset_and_showcase(self, configuration, downloader):
+        with temp_dir('fts', False) as folder:
             today = datetime.strptime('01062018', '%d%m%Y').date()
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, 'CPV', 'Cape Verde', 1, today)
             assert dataset == {'groups': [{'name': 'cpv'}], 'name': 'fts-requirements-and-funding-data-for-cape-verde',

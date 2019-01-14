@@ -436,7 +436,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 dfreq_cluster['id'] = dfreq_cluster.id.astype(str).str.replace('\\.0', '')
             if fund_data_cluster:
                 dffund_cluster = json_normalize(fund_data_cluster)
-                if 'id' not in dffund:
+                if 'id' not in dffund_cluster:
                     dffund_cluster['id'] = ''
                 df = dffund_cluster.merge(dfreq_cluster, on='id', how='outer', validate='1:1')
                 df.rename(columns={'name_x': 'clusterName'}, inplace=True)
