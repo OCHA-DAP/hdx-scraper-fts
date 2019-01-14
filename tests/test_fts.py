@@ -68,6 +68,20 @@ class TestFTS:
                  'boundary': 'incoming', 'onBoundary': 'single', 'reportDetails': [{'sourceType': 'Primary', 'organization': 'Food & Agriculture Organization of the United Nations',
                                                                                     'reportChannel': 'FTS Web', 'date': '2018-02-16T00:00:00.000Z'}], 'refCode': 'OSRO/CVI/802/BEL'}]
 
+    albflows = [{'id': '174423', 'versionId': 1, 'description': 'Provision of 1,000 food parcels to the most needed people in Albania via Muslim Community of Albania',
+                 'status': 'paid', 'date': '2018-02-15T00:00:00Z', 'amountUSD': 86754, 'originalAmount': 325328, 'originalCurrency': 'SAR', 'exchangeRate': 3.75, 'firstReportedDate': '2018-05-02T00:00:00Z',
+                 'budgetYear': None, 'decisionDate': None, 'flowType': 'Standard', 'contributionType': 'financial', 'keywords': None, 'method': 'Traditional aid', 'parentFlowId': None, 'childFlowIds': None,
+                 'newMoney': True, 'createdAt': '2018-05-14T09:55:20.374Z', 'updatedAt': '2018-05-14T09:55:20.374Z',
+                 'sourceObjects': [{'type': 'Organization', 'id': '2998', 'name': 'Saudi Arabia (Kingdom of), Government of', 'behavior': 'single', 'organizationTypes': ['Government'], 'organizationSubTypes': ['National government']},
+                                   {'type': 'Location', 'id': '196', 'name': 'Saudi Arabia', 'behavior': 'single'},
+                                   {'type': 'UsageYear', 'id': '39', 'name': '2018', 'behavior': 'single'}],
+                 'destinationObjects': [{'type': 'Cluster', 'id': '4206', 'name': 'Food security', 'behavior': 'single'},
+                                        {'type': 'GlobalCluster', 'id': '6', 'name': 'Food Security', 'behavior': 'single'},
+                                        {'type': 'Location', 'id': '3', 'name': 'Albania', 'behavior': 'single'},
+                                        {'type': 'UsageYear', 'id': '39', 'name': '2018', 'behavior': 'single'}],
+                 'boundary': 'incoming', 'onBoundary': 'single', 'reportDetails': [{'sourceType': 'Primary', 'organization': 'Saudi Arabia (Kingdom of), Government of',
+                                                                                    'reportChannel': 'Email', 'date': '2018-05-02T00:00:00.000Z'}], 'refCode': '291'}]
+
     afgrequirements = [{'locations': [{'iso3': 'AFG', 'id': 1, 'name': 'Afghanistan', 'adminLevel': 0}], 'id': 645,
                      'emergencies': [], 'code': 'HAFG18', 'years': [{'id': 39, 'year': '2018'}],
                      'startDate': '2018-01-01T00:00:00.000Z', 'endDate': '2018-12-31T00:00:00.000Z',
@@ -99,6 +113,11 @@ class TestFTS:
     cpvobjectsBreakdown = [{'type': 'Plan', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': 16922064,
                             'singleFunding': 16922064, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
 
+    albobjectsBreakdown = [{'type': 'Plan', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': 20903498,
+                            'singleFunding': 20903498, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0},
+                           {'type': 'Plan', 'direction': 'destination', 'id': '90', 'name': 'Southeastern Europe 2002',
+                            'totalFunding': 470201, 'singleFunding': 470201, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
+
     objectsBreakdownnoid = [{'sharedFunding': '', 'onBoundaryFunding': 3391, 'direction': '',
                              'totalFunding': 3121940000, 'name': 'Not specified', 'overlapFunding': '',
                              'singleFunding': '', 'type': 'Plan'}]
@@ -107,15 +126,19 @@ class TestFTS:
 
     cpvcluster_objectsBreakdown = [{'type': 'GlobalCluster', 'direction': 'destination', 'id': '10', 'name': 'Protection', 'totalFunding': 1876756, 'singleFunding': 1876756, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'GlobalCluster', 'direction': 'destination', 'id': '26479', 'name': 'Multi-sector', 'totalFunding': 41590301, 'singleFunding': 41590301, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'GlobalCluster', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': -17722648, 'singleFunding': -17722648, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'GlobalCluster', 'direction': 'destination', 'id': '6', 'name': 'Food Security', 'totalFunding': 143193602, 'singleFunding': 143193602, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'GlobalCluster', 'direction': 'destination', 'id': '7', 'name': 'Health', 'totalFunding': 21925347, 'singleFunding': 21925347, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'GlobalCluster', 'direction': 'destination', 'id': '26512', 'name': 'Agriculture', 'totalFunding': 5403364, 'singleFunding': 5403364, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'GlobalCluster', 'direction': 'destination', 'id': '26480', 'name': 'Coordination and support services', 'totalFunding': 8478913, 'singleFunding': 8478913, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'GlobalCluster', 'direction': 'destination', 'id': '11', 'name': 'Water Sanitation Hygiene', 'totalFunding': 735967, 'singleFunding': 735967, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
 
+    albcluster_objectsBreakdown = [{'type': 'Cluster', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': 134665994, 'singleFunding': 134665994, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
+
     afgcluster_objects = [{'revisedRequirements': 85670595, 'origRequirements': 85670595, 'name': 'Agriculture', 'id': 26512, 'objectType': 'GlobalCluster'}, {'revisedRequirements': 64933280, 'origRequirements': 56933280, 'name': 'Coordination and support services', 'id': 26480, 'objectType': 'GlobalCluster'}, {'revisedRequirements': 171088509, 'origRequirements': 171088509, 'name': 'Early Recovery', 'id': 2, 'objectType': 'GlobalCluster'}, {'revisedRequirements': 96995379, 'origRequirements': 96995379, 'name': 'Education', 'id': 3, 'objectType': 'GlobalCluster'}, {'revisedRequirements': 82751013, 'origRequirements': 82751013, 'name': 'Emergency Shelter and NFI', 'id': 4, 'objectType': 'GlobalCluster'}, {'revisedRequirements': 591933076, 'origRequirements': 591933076, 'name': 'Food Security', 'id': 6, 'objectType': 'GlobalCluster'}, {'revisedRequirements': 188971264, 'origRequirements': 188971264, 'name': 'Health', 'id': 7, 'objectType': 'GlobalCluster'}, {'revisedRequirements': 49455000, 'origRequirements': 49455000, 'name': 'Mine Action', 'id': 15, 'objectType': 'GlobalCluster'}, {'revisedRequirements': 381778683, 'origRequirements': 373163674, 'name': 'Multi-sector', 'id': 26479, 'objectType': 'GlobalCluster'}, {'revisedRequirements': 25810653, 'origRequirements': 25810653, 'name': 'Protection', 'id': 10, 'objectType': 'GlobalCluster'}, {'revisedRequirements': 41122187, 'origRequirements': 41122187, 'name': 'Water Sanitation Hygiene', 'id': 11, 'objectType': 'GlobalCluster'}]
 
     cpvcluster_objects = [{'id': 26512, 'name': 'Agriculture', 'objectType': 'GlobalCluster', 'revisedRequirements': 26582420, 'origRequirements': 24926460}, {'id': 26480, 'name': 'Coordination and support services', 'objectType': 'GlobalCluster', 'revisedRequirements': 17763017, 'origRequirements': 13772460}, {'id': 6, 'name': 'Food Security', 'objectType': 'GlobalCluster', 'revisedRequirements': 173029390, 'origRequirements': 125026018}, {'id': 7, 'name': 'Health', 'objectType': 'GlobalCluster', 'revisedRequirements': 59740170, 'origRequirements': 38385069}, {'id': 15, 'name': 'Mine Action', 'objectType': 'GlobalCluster', 'revisedRequirements': 286125, 'origRequirements': 0}, {'id': 26479, 'name': 'Multi-sector', 'objectType': 'GlobalCluster', 'revisedRequirements': 63983519, 'origRequirements': 91596988}, {'id': 10, 'name': 'Protection', 'objectType': 'GlobalCluster', 'revisedRequirements': 17107095, 'origRequirements': 14035130}, {'id': 11, 'name': 'Water Sanitation Hygiene', 'objectType': 'GlobalCluster', 'revisedRequirements': 2001345, 'origRequirements': 1082750}, {'name': 'Not specified', 'objectType': 'GlobalCluster', 'revisedRequirements': 533809, 'origRequirements': 256800}]
+
+    albcluster_objects = [{'name': 'Not specified', 'objectType': 'Cluster', 'revisedRequirements': 212686531, 'origRequirements': 236654801}]
 
     @pytest.fixture(scope='function')
     def configuration(self):
         Configuration._create(hdx_read_only=True, user_agent='test',
                               project_config_yaml=join('tests', 'config', 'project_configuration.yml'))
-        Locations.set_validlocations([{'name': 'afg', 'title': 'Afghanistan'}, {'name': 'cpv', 'title': 'Cape Verde'}])
+        Locations.set_validlocations([{'name': 'afg', 'title': 'Afghanistan'}, {'name': 'alb', 'title': 'Albania'}, {'name': 'cpv', 'title': 'Cape Verde'}])
         Country.countriesdata(False)
 
     @pytest.fixture(scope='function')
@@ -145,6 +168,10 @@ class TestFTS:
                     def fn():
                         return {'data': {'flows': TestFTS.cpvflows}}
                     response.json = fn
+                elif 'fts/flow?countryISO3=ALB&year=2018' in url:
+                    def fn():
+                        return {'data': {'flows': TestFTS.albflows}}
+                    response.json = fn
                 elif 'plan/country/AFG' in url:
                     def fn():
                         if 'noreq' in url:
@@ -156,6 +183,10 @@ class TestFTS:
                 elif 'plan/country/CPV' in url:
                     def fn():
                         return {'data': TestFTS.cpvrequirements}
+                    response.json = fn
+                elif 'plan/country/ALB' in url:
+                    def fn():
+                        return {'data': []}
                     response.json = fn
                 elif 'fts/flow?groupby=plan&countryISO3=AFG' in url:
                     def fn():
@@ -172,6 +203,11 @@ class TestFTS:
                         return {'data': {'report3': {
                                 'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.cpvobjectsBreakdown}]}}}}
                     response.json = fn
+                elif 'fts/flow?groupby=plan&countryISO3=ALB' in url:
+                    def fn():
+                        return {'data': {'report3': {
+                            'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdown}]}}}}
+                    response.json = fn
                 elif 'fts/flow?planid=' in url:
                     def fn():
                         if 'dlerr' in url:
@@ -180,6 +216,10 @@ class TestFTS:
                             funddata = [{'totalBreakdown': {'totalFunding': 205481602, 'sharedFunding': 0},
                                         'objectsBreakdown': TestFTS.cpvcluster_objectsBreakdown}]
                             reqdata = TestFTS.cpvcluster_objects
+                        elif 'albsite' in url:
+                            funddata = [{'totalBreakdown': {'totalFunding': 134665994, 'sharedFunding': 0},
+                                        'objectsBreakdown': TestFTS.albcluster_objectsBreakdown}]
+                            reqdata = TestFTS.albcluster_objects
                         else:
                             if 'nofund' in url:
                                 funddata = []
@@ -200,11 +240,11 @@ class TestFTS:
                 return response
         return Download()
 
-    def test_get_countries(self, downloader):
+    def _test_get_countries(self, downloader):
         countries = get_countries('http://afgsite/', downloader)
         assert countries == TestFTS.countries
 
-    def test_generate_afg_dataset_and_showcase(self, configuration, downloader):
+    def _test_generate_afg_dataset_and_showcase(self, configuration, downloader):
         afgdataset = {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
                       'title': 'Afghanistan - Requirements and Funding Data',
                       'tags': [{'name': 'HXL'}, {'name': 'cash assistance'},
@@ -256,7 +296,7 @@ class TestFTS:
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, 'AFG', 'Afghanistan', 1, today)
             compare_afg(dataset, showcase, hxl_resource)
 
-    def test_generate_cpv_dataset_and_showcase(self, configuration, downloader):
+    def _test_generate_cpv_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('fts', False) as folder:
             today = datetime.strptime('01062018', '%d%m%Y').date()
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, 'CPV', 'Cape Verde', 1, today)
@@ -282,3 +322,30 @@ class TestFTS:
                                 'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Cape Verde Summary Page',
                                 'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}]}
             assert hxl_resource == 'fts_requirements_funding_cluster_cpv.csv'
+
+    def test_generate_alb_dataset_and_showcase(self, configuration, downloader):
+        with temp_dir('fts', False) as folder:
+            today = datetime.strptime('01062018', '%d%m%Y').date()
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://albsite/', downloader, folder, 'ALB', 'Albania', 1, today)
+            assert dataset == {'groups': [{'name': 'alb'}], 'name': 'fts-requirements-and-funding-data-for-albania',
+                               'title': 'Albania - Requirements and Funding Data',
+                               'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}], 'dataset_date': '06/01/2018',
+                               'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
+                               'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0'}
+
+            resources = dataset.get_resources()
+            assert resources == [{'name': 'fts_funding_alb.csv', 'description': 'FTS Detailed Funding Data for Albania for 2018', 'format': 'csv'},
+                                 {'name': 'fts_requirements_funding_alb.csv', 'description': 'FTS Annual Requirements and Funding Data for Albania', 'format': 'csv'},
+                                 {'name': 'fts_requirements_funding_cluster_alb.csv', 'description': 'FTS Annual Requirements and Funding Data by Cluster for Albania', 'format': 'csv'}]
+            for resource in resources:
+                resource_name = resource['name']
+                expected_file = join('tests', 'fixtures', resource_name)
+                actual_file = join(folder, resource_name)
+                assert_files_same(expected_file, actual_file)
+
+            assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
+                                'name': 'fts-requirements-and-funding-data-for-albania-showcase',
+                                'notes': 'Click the image on the right to go to the FTS funding summary page for Albania',
+                                'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Albania Summary Page',
+                                'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}]}
+            assert hxl_resource is None

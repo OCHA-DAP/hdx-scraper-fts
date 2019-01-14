@@ -1,0 +1,3 @@
+countryCode,id,name,code,startDate,endDate,year,clusterCode,Cluster,Requirements,Funding,Percent Funded
+#country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#sector+cluster+code,#sector+cluster+name,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
+ALB,90,Southeastern Europe 2002,,,,,,Not specified,212686531,134665994,63

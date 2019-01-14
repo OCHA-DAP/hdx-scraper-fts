@@ -36,6 +36,7 @@ def main():
             base_url = Configuration.read()['base_url']
             countries = get_countries(base_url, downloader)
             today = datetime.now()
+            today = datetime.strptime('01062018', '%d%m%Y').date()
             for country in countries:
                 locationid = country['id']
                 countryname = country['name']

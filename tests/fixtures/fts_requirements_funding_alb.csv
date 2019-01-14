@@ -1,0 +1,4 @@
+countryCode,id,name,code,startDate,endDate,year,Requirements,Funding,Percent Funded
+#country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
+ALB,,Not specified,,,,,,20903498,
+ALB,90,Southeastern Europe 2002,,,,,,134665994,
