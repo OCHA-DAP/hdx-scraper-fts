@@ -53,7 +53,7 @@ funding_hxl_names = {
     'srcUsageYearEnd': '#date+year+end+funder',
     'destOrganization': '#org+name+impl',
     'destOrganizationTypes': '#org+type+impl+list',
-    'destClusters': '#sector+cluster+name+impl+list',
+    'destGlobalClusters': '#sector+cluster+name+impl+list',
     'destLocations': '#country+iso3+impl+list',
     'destProject': '#activity+project+name+impl',
     'destProjectCode': '#activity+project+code+impl',
@@ -85,7 +85,7 @@ rename_columns = {
 
 country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'srcOrganization',
                                'srcOrganizationTypes', 'srcLocations', 'srcUsageYearStart', 'srcUsageYearEnd',
-                               'destOrganization', 'destOrganizationTypes', 'destClusters', 'destLocations',
+                               'destOrganization', 'destOrganizationTypes', 'destGlobalClusters', 'destLocations',
                                'destProject', 'destProjectCode', 'destUsageYearStart', 'destUsageYearEnd',
                                'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate',
                                'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id',
@@ -132,13 +132,6 @@ def remove_nonenan(df, colname):
     df[colname].replace(['nan', 'none'], ['', ''], inplace=True)
 
 
-def get_clusters(base_url, downloader):
-    url = '%sglobal-cluster' % base_url
-    response = downloader.download(url)
-    json = response.json()
-    return json['data']
-
-
 def get_countries(base_url, downloader):
     url = '%slocation' % base_url
     response = downloader.download(url)
@@ -146,7 +139,7 @@ def get_countries(base_url, downloader):
     return json['data']
 
 
-def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countryiso, countryname, locationid, today):
+def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, countryname, locationid, today):
     '''
     api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
     '''
@@ -209,14 +202,14 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                     keyname = '%s%s' % (prefix, key.capitalize())
                     values = typedicts[objectType][key]
                     replacements = {'OrganizationOrganization': 'Organization', 'Name': '', 'types': 'Types',
-                                    'code': 'Code', 'GlobalCluster': 'Cluster', 'source': 'src', 'destination': 'dest'}
+                                    'code': 'Code', 'source': 'src', 'destination': 'dest'}
                     keyname = multiple_replace(keyname, replacements)
                     if 'UsageYear' in keyname:
                         values = sorted(values)
                         outputdicts['%sStart' % keyname] = values[0]
                         outputstr = values[-1]
                         keyname = '%sEnd' % keyname
-                    elif any(x in keyname for x in ['Cluster', 'Location', 'OrganizationTypes']):
+                    elif any(x in keyname for x in ['GlobalCluster', 'Location', 'OrganizationTypes']):
                         if keyname[-1] != 's':
                             keyname = '%ss' % keyname
                         if 'Location' in keyname:
@@ -408,7 +401,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, clusters, countr
                 pass
                 #fill_row(planid, row)
 
-        funding_url = '%sfts/flow?planid=%s&groupby=globalcluster' % (base_url, planid)
+        funding_url = '%sfts/flow?planid=%s&groupby=cluster' % (base_url, planid)
         try:
             r = downloader.download(funding_url)
             data = r.json()['data']

@@ -15,24 +15,10 @@ from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.path import temp_dir
 
-from fts import generate_dataset_and_showcase, get_clusters, get_countries
+from fts import generate_dataset_and_showcase, get_countries
 
 
-class TestFTS:
-    clusters = [{
-        'id': 1,
-        'name': 'Camp Coordination / Management',
-        'code': 'CCM',
-        'type': 'global',
-        'parentId': None
-    }, {
-        'id': 12,
-        'name': 'Child Protection',
-        'code': 'PRO-CPN',
-        'type': 'aor',
-        'parentId': None
-    }]
-    
+class TestFTS:    
     countries = [{
         'id': 1,
         'iso3': 'AFG',
@@ -143,11 +129,7 @@ class TestFTS:
             @staticmethod
             def download(url):
                 response = Response()
-                if 'global-cluster' in url:
-                    def fn():
-                        return {'data': TestFTS.clusters}
-                    response.json = fn
-                elif 'location' in url:
+                if 'location' in url:
                     def fn():
                         return {'data': TestFTS.countries}
                     response.json = fn
@@ -218,10 +200,6 @@ class TestFTS:
                 return response
         return Download()
 
-    def test_get_clusters(self, downloader):
-        clusters = get_clusters('http://afgsite/', downloader)
-        assert clusters == TestFTS.clusters
-
     def test_get_countries(self, downloader):
         countries = get_countries('http://afgsite/', downloader)
         assert countries == TestFTS.countries
@@ -262,24 +240,24 @@ class TestFTS:
             assert showcase == afgshowcase
             assert hxl_resource == expected_hxl_resource
 
-        with temp_dir('fts') as folder:
+        with temp_dir('fts', False) as folder:
             today = datetime.strptime('01062017', '%d%m%Y').date()
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://nofundnoreq/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://nofundnoreq/', downloader, folder, 'AFG', 'Afghanistan', 1, today)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
             test = 'nofund'
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, 'AFG', 'Afghanistan', 1, today)
             compare_afg(dataset, showcase, hxl_resource, expected_resources=afgresources[1:], expected_hxl_resource=None, prefix=test)
             test = 'noreq'
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, 'AFG', 'Afghanistan', 1, today)
             compare_afg(dataset, showcase, hxl_resource, expected_hxl_resource=None, prefix=test)
 
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, TestFTS.clusters, 'AFG', 'Afghanistan', 1, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, 'AFG', 'Afghanistan', 1, today)
             compare_afg(dataset, showcase, hxl_resource)
 
             today = datetime.strptime('01062018', '%d%m%Y').date()
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, TestFTS.clusters, 'CPV', 'Cape Verde', 1, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, 'CPV', 'Cape Verde', 1, today)
             assert dataset == {'groups': [{'name': 'cpv'}], 'name': 'fts-requirements-and-funding-data-for-cape-verde',
                                'title': 'Cape Verde - Requirements and Funding Data',
                                'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}], 'dataset_date': '06/01/2018',
