@@ -1,4 +1,4 @@
 countryCode,id,name,code,startDate,endDate,year,Requirements,Funding,Percent Funded
 #country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
-CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,361026890,205481602,56
+CPV,222,West Africa 2007,CXWAF07,2007-01-01,2007-12-31,2007,565000,,0
 CPV,,Not specified,,,,,,16922064,

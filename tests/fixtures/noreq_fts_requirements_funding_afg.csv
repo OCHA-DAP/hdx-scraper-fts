@@ -1,5 +1,5 @@
 countryCode,id,name,code,startDate,endDate,year,Requirements,Funding,Percent Funded
 #country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
-AFG,645,Afghanistan 2018,HAFG18,2018-01-01,2018-12-31,2018,,2500000,
-AFG,544,Afghanistan 2017,HAFG17,2017-01-01,2017-12-31,2017,,319542149,
+AFG,645,Afghanistan 2018,HAFG18,2018-01-01,2018-12-31,2018,,462150015,
+AFG,544,Afghanistan 2017,HAFG17,2017-01-01,2017-12-31,2017,,331238992,
 AFG,,Not specified,,,,,,3121943391,

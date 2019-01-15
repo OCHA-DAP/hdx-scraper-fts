@@ -51,6 +51,9 @@ funding_hxl_names = {
     'srcLocations': '#country+iso3+funder+list',
     'srcUsageYearStart': '#date+year+start+funder',
     'srcUsageYearEnd': '#date+year+end+funder',
+    'destPlan': '#activity+appeal+name+impl',
+    'destPlanCode': '#activity+appeal+id+external+impl',
+    'destPlanId': '#activity+appeal+id+fts_internal+impl',
     'destOrganization': '#org+name+impl',
     'destOrganizationTypes': '#org+type+impl+list',
     'destGlobalClusters': '#sector+cluster+name+impl+list',
@@ -85,7 +88,7 @@ rename_columns = {
 
 country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'srcOrganization',
                                'srcOrganizationTypes', 'srcLocations', 'srcUsageYearStart', 'srcUsageYearEnd',
-                               'destOrganization', 'destOrganizationTypes', 'destGlobalClusters', 'destLocations',
+                               'destPlan', 'destPlanCode', 'destPlanId', 'destOrganization', 'destOrganizationTypes', 'destGlobalClusters', 'destLocations',
                                'destProject', 'destProjectCode', 'destUsageYearStart', 'destUsageYearEnd',
                                'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate',
                                'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id',
@@ -174,11 +177,11 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     })
     showcase.add_tags(tags)
 
-    nodata = True
+    file_to_upload_funddet = None
     funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
     r = downloader.download(funding_url)
     fund_data = r.json()['data']['flows']
-    dffund = json_normalize(fund_data)
+    dffunddet = json_normalize(fund_data)
 
     def add_objects(name):
         def flatten_objects(x):
@@ -188,7 +191,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 infodicttype = infodict['type']
                 typedict = typedicts.get(infodicttype, OrderedDict())
                 for key in infodict:
-                    if key not in ['type', 'behavior', 'id']:
+                    if key not in ['type', 'behavior', 'id'] or (infodicttype == 'Plan' and key == 'id'):
                         value = infodict[key]
                         if isinstance(value, list):
                             for element in value:
@@ -209,7 +212,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                         outputdicts['%sStart' % keyname] = values[0]
                         outputstr = values[-1]
                         keyname = '%sEnd' % keyname
-                    elif any(x in keyname for x in ['GlobalCluster', 'Location', 'OrganizationTypes']):
+                    elif any(x in keyname for x in ['Cluster', 'Location', 'OrganizationTypes']):
                         if keyname[-1] != 's':
                             keyname = '%ss' % keyname
                         if 'Location' in keyname:
@@ -227,12 +230,12 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                     outputdicts[keyname] = outputstr
             return outputdicts
 
-        typedicts = dffund['%sObjects' % name].apply(flatten_objects)
-        return dffund.join(DataFrame(list(typedicts)))
+        typedicts = dffunddet['%sObjects' % name].apply(flatten_objects)
+        return dffunddet.join(DataFrame(list(typedicts)))
 
-    if 'sourceObjects' in dffund:
-        dffund = add_objects('source')
-        dffund = add_objects('destination')
+    if 'sourceObjects' in dffunddet:
+        dffunddet = add_objects('source')
+        dffunddet = add_objects('destination')
 
         def get_keywords(x):
             if x:
@@ -240,27 +243,26 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
             else:
                 return ''
 
-        dffund['keywords'] = dffund.keywords.apply(get_keywords)
-        if 'originalAmount' not in dffund:
-            dffund['originalAmount'] = ''
-        if 'originalCurrency' not in dffund:
-            dffund['originalCurrency'] = ''
-        if 'refCode' not in dffund:
-            dffund['refCode'] = ''
-        dffund = drop_columns_except(dffund, country_all_columns_to_keep)
-        dffund.sort_values('date', ascending=False, inplace=True)
-        dffund.date = dffund.date.str[:10]
-        dffund.firstReportedDate = dffund.firstReportedDate.str[:10]
-        dffund.decisionDate = dffund.decisionDate.str[:10]
-        dffund.createdAt = dffund.createdAt.str[:10]
-        dffund.updatedAt = dffund.updatedAt.str[:10]
+        dffunddet['keywords'] = dffunddet.keywords.apply(get_keywords)
+        if 'originalAmount' not in dffunddet:
+            dffunddet['originalAmount'] = ''
+        if 'originalCurrency' not in dffunddet:
+            dffunddet['originalCurrency'] = ''
+        if 'refCode' not in dffunddet:
+            dffunddet['refCode'] = ''
+        dffunddet = drop_columns_except(dffunddet, country_all_columns_to_keep)
+        dffunddet.sort_values('date', ascending=False, inplace=True)
+        dffunddet.date = dffunddet.date.str[:10]
+        dffunddet.firstReportedDate = dffunddet.firstReportedDate.str[:10]
+        dffunddet.decisionDate = dffunddet.decisionDate.str[:10]
+        dffunddet.createdAt = dffunddet.createdAt.str[:10]
+        dffunddet.updatedAt = dffunddet.updatedAt.str[:10]
         # add HXL tags
-        dffund = hxlate(dffund, funding_hxl_names)
-        dffund.rename(index=str, columns=rename_columns, inplace=True)
+        dffunddet = hxlate(dffunddet, funding_hxl_names)
+        dffunddet.rename(index=str, columns=rename_columns, inplace=True)
 
         filename = 'fts_funding_%s.csv' % countryiso.lower()
-        file_to_upload = join(folder, filename)
-        dffund.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
+        file_to_upload_funddet = join(folder, filename)
 
         resource_data = {
             'name': filename.lower(),
@@ -268,10 +270,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
             'format': 'csv'
         }
         resource = Resource(resource_data)
-        resource.set_file_to_upload(file_to_upload)
+        resource.set_file_to_upload(file_to_upload_funddet)
         dataset.add_update_resource(resource)
-        nodata = False
 
+    planidcodemapping = dict()
     requirements_url = '%splan/country/%s' % (base_url, countryiso)
     funding_url = '%sfts/flow?groupby=plan&countryISO3=%s' % (base_url, countryiso)
     r = downloader.download(requirements_url)
@@ -284,8 +286,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         fund_data = data[0].get('objectsBreakdown')
     if len(req_data) == 0:
         if not fund_data:
-            if not nodata:
-                raise FTSException('This should not happen!! We have latest year funding data but no overall funding data for %s' % title)
+            if file_to_upload_funddet:
+                logger.error('We have latest year funding data but no overall funding data for %s' % title)
+                dffunddet.to_csv(file_to_upload_funddet, encoding='utf-8', index=False, date_format='%Y-%m-%d')
+                return dataset, showcase, None
             logger.warning('No requirements or funding data available')
             return None, None, None
         logger.warning('No requirements data, only funding data available')
@@ -302,6 +306,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         if bool(dfreq['years'].apply(lambda x: len(x) != 1).any()) is True:
             logger.error('More than one year listed in a plan for %s!' % countryname)
         dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
+        planidcodemapping.update(Series(dfreq.code.values, index=dfreq.id).to_dict())
         if fund_data:
             dffund = json_normalize(fund_data)
             if 'id' in dffund:
@@ -350,7 +355,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     hxldffundreq.rename(index=str, columns=rename_columns, inplace=True)
 
     filename = 'fts_requirements_funding_%s.csv' % countryiso.lower()
-    file_to_upload = join(folder, filename)
+    file_to_upload_hxldffundreq = join(folder, filename)
 
     resource_data = {
         'name': filename.lower(),
@@ -358,25 +363,31 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         'format': 'csv'
     }
     resource = Resource(resource_data)
-    resource.set_file_to_upload(file_to_upload)
+    resource.set_file_to_upload(file_to_upload_hxldffundreq)
     dataset.add_update_resource(resource)
 
     def fill_row(planid, row):
         plan_url = '%splan/id/%s' % (base_url, planid)
         r = downloader.download(plan_url)
         data = r.json()['data']
-        row['code'] = data['code']
+        error = data.get('message')
+        if error:
+            raise FTSException(error)
+        code = data['code']
+        planidcodemapping[planid] = code
+        row['code'] = code
         row['startDate'] = str(data['startDate'])[:10]
         row['endDate'] = str(data['endDate'])[:10]
         years = data['years']
-        if len(years) > 0:
+        if len(years) > 1:
             logger.error('More than one year listed in plan %s for %s!' % (planid, countryname))
         row['year'] = years[0]['year']
         locations = data['locations']
         if len(locations) == 0:
             return True
         for location in data['locations']:
-            if location['adminlevel'] == 0 and location['iso3'] != countryiso:
+            adminlevel = location.get('adminlevel', location.get('adminLevel'))
+            if adminlevel == 0 and location['iso3'] != countryiso:
                 return True
         return False
 
@@ -385,7 +396,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     else:
         reqplanids = drop_columns_except(dfreq, ['id', 'locations'])
     combined = DataFrame()
-    multilocwarning = 'Plan spans multiple locations - ignoring in cluster breakdown!'
+    multilocwarning = 'Plan %s spans multiple locations - ignoring in cluster breakdown (%s)!'
     for i, row in hxldffundreq.iterrows():
         if i == '0':
             continue
@@ -396,20 +407,73 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 continue
             raise FTSException('Plan Name: %s is invalid!' % planname)
         else:
-            if reqplanids is not None:
-                planlocations = reqplanids.loc[reqplanids['id'] == planid].squeeze()
-                if len(planlocations) == 0:
-                    if fill_row(planid, row):
-                        logger.warning(multilocwarning)
-                        continue
+            loc_funding_url = '%sfts/flow?planid=%s&groupby=location' % (base_url, planid)
+            try:
+                r = downloader.download(loc_funding_url)
+                loc_data = r.json()['data']
+                loc_fund_objects = loc_data['report3']['fundingTotals']['objects']
+                totalfunding = row['Funding']
+                try:
+                    origfunding = int(totalfunding)
+                except ValueError:
+                    origfunding = None
+                totalrequirements = row['Requirements']
+                try:
+                    origrequirements = int(totalrequirements)
+                except ValueError:
+                    origrequirements = None
+                if len(loc_fund_objects) != 0:
+                    for location in loc_fund_objects[0]['objectsBreakdown']:
+                        if Country.get_iso3_country_code_fuzzy(location['name'])[0] != countryiso:
+                            continue
+                        totalfunding = location['totalFunding']
+                        if isinstance(totalfunding, int):
+                            boundaryfunding = location['onBoundaryFunding']
+                            if isinstance(boundaryfunding, int):
+                                totalfunding += boundaryfunding
+                            if origfunding != totalfunding:
+                                #logger.warning('Overriding funding')
+                                row['Funding'] = totalfunding
+                        break
+                loc_req_objects = loc_data['requirements']['objects']
+                if loc_req_objects:
+                    for location in loc_req_objects:
+                        if Country.get_iso3_country_code_fuzzy(location['name'])[0] != countryiso:
+                            continue
+                        totalrequirements = location['revisedRequirements']
+                        if isinstance(totalrequirements, int):
+                            if origrequirements != totalrequirements:
+                                #logger.warning('Overriding requirements for %s' % planid)
+                                row['Requirements'] = totalrequirements
+                        break
+                if totalrequirements:
+                    if totalfunding == '':
+                        row['Percent Funded'] = '0'
+                    else:
+                        row['Percent Funded'] = str(int(int(totalfunding) / int(totalrequirements) * 100))
                 else:
-                    if len(planlocations['locations']) > 1:
-                        logger.warning(multilocwarning)
+                    row['Percent Funded'] = ''
+            except DownloadError:
+                logger.error('Problem with downloading %s!' % loc_funding_url)
+
+            try:
+                if reqplanids is not None:
+                    planlocations = reqplanids.loc[reqplanids['id'] == planid].squeeze()
+                    if len(planlocations) == 0:
+                        if fill_row(planid, row):
+                            logger.warning(multilocwarning % (planid, 'no locations in req plan info'))
+                            continue
+                    else:
+                        if len(planlocations['locations']) > 1:
+                            logger.warning(multilocwarning % (planid, '>1 locations in req plan info'))
+                            continue
+                else:
+                    if fill_row(planid, row):
+                        logger.warning(multilocwarning % (planid, 'no req plan info'))
                         continue
-            else:
-                if fill_row(planid, row):
-                    logger.warning(multilocwarning)
-                    continue
+            except FTSException as ex:
+                logger.error(ex)
+                continue
 
         funding_url = '%sfts/flow?planid=%s&groupby=cluster' % (base_url, planid)
         try:
@@ -421,19 +485,6 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 fund_data_cluster = None
             else:
                 fund_data_cluster = fund_objects[0]['objectsBreakdown']
-                newtotalfunding = fund_objects[0]['totalBreakdown']['totalFunding']
-                if isinstance(newtotalfunding, int):
-                    try:
-                        curtotalfunding = int(row['Funding'])
-                    except ValueError:
-                        curtotalfunding = None
-                    if newtotalfunding != curtotalfunding:
-                        row['Funding'] = newtotalfunding
-                        try:
-                            requirements = int(row['Requirements'])
-                            row['Percent Funded'] = int(newtotalfunding / requirements * 100)
-                        except ValueError:
-                            row['Percent Funded'] = ''
         except DownloadError:
             logger.error('Problem with downloading %s!' % funding_url)
             continue
@@ -468,7 +519,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         df.rename(columns={'id': 'clusterCode'}, inplace=True)
         df = drop_columns_except(df, plan_columns_to_keep)
         remove_nonenan(df, 'clusterCode')
-        if fund_data is None:
+        if fund_data_cluster is None:
             shared_funding = None
         else:
             shared_funding = data['report3']['fundingTotals']['objects'][0]['totalBreakdown']['sharedFunding']
@@ -479,7 +530,11 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
 
         combined = combined.append(df, ignore_index=True)
 
-    hxldffundreq.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
+    if file_to_upload_funddet:
+        dffunddet['destPlanCode'] = dffunddet.destPlanId.map(planidcodemapping).fillna(dffunddet.destPlanCode)
+        dffunddet.to_csv(file_to_upload_funddet, encoding='utf-8', index=False, date_format='%Y-%m-%d')
+    hxldffundreq.to_csv(file_to_upload_hxldffundreq, encoding='utf-8', index=False, date_format='%Y-%m-%d')
+
     if len(combined) == 0:
         logger.warning('No cluster data available')
         return dataset, showcase, None
