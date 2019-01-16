@@ -31,7 +31,7 @@ lookup = 'hdx-scraper-fts'
 def main():
     '''Generate dataset and create it in HDX'''
 
-    with temp_dir('fts', False) as folder:
+    with temp_dir('fts') as folder:
         with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup) as downloader:
             base_url = Configuration.read()['base_url']
             countries = get_countries(base_url, downloader)
