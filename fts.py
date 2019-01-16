@@ -320,7 +320,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 logger.info('Funding data lacks plan ids')
                 dffundreq = dfreq
                 dffundreq['totalFunding'] = ''
-                dffundreq['percentFunded'] = '0'
+                dffundreq['percentFunded'] = ''
                 dffund.totalFunding += dffund.onBoundaryFunding
                 dffund = drop_columns_except(dffund, country_columns_to_keep)
                 dffund['percentFunded'] = ''
@@ -330,7 +330,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
             logger.warning('No funding data, only requirements data available')
             dffundreq = dfreq
             dffundreq['totalFunding'] = ''
-            dffundreq['percentFunded'] = '0'
+            dffundreq['percentFunded'] = ''
     dffundreq['countryCode'] = countryiso
     dffundreq.rename(columns={'name_x': 'name'}, inplace=True)
     dffundreq = drop_columns_except(dffundreq, country_columns_to_keep)
@@ -448,7 +448,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                         break
                 if totalrequirements:
                     if totalfunding == '':
-                        row['Percent Funded'] = '0'
+                        row['Percent Funded'] = ''
                     else:
                         row['Percent Funded'] = str(int(int(totalfunding) / int(totalrequirements) * 100))
                 else:
