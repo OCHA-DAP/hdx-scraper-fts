@@ -16,7 +16,7 @@ from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
 
-from fts import generate_dataset_and_showcase, get_clusters, get_countries, generate_resource_view
+from fts import generate_dataset_and_showcase, get_countries, generate_resource_view
 
 #from hdx.facades import logging_kwargs
 #logging_kwargs['smtp_config_yaml'] = join('config', 'smtp_configuration.yml')
@@ -34,7 +34,6 @@ def main():
     with temp_dir('fts') as folder:
         with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup) as downloader:
             base_url = Configuration.read()['base_url']
-            clusters = get_clusters(base_url, downloader)
             countries = get_countries(base_url, downloader)
             today = datetime.now()
             for country in countries:
@@ -44,7 +43,7 @@ def main():
                     logger.info('Ignoring  %s' % countryname)
                     continue
                 logger.info('Adding FTS data for %s' % countryname)
-                dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, clusters, country['iso3'], countryname, locationid, today)
+                dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, country['iso3'], countryname, locationid, today)
                 if dataset is None:
                     logger.info('No data for %s' % countryname)
                 else:
