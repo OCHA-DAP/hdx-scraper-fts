@@ -391,12 +391,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 return True
         return False
 
-    if dfreq is None:
-        reqplanids = None
-    else:
-        reqplanids = drop_columns_except(dfreq, ['id', 'locations'])
     combined = DataFrame()
-    multilocwarning = 'Plan %s spans multiple locations - ignoring in cluster breakdown (%s)!'
     for i, row in hxldffundreq.iterrows():
         if i == '0':
             continue
@@ -457,20 +452,9 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 logger.error('Problem with downloading %s!' % loc_funding_url)
 
             try:
-                if reqplanids is not None:
-                    planlocations = reqplanids.loc[reqplanids['id'] == planid].squeeze()
-                    if len(planlocations) == 0:
-                        if fill_row(planid, row):
-                            logger.warning(multilocwarning % (planid, 'no locations in req plan info'))
-                            continue
-                    else:
-                        if len(planlocations['locations']) > 1:
-                            logger.warning(multilocwarning % (planid, '>1 locations in req plan info'))
-                            continue
-                else:
-                    if fill_row(planid, row):
-                        logger.warning(multilocwarning % (planid, 'no req plan info'))
-                        continue
+                if fill_row(planid, row):
+                    logger.warning('Plan %s spans multiple locations - ignoring in cluster breakdown!' % planid)
+                    continue
             except FTSException as ex:
                 logger.error(ex)
                 continue

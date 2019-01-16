@@ -157,6 +157,8 @@ class TestFTS:
 
     plan90 = {'id': 90, 'name': 'Southeastern Europe 2002', 'code': 'CXSEUR02', 'startDate': '2002-01-01T00:00:00.000Z', 'endDate': '2002-12-31T00:00:00.000Z', 'isForHPCProjects': False, 'emergencies': [{'id': 10, 'name': 'Southeastern Europe 2000 - 2002'}], 'years': [{'id': 23, 'year': '2002'}], 'locations': [], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 236654801, 'revisedRequirements': 212686531, 'meta': {'language': 'en'}}
 
+    plan222 = {'id': 222, 'name': 'West Africa 2007', 'code': 'CXWAF07', 'startDate': '2007-01-01T00:00:00.000Z', 'endDate': '2007-12-31T00:00:00.000Z', 'isForHPCProjects': False, 'emergencies': [], 'years': [{'id': 28, 'year': '2007'}], 'locations': [{'id': 55, 'iso3': 'CIV', 'name': "Côte d'Ivoire", 'adminLevel': 0}, {'id': 126, 'iso3': 'LBR', 'name': 'Liberia', 'adminLevel': 0}, {'id': 137, 'iso3': 'MLI', 'name': 'Mali', 'adminLevel': 0}, {'id': 93, 'iso3': 'GIN', 'name': 'Guinea', 'adminLevel': 0}, {'id': 84, 'iso3': 'GHA', 'name': 'Ghana', 'adminLevel': 0}, {'id': 162, 'iso3': 'NER', 'name': 'Niger', 'adminLevel': 0}, {'id': 197, 'iso3': 'SEN', 'name': 'Senegal', 'adminLevel': 0}, {'id': 224, 'iso3': 'TGO', 'name': 'Togo', 'adminLevel': 0}, {'id': 36, 'iso3': 'BFA', 'name': 'Burkina Faso', 'adminLevel': 0}, {'id': 141, 'iso3': 'MRT', 'name': 'Mauritania', 'adminLevel': 0}, {'id': 200, 'iso3': 'SLE', 'name': 'Sierra Leone', 'adminLevel': 0}, {'id': 24, 'iso3': 'BEN', 'name': 'Benin', 'adminLevel': 0}, {'id': 41, 'iso3': 'CPV', 'name': 'Cape Verde', 'adminLevel': 0}, {'id': 94, 'iso3': 'GNB', 'name': 'Guinea-Bissau', 'adminLevel': 0}], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 309081675, 'revisedRequirements': 361026890, 'meta': {'language': 'en'}}
+
     @pytest.fixture(scope='function')
     def configuration(self):
         Configuration._create(hdx_read_only=True, user_agent='test',
@@ -288,6 +290,8 @@ class TestFTS:
                         plandata = TestFTS.plan544
                     elif '90' in url:
                         plandata = TestFTS.plan90
+                    elif '222' in url:
+                        plandata = TestFTS.plan222
                     else:
                         plandata = None
 
@@ -366,8 +370,7 @@ class TestFTS:
 
             resources = dataset.get_resources()
             assert resources == [{'name': 'fts_funding_cpv.csv', 'description': 'FTS Detailed Funding Data for Cape Verde for 2018', 'format': 'csv'},
-                                 {'name': 'fts_requirements_funding_cpv.csv', 'description': 'FTS Annual Requirements and Funding Data for Cape Verde', 'format': 'csv'},
-                                 {'name': 'fts_requirements_funding_cluster_cpv.csv', 'description': 'FTS Annual Requirements and Funding Data by Cluster for Cape Verde', 'format': 'csv'}]
+                                 {'name': 'fts_requirements_funding_cpv.csv', 'description': 'FTS Annual Requirements and Funding Data for Cape Verde', 'format': 'csv'}]
             for resource in resources:
                 resource_name = resource['name']
                 expected_file = join('tests', 'fixtures', resource_name)
@@ -379,7 +382,7 @@ class TestFTS:
                                 'notes': 'Click the image on the right to go to the FTS funding summary page for Cape Verde',
                                 'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Cape Verde Summary Page',
                                 'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}]}
-            assert hxl_resource == 'fts_requirements_funding_cluster_cpv.csv'
+            assert hxl_resource is None
 
     def test_generate_alb_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('fts') as folder:
