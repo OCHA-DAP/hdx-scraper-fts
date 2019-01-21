@@ -172,7 +172,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         'name': '%s-showcase' % slugified_name,
         'title': 'FTS %s Summary Page' % countryname,
         'notes': 'Click the image on the right to go to the FTS funding summary page for %s' % countryname,
-        'url': 'https://fts.unocha.org/countries/%s/flows/2017' % locationid,
+        'url': 'https://fts.unocha.org/countries/%s/flows/%s' % (locationid, latestyear),
         'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg'
     })
     showcase.add_tags(tags)
