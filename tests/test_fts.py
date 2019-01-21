@@ -380,7 +380,7 @@ class TestFTS:
             assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
                                 'name': 'fts-requirements-and-funding-data-for-cape-verde-showcase',
                                 'notes': 'Click the image on the right to go to the FTS funding summary page for Cape Verde',
-                                'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Cape Verde Summary Page',
+                                'url': 'https://fts.unocha.org/countries/1/flows/2018', 'title': 'FTS Cape Verde Summary Page',
                                 'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}]}
             assert hxl_resource is None
 
@@ -406,6 +406,6 @@ class TestFTS:
             assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
                                 'name': 'fts-requirements-and-funding-data-for-albania-showcase',
                                 'notes': 'Click the image on the right to go to the FTS funding summary page for Albania',
-                                'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Albania Summary Page',
+                                'url': 'https://fts.unocha.org/countries/1/flows/2018', 'title': 'FTS Albania Summary Page',
                                 'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}]}
             assert hxl_resource is None
