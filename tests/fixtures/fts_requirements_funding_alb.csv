@@ -1,4 +1,5 @@
-countryCode,id,name,code,startDate,endDate,year,Requirements,Funding,Percent Funded
+countryCode,id,name,code,startDate,endDate,year,requirements,funding,percentFunded
 #country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
-ALB,,Not specified,,,,,,20903498,
+ALB,,Not specified,,,,2018,,86754,
 ALB,90,Southeastern Europe 2002,CXSEUR02,2002-01-01,2002-12-31,2002,,470201,
+ALB,,Not specified,,,,2002,,2914030,
