@@ -166,13 +166,9 @@ class TestFTS:
 
     afg544cluster_objectsBreakdown = [{'type': 'Cluster', 'direction': 'destination', 'id': '212', 'name': 'Protection', 'totalFunding': 29481076, 'singleFunding': 29481076, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '213', 'name': 'Water, Sanitation and Hygiene', 'totalFunding': 9776526, 'singleFunding': 9776526, 'overlapFunding': 0, 'sharedFunding': 8850159, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '206', 'name': 'Coordination', 'totalFunding': 13785104, 'singleFunding': 13785104, 'overlapFunding': 0, 'sharedFunding': 5000159, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '211', 'name': 'Nutrition', 'totalFunding': 27474573, 'singleFunding': 27474573, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '209', 'name': 'Health', 'totalFunding': 24425281, 'singleFunding': 24425281, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '207', 'name': 'Emergency Shelter and NFI', 'totalFunding': 18661212, 'singleFunding': 18661212, 'overlapFunding': 0, 'sharedFunding': 8332854, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '208', 'name': 'Food Security and Agriculture', 'totalFunding': 83368135, 'singleFunding': 83368135, 'overlapFunding': 0, 'sharedFunding': 4482854, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '3964', 'name': 'Education in Emergencies WG', 'totalFunding': 1321353, 'singleFunding': 1321353, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': 69032991, 'singleFunding': 69032991, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '210', 'name': 'Multi Purpose Cash', 'totalFunding': 25938725, 'singleFunding': 25938725, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '205', 'name': 'Aviation', 'totalFunding': 12742023, 'singleFunding': 12742023, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '3965', 'name': 'Refugee Chapter', 'totalFunding': 3388177, 'singleFunding': 3388177, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
 
-    albcluster_objectsBreakdown = [{'type': 'Cluster', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': 134665994, 'singleFunding': 134665994, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
-
     afg645cluster_objects = [{'id': 4088, 'name': 'Aviation', 'objectType': 'Cluster', 'revisedRequirements': 16390000}, {'id': 4097, 'name': 'Education in Emergencies WG', 'objectType': 'Cluster', 'revisedRequirements': 29685000}, {'id': 4090, 'name': 'Emergency Shelter and NFI', 'objectType': 'Cluster', 'revisedRequirements': 52975538}, {'id': 4096, 'name': 'Water, Sanitation and Hygiene', 'objectType': 'Cluster', 'revisedRequirements': 39000782}, {'id': 4095, 'name': 'Protection', 'objectType': 'Cluster', 'revisedRequirements': 66505803}, {'id': 4094, 'name': 'Nutrition', 'objectType': 'Cluster', 'revisedRequirements': 62370635}, {'id': 4089, 'name': 'Coordination', 'objectType': 'Cluster', 'revisedRequirements': 15900000}, {'id': 4092, 'name': 'Health', 'objectType': 'Cluster', 'revisedRequirements': 48696240}, {'id': 4091, 'name': 'Food Security and Agriculture', 'objectType': 'Cluster', 'revisedRequirements': 231000000}, {'id': 4093, 'name': 'Multi Purpose Cash', 'objectType': 'Cluster', 'revisedRequirements': 36400000}]
 
     afg544cluster_objects = [{'id': 3964, 'name': 'Education in Emergencies WG', 'objectType': 'Cluster', 'revisedRequirements': 40000000}, {'id': 212, 'name': 'Protection', 'objectType': 'Cluster', 'revisedRequirements': 54413760}, {'id': 213, 'name': 'Water, Sanitation and Hygiene', 'objectType': 'Cluster', 'revisedRequirements': 25000000}, {'id': 206, 'name': 'Coordination', 'objectType': 'Cluster', 'revisedRequirements': 9500000}, {'id': 208, 'name': 'Food Security and Agriculture', 'objectType': 'Cluster', 'revisedRequirements': 65590000}, {'id': 211, 'name': 'Nutrition', 'objectType': 'Cluster', 'revisedRequirements': 48000000}, {'id': 209, 'name': 'Health', 'objectType': 'Cluster', 'revisedRequirements': 30000000}, {'id': 205, 'name': 'Aviation', 'objectType': 'Cluster', 'revisedRequirements': 17000000}, {'id': 3965, 'name': 'Refugee Chapter', 'objectType': 'Cluster', 'revisedRequirements': 19535052}, {'id': 210, 'name': 'Multi Purpose Cash', 'objectType': 'Cluster', 'revisedRequirements': 64775000}, {'id': 207, 'name': 'Emergency Shelter and NFI', 'objectType': 'Cluster', 'revisedRequirements': 35600000}]
-
-    albcluster_objects = [{'name': 'Not specified', 'objectType': 'Cluster', 'revisedRequirements': 212686531, 'origRequirements': 236654801}]
 
     afg645location_objectsBreakdown = [{'type': 'Location', 'direction': 'destination', 'id': '1', 'name': 'Afghanistan', 'totalFunding': 462150015, 'singleFunding': 462150015, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
 
@@ -323,24 +319,20 @@ class TestFTS:
                             fundtotaldata = {'sharedFunding': 0}
                             if 'dlerr' in url:
                                 raise DownloadError()
-                            if 'albsite' in url:
-                                funddata = TestFTS.albcluster_objectsBreakdown
-                                reqdata = TestFTS.albcluster_objects
-                            else:  # afgsite
-                                if 'nofund' in url:
-                                    funddata = []
+                            if 'nofund' in url:
+                                funddata = []
+                            else:
+                                if '645' in url:
+                                    funddata = TestFTS.afg645cluster_objectsBreakdown
                                 else:
-                                    if '645' in url:
-                                        funddata = TestFTS.afg645cluster_objectsBreakdown
-                                    else:
-                                        funddata = TestFTS.afg544cluster_objectsBreakdown
-                                if 'noreq' in url:
-                                    reqdata = {}
+                                    funddata = TestFTS.afg544cluster_objectsBreakdown
+                            if 'noreq' in url:
+                                reqdata = {}
+                            else:
+                                if '645' in url:
+                                    reqdata = TestFTS.afg645cluster_objects
                                 else:
-                                    if '645' in url:
-                                        reqdata = TestFTS.afg645cluster_objects
-                                    else:
-                                        reqdata = TestFTS.afg544cluster_objects
+                                    reqdata = TestFTS.afg544cluster_objects
                         else:  # groupby=location
                             fundtotaldata = None
                             if 'cpvsite' in url:
