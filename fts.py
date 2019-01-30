@@ -296,9 +296,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
             logger.warning('No requirements or funding data available')
             return None, None, None
         logger.warning('No requirements data, only funding data available')
-        dfreq = None
         dffund = json_normalize(fund_data)
-        dffund.totalFunding += dffund.onBoundaryFunding
         dffund = drop_columns_except(dffund, country_columns_to_keep)
         dffund['percentFunded'] = ''
         dffund.fillna('', inplace=True)
@@ -316,7 +314,6 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 dffundreq = dfreq.merge(dffund, on='id', how='outer', validate='1:1')
                 dffundreq.name_x.fillna(dffundreq.name_y, inplace=True)
                 dffundreq.fillna('', inplace=True)
-                dffundreq.totalFunding += dffundreq.onBoundaryFunding
                 dffundreq['percentFunded'] = (to_numeric(dffundreq.totalFunding) / to_numeric(
                     dffundreq.revisedRequirements) * 100).astype(str)
             else:
@@ -324,7 +321,6 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 dffundreq = dfreq
                 dffundreq['totalFunding'] = ''
                 dffundreq['percentFunded'] = ''
-                dffund.totalFunding += dffund.onBoundaryFunding
                 dffund = drop_columns_except(dffund, country_columns_to_keep)
                 dffund['percentFunded'] = ''
                 dffund.fillna('', inplace=True)
@@ -355,12 +351,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                         for year_plan_data in data[0].get('objectsBreakdown'):
                             year_plan_name = year_plan_data.get('name')
                             if year_plan_name.lower() == 'not specified':
-                                totalfunding = year_plan_data['totalFunding']
-                                if isinstance(totalfunding, int):
-                                    boundaryfunding = year_plan_data['onBoundaryFunding']
-                                    if isinstance(boundaryfunding, int):
-                                        totalfunding += boundaryfunding
-                                years_not_specified.append({'countryCode': countryiso, 'year': year, 'name': 'Not specified', 'totalFunding': totalfunding})
+                                years_not_specified.append({'countryCode': countryiso, 'year': year, 'name': 'Not specified', 'totalFunding': year_plan_data['totalFunding']})
             df_years_not_specified = DataFrame(data=years_not_specified, columns=list(dffundreq))
             df_years_not_specified.fillna('', inplace=True)
             dffundreq = dffundreq.append(df_years_not_specified)
@@ -446,9 +437,6 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                             continue
                         totalfunding = location['totalFunding']
                         if isinstance(totalfunding, int):
-                            boundaryfunding = location['onBoundaryFunding']
-                            if isinstance(boundaryfunding, int):
-                                totalfunding += boundaryfunding
                             if origfunding != totalfunding:
                                 #logger.warning('Overriding funding')
                                 row['funding'] = totalfunding
