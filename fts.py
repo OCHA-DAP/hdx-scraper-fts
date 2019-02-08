@@ -121,6 +121,10 @@ def drop_rows_with_col_word(df, columnname, word):
     return df
 
 
+def lookup_values_by_key(df, lookupcolumn, key, valuecolumn):
+    return df.query('%s==%s' % (lookupcolumn, key))[valuecolumn]
+
+
 def hxlate(df, hxl_names):
     hxl_columns = [hxl_names[c] for c in df.columns]
     hxl = DataFrame.from_records([hxl_columns], columns=df.columns)
@@ -334,27 +338,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     dffundreq.rename(columns={'name_x': 'name'}, inplace=True)
     dffundreq = drop_columns_except(dffundreq, country_columns_to_keep)
     dffundreq = drop_rows_with_col_word(dffundreq, 'name', 'test')
-    if dffundreq['name'].str.contains('Not specified', case=False).any():
-        dffundreq = drop_rows_with_col_word(dffundreq, 'name', 'Not specified')
-        years_url = '%sfts/flow?countryISO3=%s&groupby=year' % (base_url, countryiso)
-        r = downloader.download(years_url)
-        data = r.json()['data']['report3']['fundingTotals']['objects']
-        if len(data) != 0:
-            years_not_specified = list()
-            for year_data in data[0].get('objectsBreakdown'):
-                year = year_data.get('name')
-                if year:
-                    year_plan_url = '%sfts/flow?countryISO3=%s&year=%s&groupby=plan' % (base_url, countryiso, year)
-                    r = downloader.download(year_plan_url)
-                    data = r.json()['data']['report3']['fundingTotals']['objects']
-                    if len(data) != 0:
-                        for year_plan_data in data[0].get('objectsBreakdown'):
-                            year_plan_name = year_plan_data.get('name')
-                            if year_plan_name.lower() == 'not specified':
-                                years_not_specified.append({'countryCode': countryiso, 'year': year, 'name': 'Not specified', 'totalFunding': year_plan_data['totalFunding']})
-            df_years_not_specified = DataFrame(data=years_not_specified, columns=list(dffundreq))
-            df_years_not_specified.fillna('', inplace=True)
-            dffundreq = dffundreq.append(df_years_not_specified)
+    dffundreq = drop_rows_with_col_word(dffundreq, 'name', 'Not specified')
 
     dffundreq.startDate = dffundreq.startDate.str[:10]
     dffundreq.endDate = dffundreq.endDate.str[:10]
@@ -528,7 +512,38 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     for fund_boundary_info in fund_boundaries_info:
         fund_boundary_info[0]['destPlanCode'] = fund_boundary_info[0].destPlanId.map(planidcodemapping).fillna(fund_boundary_info[0].destPlanCode)
         fund_boundary_info[0].to_csv(fund_boundary_info[1], encoding='utf-8', index=False, date_format='%Y-%m-%d')
+
+    years_url = '%sfts/flow?countryISO3=%s&groupby=year' % (base_url, countryiso)
+    ## get totals from year call and subtract all plans in that year
+    # 691121294 - 611797140 (2018 SDN)
+    r = downloader.download(years_url)
+    data = r.json()['data']['report3']['fundingTotals']['objects']
+    if len(data) != 0:
+        years_not_specified = list()
+        for year_data in data[0].get('objectsBreakdown'):
+            year = year_data.get('name')
+            if year:
+                year_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, year)
+                r = downloader.download(year_url)
+                data = r.json()['data']
+                if len(data['flows']) == 0:
+                    continue
+                totalfunding = data['incoming']['fundingTotal']
+                funding_in_year = lookup_values_by_key(dffundreq, 'year', "'%s'" % year, 'funding')
+                if funding_in_year.empty:
+                    not_specified = str(int(totalfunding))
+                else:
+                    not_specified = str(int(totalfunding - to_numeric(funding_in_year, errors='coerce').sum()))
+                if year == 'Not specified':
+                    year = '1000'
+                years_not_specified.append({'countryCode': countryiso, 'year': year, 'name': 'Not specified',
+                                            'funding': not_specified})
+        df_years_not_specified = DataFrame(data=years_not_specified, columns=list(dffundreq))
+        df_years_not_specified.fillna('', inplace=True)
+        dffundreq = dffundreq.append(df_years_not_specified)
+
     dffundreq.sort_values(['year', 'endDate', 'name'], ascending=[False, False, True], inplace=True)
+    dffundreq['year'] = dffundreq['year'].replace('1000', 'Not specified')
     hxldffundreq = hxlate(dffundreq, hxl_names)
     hxldffundreq.to_csv(file_to_upload_hxldffundreq, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 

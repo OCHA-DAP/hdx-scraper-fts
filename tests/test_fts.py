@@ -116,30 +116,6 @@ class TestFTS:
                                  {'type': 'UsageYear', 'direction': 'destination', 'id': '39', 'name': '2018',
                                   'totalFunding': 86754, 'singleFunding': 86754, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
 
-    afgobjectsBreakdownByPlanFor2017 = [{'type': 'Plan', 'direction': 'destination', 'id': '544', 'name': 'Afghanistan 2017',
-                                            'totalFunding': 331238992, 'singleFunding': 331238992, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 1489197},
-                                           {'type': 'Plan', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': 60400934,
-                                            'singleFunding': 60400934, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
-
-    afgobjectsBreakdownByPlanFor2018 = [{'type': 'Plan', 'direction': 'destination', 'id': '645', 'name': 'Afghanistan 2018',
-                                         'totalFunding': 467562104, 'singleFunding': 467562104, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0},
-                                        {'type': 'Plan', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': 69195671,
-                                         'singleFunding': 69195671, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 40}]
-
-    cpvobjectsBreakdownByPlanFor2007 = [{'type': 'Plan', 'direction': 'destination', 'name': 'Not specified',
-                                         'totalFunding': 1270424, 'singleFunding': 1270424, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
-
-    cpvobjectsBreakdownByPlanFor2018 = [{'type': 'Plan', 'direction': 'destination', 'name': 'Not specified',
-                                         'totalFunding': 568918, 'singleFunding': 568918, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
-
-    albobjectsBreakdownByPlanFor2002 = [{'type': 'Plan', 'direction': 'destination', 'name': 'Not specified',
-                                         'totalFunding': 2914030, 'singleFunding': 2914030, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0},
-                                        {'type': 'Plan', 'direction': 'destination', 'id': '90', 'name': 'Southeastern Europe 2002',
-                                         'totalFunding': 470201, 'singleFunding': 470201, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
-
-    albobjectsBreakdownByPlanFor2018 = [{'type': 'Plan', 'direction': 'destination', 'name': 'Not specified',
-                                         'totalFunding': 86754, 'singleFunding': 86754, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
-
     afgobjectsBreakdownByPlan = [{'sharedFunding': 0, 'onBoundaryFunding': 0, 'direction': 'destination',
                          'totalFunding': 2500000, 'name': 'Afghanistan 2018', 'overlapFunding': 0, 'id': '645',
                          'singleFunding': 2500000, 'type': 'Plan'},
@@ -166,15 +142,11 @@ class TestFTS:
 
     afg544cluster_objectsBreakdown = [{'type': 'Cluster', 'direction': 'destination', 'id': '212', 'name': 'Protection', 'totalFunding': 29481076, 'singleFunding': 29481076, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '213', 'name': 'Water, Sanitation and Hygiene', 'totalFunding': 9776526, 'singleFunding': 9776526, 'overlapFunding': 0, 'sharedFunding': 8850159, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '206', 'name': 'Coordination', 'totalFunding': 13785104, 'singleFunding': 13785104, 'overlapFunding': 0, 'sharedFunding': 5000159, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '211', 'name': 'Nutrition', 'totalFunding': 27474573, 'singleFunding': 27474573, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '209', 'name': 'Health', 'totalFunding': 24425281, 'singleFunding': 24425281, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '207', 'name': 'Emergency Shelter and NFI', 'totalFunding': 18661212, 'singleFunding': 18661212, 'overlapFunding': 0, 'sharedFunding': 8332854, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '208', 'name': 'Food Security and Agriculture', 'totalFunding': 83368135, 'singleFunding': 83368135, 'overlapFunding': 0, 'sharedFunding': 4482854, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '3964', 'name': 'Education in Emergencies WG', 'totalFunding': 1321353, 'singleFunding': 1321353, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': 69032991, 'singleFunding': 69032991, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '210', 'name': 'Multi Purpose Cash', 'totalFunding': 25938725, 'singleFunding': 25938725, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '205', 'name': 'Aviation', 'totalFunding': 12742023, 'singleFunding': 12742023, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Cluster', 'direction': 'destination', 'id': '3965', 'name': 'Refugee Chapter', 'totalFunding': 3388177, 'singleFunding': 3388177, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
 
-    albcluster_objectsBreakdown = [{'type': 'Cluster', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': 134665994, 'singleFunding': 134665994, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
-
     afg645cluster_objects = [{'id': 4088, 'name': 'Aviation', 'objectType': 'Cluster', 'revisedRequirements': 16390000}, {'id': 4097, 'name': 'Education in Emergencies WG', 'objectType': 'Cluster', 'revisedRequirements': 29685000}, {'id': 4090, 'name': 'Emergency Shelter and NFI', 'objectType': 'Cluster', 'revisedRequirements': 52975538}, {'id': 4096, 'name': 'Water, Sanitation and Hygiene', 'objectType': 'Cluster', 'revisedRequirements': 39000782}, {'id': 4095, 'name': 'Protection', 'objectType': 'Cluster', 'revisedRequirements': 66505803}, {'id': 4094, 'name': 'Nutrition', 'objectType': 'Cluster', 'revisedRequirements': 62370635}, {'id': 4089, 'name': 'Coordination', 'objectType': 'Cluster', 'revisedRequirements': 15900000}, {'id': 4092, 'name': 'Health', 'objectType': 'Cluster', 'revisedRequirements': 48696240}, {'id': 4091, 'name': 'Food Security and Agriculture', 'objectType': 'Cluster', 'revisedRequirements': 231000000}, {'id': 4093, 'name': 'Multi Purpose Cash', 'objectType': 'Cluster', 'revisedRequirements': 36400000}]
 
     afg544cluster_objects = [{'id': 3964, 'name': 'Education in Emergencies WG', 'objectType': 'Cluster', 'revisedRequirements': 40000000}, {'id': 212, 'name': 'Protection', 'objectType': 'Cluster', 'revisedRequirements': 54413760}, {'id': 213, 'name': 'Water, Sanitation and Hygiene', 'objectType': 'Cluster', 'revisedRequirements': 25000000}, {'id': 206, 'name': 'Coordination', 'objectType': 'Cluster', 'revisedRequirements': 9500000}, {'id': 208, 'name': 'Food Security and Agriculture', 'objectType': 'Cluster', 'revisedRequirements': 65590000}, {'id': 211, 'name': 'Nutrition', 'objectType': 'Cluster', 'revisedRequirements': 48000000}, {'id': 209, 'name': 'Health', 'objectType': 'Cluster', 'revisedRequirements': 30000000}, {'id': 205, 'name': 'Aviation', 'objectType': 'Cluster', 'revisedRequirements': 17000000}, {'id': 3965, 'name': 'Refugee Chapter', 'objectType': 'Cluster', 'revisedRequirements': 19535052}, {'id': 210, 'name': 'Multi Purpose Cash', 'objectType': 'Cluster', 'revisedRequirements': 64775000}, {'id': 207, 'name': 'Emergency Shelter and NFI', 'objectType': 'Cluster', 'revisedRequirements': 35600000}]
 
-    albcluster_objects = [{'name': 'Not specified', 'objectType': 'Cluster', 'revisedRequirements': 212686531, 'origRequirements': 236654801}]
-
-    afg645location_objectsBreakdown = [{'type': 'Location', 'direction': 'destination', 'id': '1', 'name': 'Afghanistan', 'totalFunding': 462150015, 'singleFunding': 462150015, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
+    afg645location_objectsBreakdown = [{'type': 'Location', 'direction': 'destination', 'id': '1', 'name': 'Afghanistan', 'totalFunding': 468106102, 'singleFunding': 468106102, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
 
     afg544location_objectsBreakdown = [{'type': 'Location', 'direction': 'destination', 'id': '1', 'name': 'Afghanistan', 'totalFunding': 331238992, 'singleFunding': 331238992, 'overlapFunding': 0, 'sharedFunding': 1489197, 'onBoundaryFunding': 0}, {'type': 'Location', 'direction': 'destination', 'id': '25799581', 'onBoundaryFunding': 0, 'name': 'Western', 'totalFunding': 0, 'singleFunding': 0, 'overlapFunding': 0, 'sharedFunding': 592979}, {'type': 'Location', 'direction': 'destination', 'id': '25799580', 'onBoundaryFunding': 0, 'name': 'Southern', 'totalFunding': 0, 'singleFunding': 0, 'overlapFunding': 0, 'sharedFunding': 592979}, {'type': 'Location', 'direction': 'destination', 'id': '25799579', 'onBoundaryFunding': 0, 'name': 'South Eastern', 'totalFunding': 0, 'singleFunding': 0, 'overlapFunding': 0, 'sharedFunding': 592979}, {'type': 'Location', 'direction': 'destination', 'id': '25799578', 'onBoundaryFunding': 0, 'name': 'Northern', 'totalFunding': 0, 'singleFunding': 0, 'overlapFunding': 0, 'sharedFunding': 592979}, {'type': 'Location', 'direction': 'destination', 'id': '25799574', 'onBoundaryFunding': 0, 'name': 'Central Highland', 'totalFunding': 0, 'singleFunding': 0, 'overlapFunding': 0, 'sharedFunding': 592979}, {'type': 'Location', 'direction': 'destination', 'id': '25799575', 'onBoundaryFunding': 0, 'name': 'Capital', 'totalFunding': 0, 'singleFunding': 0, 'overlapFunding': 0, 'sharedFunding': 592979}, {'type': 'Location', 'direction': 'destination', 'id': '25799576', 'onBoundaryFunding': 0, 'name': 'Eastern', 'totalFunding': 0, 'singleFunding': 0, 'overlapFunding': 0, 'sharedFunding': 592979}, {'type': 'Location', 'direction': 'destination', 'id': '25799577', 'onBoundaryFunding': 0, 'name': 'North Eastern', 'totalFunding': 0, 'singleFunding': 0, 'overlapFunding': 0, 'sharedFunding': 592979}, {'type': 'Location', 'direction': 'destination', 'id': '4060', 'onBoundaryFunding': 0, 'name': 'Capital', 'totalFunding': 0, 'singleFunding': 0, 'overlapFunding': 0, 'sharedFunding': 896218}]
 
@@ -223,18 +195,39 @@ class TestFTS:
                 elif 'groupby' not in url and 'fts/flow?countryISO3=AFG&year=2017' in url:
                     def fn():
                         if 'nofund' in url:
-                            data = {}
+                            data = []
+                            incoming = 0
                         else:
                             data = TestFTS.afgflows
-                        return {'data': {'flows': data}}
+                            incoming = 391639926
+                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}}
+                    response.json = fn
+                elif 'groupby' not in url and 'fts/flow?countryISO3=AFG&year=2018' in url:
+                    def fn():
+                        if 'nofund' in url:
+                            data = []
+                            incoming = 0
+                        else:
+                            data = [1]  # value is not used in test, just needs to be non empty list
+                            incoming = 537301773
+                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}}
+
+                    response.json = fn
+                elif 'groupby' not in url and 'fts/flow?countryISO3=CPV&year=2007' in url:
+                    def fn():
+                        return {'data': {'incoming': {'fundingTotal': 1270424}, 'flows': [1]}}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=CPV&year=2018' in url:
                     def fn():
-                        return {'data': {'flows': TestFTS.cpvflows}}
+                        return {'data': {'incoming': {'fundingTotal': 568918}, 'flows': TestFTS.cpvflows}}
+                    response.json = fn
+                elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2002' in url:
+                    def fn():
+                        return {'data': {'incoming': {'fundingTotal': 3384231}, 'flows': [1]}}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2018' in url:
                     def fn():
-                        return {'data': {'flows': TestFTS.albflows}}
+                        return {'data': {'incoming': {'fundingTotal': 86754}, 'flows': TestFTS.albflows}}
                     response.json = fn
                 elif 'plan/country/AFG' in url:
                     def fn():
@@ -267,36 +260,6 @@ class TestFTS:
                         return {'data': {'report3': {
                                 'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByYear}]}}}}
                     response.json = fn
-                elif 'fts/flow?countryISO3=AFG&year=2017&groupby=plan' in url:
-                    def fn():
-                        return {'data': {'report3': {
-                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.afgobjectsBreakdownByPlanFor2017}]}}}}
-                    response.json = fn
-                elif 'fts/flow?countryISO3=AFG&year=2018&groupby=plan' in url:
-                    def fn():
-                        return {'data': {'report3': {
-                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.afgobjectsBreakdownByPlanFor2018}]}}}}
-                    response.json = fn
-                elif 'fts/flow?countryISO3=CPV&year=2007&groupby=plan' in url:
-                    def fn():
-                        return {'data': {'report3': {
-                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.cpvobjectsBreakdownByPlanFor2007}]}}}}
-                    response.json = fn
-                elif 'fts/flow?countryISO3=CPV&year=2018&groupby=plan' in url:
-                    def fn():
-                        return {'data': {'report3': {
-                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.cpvobjectsBreakdownByPlanFor2018}]}}}}
-                    response.json = fn
-                elif 'fts/flow?countryISO3=ALB&year=2002&groupby=plan' in url:
-                    def fn():
-                        return {'data': {'report3': {
-                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByPlanFor2002}]}}}}
-                    response.json = fn
-                elif 'fts/flow?countryISO3=ALB&year=2018&groupby=plan' in url:
-                    def fn():
-                        return {'data': {'report3': {
-                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByPlanFor2018}]}}}}
-                    response.json = fn
                 elif 'fts/flow?groupby=plan&countryISO3=AFG' in url:
                     def fn():
                         if 'fundnoid' in url:
@@ -323,24 +286,20 @@ class TestFTS:
                             fundtotaldata = {'sharedFunding': 0}
                             if 'dlerr' in url:
                                 raise DownloadError()
-                            if 'albsite' in url:
-                                funddata = TestFTS.albcluster_objectsBreakdown
-                                reqdata = TestFTS.albcluster_objects
-                            else:  # afgsite
-                                if 'nofund' in url:
-                                    funddata = []
+                            if 'nofund' in url:
+                                funddata = []
+                            else:
+                                if '645' in url:
+                                    funddata = TestFTS.afg645cluster_objectsBreakdown
                                 else:
-                                    if '645' in url:
-                                        funddata = TestFTS.afg645cluster_objectsBreakdown
-                                    else:
-                                        funddata = TestFTS.afg544cluster_objectsBreakdown
-                                if 'noreq' in url:
-                                    reqdata = {}
+                                    funddata = TestFTS.afg544cluster_objectsBreakdown
+                            if 'noreq' in url:
+                                reqdata = {}
+                            else:
+                                if '645' in url:
+                                    reqdata = TestFTS.afg645cluster_objects
                                 else:
-                                    if '645' in url:
-                                        reqdata = TestFTS.afg645cluster_objects
-                                    else:
-                                        reqdata = TestFTS.afg544cluster_objects
+                                    reqdata = TestFTS.afg544cluster_objects
                         else:  # groupby=location
                             fundtotaldata = None
                             if 'cpvsite' in url:
