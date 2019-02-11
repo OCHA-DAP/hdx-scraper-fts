@@ -318,8 +318,8 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 dffundreq = dfreq.merge(dffund, on='id', how='outer', validate='1:1')
                 dffundreq.name_x.fillna(dffundreq.name_y, inplace=True)
                 dffundreq.fillna('', inplace=True)
-                dffundreq['percentFunded'] = (to_numeric(dffundreq.totalFunding) / to_numeric(
-                    dffundreq.revisedRequirements) * 100).astype(str)
+                dffundreq['percentFunded'] = ((to_numeric(dffundreq.totalFunding) / to_numeric(
+                    dffundreq.revisedRequirements) * 100) + 0.5).astype(str)
             else:
                 logger.info('Funding data lacks plan ids')
                 dffundreq = dfreq
@@ -440,7 +440,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                     if totalfunding == '':
                         row['percentFunded'] = ''
                     else:
-                        row['percentFunded'] = str(int(int(totalfunding) / int(totalrequirements) * 100))
+                        row['percentFunded'] = str(int((int(totalfunding) / int(totalrequirements) * 100) + 0.5))
                 else:
                     row['percentFunded'] = ''
             except DownloadError:
@@ -554,7 +554,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     df = combined.merge(dffundreq, on='id')
     df.rename(columns={'name_x': 'name', 'revisedRequirements_x': 'revisedRequirements', 'totalFunding_x': 'totalFunding'}, inplace=True)
     df = drop_columns_except(df, cluster_columns_to_keep)
-    df['percentFunded'] = (to_numeric(df.totalFunding) / to_numeric(df.revisedRequirements) * 100).astype(str)
+    df['percentFunded'] = ((to_numeric(df.totalFunding) / to_numeric(df.revisedRequirements) * 100) + 0.5).astype(str)
     remove_fractions(df, 'revisedRequirements')
     remove_nonenan(df, 'revisedRequirements')
     remove_fractions(df, 'totalFunding')
