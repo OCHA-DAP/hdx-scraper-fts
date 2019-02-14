@@ -162,6 +162,9 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     dataset.set_dataset_date_from_datetime(today)
     dataset.set_expected_update_frequency('Every day')
     dataset.set_subnational(False)
+    if countryiso is None:
+        logger.error('%s has a problem! Iso3 is None!' % title)
+        return None, None, None
     try:
         dataset.add_country_location(countryiso)
     except HDXError as e:
