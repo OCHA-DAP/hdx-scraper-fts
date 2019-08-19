@@ -406,7 +406,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 continue
             raise FTSException('Plan Name: %s is invalid!' % planname)
         else:
-            loc_funding_url = '%sfts/flow?planid=%s&groupby=country' % (base_url, planid)
+            loc_funding_url = '%sfts/flow?planid=%s&groupby=location' % (base_url, planid)
             try:
                 r = downloader.download(loc_funding_url)
                 loc_data = r.json()['data']
