@@ -185,9 +185,14 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     showcase.add_tags(tags)
 
     fund_boundaries_info = list()
+    fund_data = list()
     funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
-    r = downloader.download(funding_url)
-    fund_data = r.json()['data']['flows']
+    while funding_url:
+        r = downloader.download(funding_url)
+        json = r.json()
+        fund_data.extend(json['data']['flows'])
+        funding_url = json['meta'].get('nextLink')
+
     dffunddet = json_normalize(fund_data)
 
     def add_objects(name):

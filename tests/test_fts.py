@@ -4,6 +4,7 @@
 Unit tests for fts.
 
 '''
+import copy
 from datetime import datetime
 from os.path import join
 
@@ -197,13 +198,18 @@ class TestFTS:
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=AFG&year=2017' in url:
                     def fn():
+                        meta = dict()
                         if 'nofund' in url:
                             data = []
                             incoming = 0
                         else:
-                            data = TestFTS.afgflows
+                            data = copy.deepcopy(TestFTS.afgflows)
                             incoming = 391639926
-                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}}
+                            if 'page' in url:
+                                data[0]['id'] = '149198X'
+                            else:
+                                meta['nextLink'] = '%s&page=2' % url
+                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}, 'meta': meta}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=AFG&year=2018' in url:
                     def fn():
@@ -213,24 +219,24 @@ class TestFTS:
                         else:
                             data = [1]  # value is not used in test, just needs to be non empty list
                             incoming = 537301773
-                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}}
+                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}, 'meta': dict()}
 
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=CPV&year=2007' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 1270424}, 'flows': [1]}}
+                        return {'data': {'incoming': {'fundingTotal': 1270424}, 'flows': [1]}, 'meta': dict()}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=CPV&year=2018' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 568918}, 'flows': TestFTS.cpvflows}}
+                        return {'data': {'incoming': {'fundingTotal': 568918}, 'flows': TestFTS.cpvflows}, 'meta': dict()}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2002' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 3384231}, 'flows': [1]}}
+                        return {'data': {'incoming': {'fundingTotal': 3384231}, 'flows': [1]}, 'meta': dict()}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2018' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 86754}, 'flows': TestFTS.albflows}}
+                        return {'data': {'incoming': {'fundingTotal': 86754}, 'flows': TestFTS.albflows}, 'meta': dict()}
                     response.json = fn
                 elif 'plan/country/AFG' in url:
                     def fn():
