@@ -50,15 +50,13 @@ def main():
                     dataset.update_from_yaml()
                     if hxl_resource is None:
                         dataset.preview_off()
-                        hxl_update = False
                     else:
                         dataset.set_quickchart_resource(hxl_resource)
-                        hxl_update = True
                     dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False)
                     resources = dataset.get_resources()
                     resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
-                    dataset.reorder_resources(resource_ids, hxl_update=hxl_update)
-                    if hxl_update:
+                    dataset.reorder_resources(resource_ids, hxl_update=False)
+                    if hxl_resource:
                         resource_view = generate_resource_view(dataset)
                         resource_view.create_in_hdx()
                     showcase.create_in_hdx()

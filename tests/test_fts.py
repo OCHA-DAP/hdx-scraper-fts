@@ -4,10 +4,12 @@
 Unit tests for fts.
 
 '''
+import copy
 from datetime import datetime
 from os.path import join
 
 import pytest
+from hdx.data.vocabulary import Vocabulary
 from hdx.hdx_configuration import Configuration
 from hdx.hdx_locations import Locations
 from hdx.location.country import Country
@@ -162,13 +164,13 @@ class TestFTS:
 
     alblocation_objects = [{'name': 'Not specified', 'objectType': 'Location', 'revisedRequirements': 212686531, 'origRequirements': 236654801}]
 
-    plan645 = {'id': 645, 'name': 'Afghanistan 2018', 'code': 'HAFG18', 'startDate': '2018-01-01T00:00:00.000Z', 'endDate': '2018-12-31T00:00:00.000Z', 'isForHPCProjects': False, 'emergencies': [], 'years': [{'id': 39, 'year': '2018'}], 'locations': [{'id': 1, 'name': 'Afghanistan', 'iso3': 'AFG', 'adminlevel': 0}], 'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}], 'revisedRequirements': 598923998, 'meta': {'language': 'en'}}
+    plan645 = {'id': 645, 'planVersion': {'planId': 645, 'name': 'Afghanistan 2018', 'code': 'HAFG18', 'startDate': '2018-01-01T00:00:00.000Z', 'endDate': '2018-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [], 'years': [{'id': 39, 'year': '2018'}], 'locations': [{'id': 1, 'name': 'Afghanistan', 'iso3': 'AFG', 'adminlevel': 0}], 'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}], 'revisedRequirements': 598923998, 'meta': {'language': 'en'}}
 
-    plan544 = {'id': 544, 'name': 'Afghanistan 2017', 'code': 'HAFG17', 'startDate': '2017-01-01T00:00:00.000Z', 'endDate': '2017-12-31T00:00:00.000Z', 'isForHPCProjects': False, 'emergencies': [], 'years': [{'id': 38, 'year': '2017'}], 'locations': [{'id': 1, 'name': 'Afghanistan', 'iso3': 'AFG', 'adminlevel': 0}, {'id': 25799575, 'name': 'Capital', 'iso3': None, 'adminlevel': 1}, {'id': 25799574, 'name': 'Central Highland', 'iso3': None, 'adminlevel': 1}], 'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}], 'revisedRequirements': 409413812, 'meta': {'language': 'en'}}
+    plan544 = {'id': 544, 'planVersion': {'planId': 544, 'name': 'Afghanistan 2017', 'code': 'HAFG17', 'startDate': '2017-01-01T00:00:00.000Z', 'endDate': '2017-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [], 'years': [{'id': 38, 'year': '2017'}], 'locations': [{'id': 1, 'name': 'Afghanistan', 'iso3': 'AFG', 'adminlevel': 0}, {'id': 25799575, 'name': 'Capital', 'iso3': None, 'adminlevel': 1}, {'id': 25799574, 'name': 'Central Highland', 'iso3': None, 'adminlevel': 1}], 'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}], 'revisedRequirements': 409413812, 'meta': {'language': 'en'}}
 
-    plan90 = {'id': 90, 'name': 'Southeastern Europe 2002', 'code': 'CXSEUR02', 'startDate': '2002-01-01T00:00:00.000Z', 'endDate': '2002-12-31T00:00:00.000Z', 'isForHPCProjects': False, 'emergencies': [{'id': 10, 'name': 'Southeastern Europe 2000 - 2002'}], 'years': [{'id': 23, 'year': '2002'}], 'locations': [], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 236654801, 'revisedRequirements': 212686531, 'meta': {'language': 'en'}}
+    plan90 = {'id': 90, 'planVersion': {'planId': 90, 'name': 'Southeastern Europe 2002', 'code': 'CXSEUR02', 'startDate': '2002-01-01T00:00:00.000Z', 'endDate': '2002-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [{'id': 10, 'name': 'Southeastern Europe 2000 - 2002'}], 'years': [{'id': 23, 'year': '2002'}], 'locations': [], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 236654801, 'revisedRequirements': 212686531, 'meta': {'language': 'en'}}
 
-    plan222 = {'id': 222, 'name': 'West Africa 2007', 'code': 'CXWAF07', 'startDate': '2007-01-01T00:00:00.000Z', 'endDate': '2007-12-31T00:00:00.000Z', 'isForHPCProjects': False, 'emergencies': [], 'years': [{'id': 28, 'year': '2007'}], 'locations': [{'id': 55, 'iso3': 'CIV', 'name': "Côte d'Ivoire", 'adminLevel': 0}, {'id': 126, 'iso3': 'LBR', 'name': 'Liberia', 'adminLevel': 0}, {'id': 137, 'iso3': 'MLI', 'name': 'Mali', 'adminLevel': 0}, {'id': 93, 'iso3': 'GIN', 'name': 'Guinea', 'adminLevel': 0}, {'id': 84, 'iso3': 'GHA', 'name': 'Ghana', 'adminLevel': 0}, {'id': 162, 'iso3': 'NER', 'name': 'Niger', 'adminLevel': 0}, {'id': 197, 'iso3': 'SEN', 'name': 'Senegal', 'adminLevel': 0}, {'id': 224, 'iso3': 'TGO', 'name': 'Togo', 'adminLevel': 0}, {'id': 36, 'iso3': 'BFA', 'name': 'Burkina Faso', 'adminLevel': 0}, {'id': 141, 'iso3': 'MRT', 'name': 'Mauritania', 'adminLevel': 0}, {'id': 200, 'iso3': 'SLE', 'name': 'Sierra Leone', 'adminLevel': 0}, {'id': 24, 'iso3': 'BEN', 'name': 'Benin', 'adminLevel': 0}, {'id': 41, 'iso3': 'CPV', 'name': 'Cape Verde', 'adminLevel': 0}, {'id': 94, 'iso3': 'GNB', 'name': 'Guinea-Bissau', 'adminLevel': 0}], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 309081675, 'revisedRequirements': 361026890, 'meta': {'language': 'en'}}
+    plan222 = {'id': 222, 'planVersion': {'planId': 222, 'name': 'West Africa 2007', 'code': 'CXWAF07', 'startDate': '2007-01-01T00:00:00.000Z', 'endDate': '2007-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [], 'years': [{'id': 28, 'year': '2007'}], 'locations': [{'id': 55, 'iso3': 'CIV', 'name': "Côte d'Ivoire", 'adminLevel': 0}, {'id': 126, 'iso3': 'LBR', 'name': 'Liberia', 'adminLevel': 0}, {'id': 137, 'iso3': 'MLI', 'name': 'Mali', 'adminLevel': 0}, {'id': 93, 'iso3': 'GIN', 'name': 'Guinea', 'adminLevel': 0}, {'id': 84, 'iso3': 'GHA', 'name': 'Ghana', 'adminLevel': 0}, {'id': 162, 'iso3': 'NER', 'name': 'Niger', 'adminLevel': 0}, {'id': 197, 'iso3': 'SEN', 'name': 'Senegal', 'adminLevel': 0}, {'id': 224, 'iso3': 'TGO', 'name': 'Togo', 'adminLevel': 0}, {'id': 36, 'iso3': 'BFA', 'name': 'Burkina Faso', 'adminLevel': 0}, {'id': 141, 'iso3': 'MRT', 'name': 'Mauritania', 'adminLevel': 0}, {'id': 200, 'iso3': 'SLE', 'name': 'Sierra Leone', 'adminLevel': 0}, {'id': 24, 'iso3': 'BEN', 'name': 'Benin', 'adminLevel': 0}, {'id': 41, 'iso3': 'CPV', 'name': 'Cape Verde', 'adminLevel': 0}, {'id': 94, 'iso3': 'GNB', 'name': 'Guinea-Bissau', 'adminLevel': 0}], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 309081675, 'revisedRequirements': 361026890, 'meta': {'language': 'en'}}
 
     @pytest.fixture(scope='function')
     def configuration(self):
@@ -176,6 +178,8 @@ class TestFTS:
                               project_config_yaml=join('tests', 'config', 'project_configuration.yml'))
         Locations.set_validlocations([{'name': 'afg', 'title': 'Afghanistan'}, {'name': 'alb', 'title': 'Albania'}, {'name': 'cpv', 'title': 'Cape Verde'}])
         Country.countriesdata(False)
+        Vocabulary._tags_dict = True
+        Vocabulary._approved_vocabulary = {'tags': [{'name': 'hxl'}, {'name': 'financial tracking service - fts'}, {'name': 'aid funding'}], 'id': '4e61d464-4943-4e97-973a-84673c1aaa87', 'name': 'approved'}
 
     @pytest.fixture(scope='function')
     def downloader(self):
@@ -194,13 +198,18 @@ class TestFTS:
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=AFG&year=2017' in url:
                     def fn():
+                        meta = dict()
                         if 'nofund' in url:
                             data = []
                             incoming = 0
                         else:
-                            data = TestFTS.afgflows
+                            data = copy.deepcopy(TestFTS.afgflows)
                             incoming = 391639926
-                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}}
+                            if 'page' in url:
+                                data[0]['id'] = '149198X'
+                            else:
+                                meta['nextLink'] = '%s&page=2' % url
+                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}, 'meta': meta}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=AFG&year=2018' in url:
                     def fn():
@@ -210,24 +219,24 @@ class TestFTS:
                         else:
                             data = [1]  # value is not used in test, just needs to be non empty list
                             incoming = 537301773
-                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}}
+                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}, 'meta': dict()}
 
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=CPV&year=2007' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 1270424}, 'flows': [1]}}
+                        return {'data': {'incoming': {'fundingTotal': 1270424}, 'flows': [1]}, 'meta': dict()}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=CPV&year=2018' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 568918}, 'flows': TestFTS.cpvflows}}
+                        return {'data': {'incoming': {'fundingTotal': 568918}, 'flows': TestFTS.cpvflows}, 'meta': dict()}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2002' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 3384231}, 'flows': [1]}}
+                        return {'data': {'incoming': {'fundingTotal': 3384231}, 'flows': [1]}, 'meta': dict()}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2018' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 86754}, 'flows': TestFTS.albflows}}
+                        return {'data': {'incoming': {'fundingTotal': 86754}, 'flows': TestFTS.albflows}, 'meta': dict()}
                     response.json = fn
                 elif 'plan/country/AFG' in url:
                     def fn():
@@ -367,25 +376,27 @@ class TestFTS:
     def test_generate_afg_dataset_and_showcase(self, configuration, downloader):
         afgdataset = {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
                       'title': 'Afghanistan - Requirements and Funding Data',
-                      'tags': [{'name': 'HXL'}, {'name': 'cash assistance'},
-                               {'name': 'financial tracking service - fts'}, {'name': 'funding'}],
+                      'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                               {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                               {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
                       'dataset_date': '06/01/2017',
                       'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
                       'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0'}
         afgresources = [
             {'name': 'fts_incoming_funding_afg.csv', 'description': 'FTS Incoming Funding Data for Afghanistan for 2017',
-             'format': 'csv'},
+             'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
             {'name': 'fts_requirements_funding_afg.csv',
-             'description': 'FTS Annual Requirements and Funding Data for Afghanistan', 'format': 'csv'},
+             'description': 'FTS Annual Requirements and Funding Data for Afghanistan', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
             {'name': 'fts_requirements_funding_cluster_afg.csv',
-             'description': 'FTS Annual Requirements and Funding Data by Cluster for Afghanistan', 'format': 'csv'}]
+             'description': 'FTS Annual Requirements and Funding Data by Cluster for Afghanistan', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
         afgshowcase = {
             'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
             'name': 'fts-requirements-and-funding-data-for-afghanistan-showcase',
             'notes': 'Click the image on the right to go to the FTS funding summary page for Afghanistan',
             'url': 'https://fts.unocha.org/countries/1/flows/2017', 'title': 'FTS Afghanistan Summary Page',
-            'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'},
-                     {'name': 'funding'}]}
+            'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                     {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                     {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
 
         def compare_afg(dataset, showcase, hxl_resource, expected_resources=afgresources, expected_hxl_resource='fts_requirements_funding_cluster_afg.csv', prefix=''):
             assert dataset == afgdataset
@@ -423,13 +434,16 @@ class TestFTS:
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, 'CPV', 'Cape Verde', 1, today)
             assert dataset == {'groups': [{'name': 'cpv'}], 'name': 'fts-requirements-and-funding-data-for-cape-verde',
                                'title': 'Cape Verde - Requirements and Funding Data',
-                               'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}], 'dataset_date': '06/01/2018',
+                               'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                        {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                        {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
+                               'dataset_date': '06/01/2018',
                                'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
                                'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0'}
 
             resources = dataset.get_resources()
-            assert resources == [{'name': 'fts_incoming_funding_cpv.csv', 'description': 'FTS Incoming Funding Data for Cape Verde for 2018', 'format': 'csv'},
-                                 {'name': 'fts_requirements_funding_cpv.csv', 'description': 'FTS Annual Requirements and Funding Data for Cape Verde', 'format': 'csv'}]
+            assert resources == [{'name': 'fts_incoming_funding_cpv.csv', 'description': 'FTS Incoming Funding Data for Cape Verde for 2018', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                 {'name': 'fts_requirements_funding_cpv.csv', 'description': 'FTS Annual Requirements and Funding Data for Cape Verde', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
             for resource in resources:
                 resource_name = resource['name']
                 expected_file = join('tests', 'fixtures', resource_name)
@@ -440,7 +454,9 @@ class TestFTS:
                                 'name': 'fts-requirements-and-funding-data-for-cape-verde-showcase',
                                 'notes': 'Click the image on the right to go to the FTS funding summary page for Cape Verde',
                                 'url': 'https://fts.unocha.org/countries/1/flows/2018', 'title': 'FTS Cape Verde Summary Page',
-                                'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}]}
+                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                         {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                         {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
             assert hxl_resource is None
 
     def test_generate_alb_dataset_and_showcase(self, configuration, downloader):
@@ -449,13 +465,16 @@ class TestFTS:
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://albsite/', downloader, folder, 'ALB', 'Albania', 1, today)
             assert dataset == {'groups': [{'name': 'alb'}], 'name': 'fts-requirements-and-funding-data-for-albania',
                                'title': 'Albania - Requirements and Funding Data',
-                               'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}], 'dataset_date': '06/01/2018',
+                               'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                        {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                        {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
+                               'dataset_date': '06/01/2018',
                                'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
                                'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0'}
 
             resources = dataset.get_resources()
-            assert resources == [{'name': 'fts_incoming_funding_alb.csv', 'description': 'FTS Incoming Funding Data for Albania for 2018', 'format': 'csv'},
-                                 {'name': 'fts_requirements_funding_alb.csv', 'description': 'FTS Annual Requirements and Funding Data for Albania', 'format': 'csv'}]
+            assert resources == [{'name': 'fts_incoming_funding_alb.csv', 'description': 'FTS Incoming Funding Data for Albania for 2018', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                 {'name': 'fts_requirements_funding_alb.csv', 'description': 'FTS Annual Requirements and Funding Data for Albania', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
             for resource in resources:
                 resource_name = resource['name']
                 expected_file = join('tests', 'fixtures', resource_name)
@@ -466,5 +485,7 @@ class TestFTS:
                                 'name': 'fts-requirements-and-funding-data-for-albania-showcase',
                                 'notes': 'Click the image on the right to go to the FTS funding summary page for Albania',
                                 'url': 'https://fts.unocha.org/countries/1/flows/2018', 'title': 'FTS Albania Summary Page',
-                                'tags': [{'name': 'HXL'}, {'name': 'cash assistance'}, {'name': 'financial tracking service - fts'}, {'name': 'funding'}]}
+                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                         {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                         {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
             assert hxl_resource is None

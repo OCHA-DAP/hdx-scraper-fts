@@ -8,6 +8,7 @@ Generates FTS datasets.
 
 '''
 import logging
+import re
 from collections import OrderedDict
 from os.path import join
 
@@ -171,7 +172,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         logger.error('%s has a problem! %s' % (title, e))
         return None, None, None
 
-    tags = ['HXL', 'cash assistance', 'financial tracking service - fts', 'funding']
+    tags = ['hxl', 'financial tracking service - fts', 'aid funding']
     dataset.add_tags(tags)
 
     showcase = Showcase({
@@ -184,9 +185,14 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     showcase.add_tags(tags)
 
     fund_boundaries_info = list()
+    fund_data = list()
     funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
-    r = downloader.download(funding_url)
-    fund_data = r.json()['data']['flows']
+    while funding_url:
+        r = downloader.download(funding_url)
+        json = r.json()
+        fund_data.extend(json['data']['flows'])
+        funding_url = json['meta'].get('nextLink')
+
     dffunddet = json_normalize(fund_data)
 
     def add_objects(name):
@@ -314,6 +320,8 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         if bool(dfreq['years'].apply(lambda x: len(x) != 1).any()) is True:
             logger.error('More than one year listed in a plan for %s!' % countryname)
         dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
+        dfreq.rename(columns={'planVersion.id': 'planVersion_id'}, inplace=True)
+        dfreq.rename(columns=lambda x: x.replace('planVersion.', ''), inplace=True)
         planidcodemapping.update(Series(dfreq.code.values, index=dfreq.id).to_dict())
         if fund_data:
             dffund = json_normalize(fund_data)
@@ -376,11 +384,11 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         error = data.get('message')
         if error:
             raise FTSException(error)
-        code = data['code']
+        code = data['planVersion']['code']
         planidcodemapping[planid] = code
         row['code'] = code
-        row['startDate'] = str(data['startDate'])[:10]
-        row['endDate'] = str(data['endDate'])[:10]
+        row['startDate'] = str(data['planVersion']['startDate'])[:10]
+        row['endDate'] = str(data['planVersion']['endDate'])[:10]
         years = data['years']
         if len(years) > 1:
             logger.error('More than one year listed in plan %s for %s!' % (planid, countryname))
@@ -399,7 +407,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         planid = row['id']
         if planid == '' or planid == 'undefined':
             planname = row['name']
-            if planname == 'Not specified':
+            if planname == 'Not specified' or planname == '':
                 continue
             raise FTSException('Plan Name: %s is invalid!' % planname)
         else:
