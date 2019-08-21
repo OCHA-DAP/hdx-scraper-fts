@@ -334,6 +334,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
             else:
                 logger.info('Funding data lacks plan ids')
                 dffundreq = dfreq
+                dffundreq = drop_columns_except(dffundreq, country_columns_to_keep)
                 dffundreq['totalFunding'] = ''
                 dffundreq['percentFunded'] = ''
                 dffund = drop_columns_except(dffund, country_columns_to_keep)
