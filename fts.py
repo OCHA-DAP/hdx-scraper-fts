@@ -380,7 +380,11 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
 
     def fill_row(planid, row):
         plan_url = '%splan/id/%s' % (base_url, planid)
-        r = downloader.download(plan_url)
+        try:  # Added for Haiti missing plan 237 issue
+            r = downloader.download(plan_url)
+        except DownloadError:
+            logger.error('Problem with downloading %s!' % plan_url)
+            return False
         data = r.json()['data']
         error = data.get('message')
         if error:
