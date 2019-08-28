@@ -18,10 +18,10 @@ from hdx.data.showcase import Showcase
 from hdx.data.dataset import Dataset
 from hdx.data.resource import Resource
 from hdx.location.country import Country
-from hdx.utilities.dictandlist import dict_of_lists_add, dict_of_sets_add
+from hdx.utilities.dictandlist import dict_of_lists_add
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.text import multiple_replace
-from pandas import DataFrame, concat, to_numeric, Series, Index, np
+from pandas import DataFrame, concat, to_numeric, Series
 from pandas.io.json import json_normalize
 from slugify import slugify
 
@@ -52,15 +52,16 @@ funding_hxl_names = {
     'srcLocations': '#country+iso3+funder+list',
     'srcUsageYearStart': '#date+year+start+funder',
     'srcUsageYearEnd': '#date+year+end+funder',
-    'destPlan': '#activity+appeal+name+impl',
-    'destPlanCode': '#activity+appeal+id+external+impl',
-    'destPlanId': '#activity+appeal+id+fts_internal+impl',
+    'destPlan': '#activity+appeal+name',
+    'destPlanCode': '#activity+appeal+id+external',
+    'destPlanId': '#activity+appeal+id+fts_internal',
     'destOrganization': '#org+name+impl',
     'destOrganizationTypes': '#org+type+impl+list',
-    'destGlobalClusters': '#sector+cluster+name+impl+list',
+    'destGlobalClusters': '#sector+cluster+name+list',
     'destLocations': '#country+iso3+impl+list',
-    'destProject': '#activity+project+name+impl',
-    'destProjectCode': '#activity+project+code+impl',
+    'destProject': '#activity+project+name',
+    'destProjectCode': '#activity+project+code',
+    'destEmergency': '#crisis+name',
     'destUsageYearStart': '#date+year+start+impl',
     'destUsageYearEnd': '#date+year+end+impl'
 }
@@ -89,7 +90,7 @@ rename_columns = {
 country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD', 'srcOrganization',
                                'srcOrganizationTypes', 'srcLocations', 'srcUsageYearStart', 'srcUsageYearEnd',
                                'destPlan', 'destPlanCode', 'destPlanId', 'destOrganization', 'destOrganizationTypes', 'destGlobalClusters', 'destLocations',
-                               'destProject', 'destProjectCode', 'destUsageYearStart', 'destUsageYearEnd',
+                               'destProject', 'destProjectCode', 'destEmergency', 'destUsageYearStart', 'destUsageYearEnd',
                                'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate',
                                'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id',
                                'refCode', 'createdAt', 'updatedAt']
