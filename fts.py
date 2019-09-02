@@ -447,8 +447,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                     for location in loc_req_objects:
                         if Country.get_iso3_country_code_fuzzy(location['name'])[0] != countryiso:
                             continue
-                        # fix for no revisedRequirements field in flow?planid=669&groupby=location
-                        totalrequirements = location.get('revisedRequirements')
+                        totalrequirements = location['revisedRequirements']
                         if isinstance(totalrequirements, int):
                             if origrequirements != totalrequirements:
                                 #logger.warning('Overriding requirements for %s' % planid)
