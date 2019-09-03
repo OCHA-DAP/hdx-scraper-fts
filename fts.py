@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 funding_hxl_names = {
     'amountUSD': '#value+funding+total+usd',
     'boundary': '#financial+direction',
+    'onBoundary': '#financial+direction+type',
     'budgetYear': '#date+year+budget',
     'contributionType': '#financial+contribution+type',
     'createdAt': '#date+created',
@@ -91,9 +92,9 @@ country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD',
                                'srcOrganizationTypes', 'srcLocations', 'srcUsageYearStart', 'srcUsageYearEnd',
                                'destPlan', 'destPlanCode', 'destPlanId', 'destOrganization', 'destOrganizationTypes', 'destGlobalClusters', 'destLocations',
                                'destProject', 'destProjectCode', 'destEmergency', 'destUsageYearStart', 'destUsageYearEnd',
-                               'contributionType', 'flowType', 'method', 'boundary', 'status', 'firstReportedDate',
-                               'decisionDate', 'keywords', 'originalAmount', 'originalCurrency', 'exchangeRate', 'id',
-                               'refCode', 'createdAt', 'updatedAt']
+                               'contributionType', 'flowType', 'method', 'boundary', 'onBoundary', 'status',
+                               'firstReportedDate', 'decisionDate', 'keywords', 'originalAmount', 'originalCurrency',
+                               'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
 country_columns_to_keep = ['countryCode', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements',
                            'totalFunding', 'percentFunded']
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']

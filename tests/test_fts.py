@@ -55,7 +55,7 @@ class TestFTS:
                  'reportDetails': [{'date': '2017-04-18T00:00:00.000Z',
                                  'organization': 'United States of America, Government of', 'sourceType': 'Primary',
                                  'reportChannel': 'Email'}], 'parentFlowId': None, 'originalCurrency': 'USD',
-                 'status': 'commitment', 'id': '149198', 'boundary': 'incoming',
+                 'status': 'commitment', 'id': '149198', 'boundary': 'incoming', 'onBoundary': 'single',
                  'description': 'Humanitarian Assistance (STATE/PRM)', 'decisionDate': '2016-06-24T00:00:00Z',
                  'versionId': 2}]
 
