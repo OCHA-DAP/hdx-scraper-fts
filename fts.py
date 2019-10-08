@@ -8,12 +8,10 @@ Generates FTS datasets.
 
 '''
 import logging
-import re
 from collections import OrderedDict
 from os.path import join
 
 from hdx.data.hdxobject import HDXError
-from hdx.data.resource_view import ResourceView
 from hdx.data.showcase import Showcase
 from hdx.data.dataset import Dataset
 from hdx.data.resource import Resource
@@ -610,9 +608,3 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     dataset.add_update_resource(resource)
 
     return dataset, showcase, hxl_resource
-
-
-def generate_resource_view(dataset):
-    resourceview = ResourceView({'resource_id': dataset.get_resource()['id']})
-    resourceview.update_from_yaml()
-    return resourceview

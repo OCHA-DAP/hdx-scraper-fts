@@ -16,7 +16,7 @@ from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
 
-from fts import generate_dataset_and_showcase, get_countries, generate_resource_view
+from fts import generate_dataset_and_showcase, get_countries
 
 from hdx.facades.simple import facade
 
@@ -54,8 +54,7 @@ def main():
                     resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
                     dataset.reorder_resources(resource_ids, hxl_update=False)
                     if hxl_resource:
-                        resource_view = generate_resource_view(dataset)
-                        resource_view.create_in_hdx()
+                        dataset.generate_resource_view()
                     showcase.create_in_hdx()
                     showcase.add_dataset(dataset)
 
