@@ -110,9 +110,10 @@ def remove_fractions(df, colname):
 
 
 def drop_columns_except(df, columns_to_keep):
+    # Remove duplicate columns
+    df = df.loc[:,~df.columns.duplicated()]
     # Drop unwanted columns.
-    df = df.loc[:,columns_to_keep]
-    return df
+    return df.reindex(columns=columns_to_keep)
 
 
 def drop_rows_with_col_word(df, columnname, word):
@@ -312,8 +313,9 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         dffund = json_normalize(fund_data)
         dffund = drop_columns_except(dffund, country_columns_to_keep)
         dffund['percentFunded'] = ''
-        dffund.fillna('', inplace=True)
+        dffund = dffund.fillna('')
         dffundreq = dffund
+        incompleteplans = list()
     else:
         dfreq = json_normalize(req_data)
         dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
@@ -322,13 +324,14 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
         dfreq.rename(columns={'planVersion.id': 'planVersion_id'}, inplace=True)
         dfreq.rename(columns=lambda x: x.replace('planVersion.', ''), inplace=True)
+        incompleteplans = dfreq.id.loc[~dfreq['revisionState'].isin(['none', None])].values
         planidcodemapping.update(Series(dfreq.code.values, index=dfreq.id).to_dict())
         if fund_data:
             dffund = json_normalize(fund_data)
             if 'id' in dffund:
                 dffundreq = dfreq.merge(dffund, on='id', how='outer', validate='1:1')
-                dffundreq.name_x.fillna(dffundreq.name_y, inplace=True)
-                dffundreq.fillna('', inplace=True)
+                dffundreq['name_x'] = dffundreq.name_x.fillna(dffundreq.name_y)
+                dffundreq = dffundreq.fillna('')
                 dffundreq['percentFunded'] = ((to_numeric(dffundreq.totalFunding) / to_numeric(
                     dffundreq.revisedRequirements) * 100) + 0.5).astype(str)
             else:
@@ -339,7 +342,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 dffundreq['percentFunded'] = ''
                 dffund = drop_columns_except(dffund, country_columns_to_keep)
                 dffund['percentFunded'] = ''
-                dffund.fillna('', inplace=True)
+                dffund = dffund.fillna('')
                 dffundreq = dffundreq.append(dffund)
         else:
             logger.warning('No funding data, only requirements data available')
@@ -416,6 +419,9 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 continue
             raise FTSException('Plan Name: %s is invalid!' % planname)
         else:
+            if planid in incompleteplans:
+                logger.warning('Not reading location and cluster info for plan id %s which is incomplete!' % planid)
+                continue
             loc_funding_url = '%sfts/flow?planid=%s&groupby=location' % (base_url, planid)
             try:
                 r = downloader.download(loc_funding_url)
@@ -456,7 +462,11 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                     if totalfunding == '':
                         row['percentFunded'] = ''
                     else:
-                        row['percentFunded'] = str(int((int(totalfunding) / int(totalrequirements) * 100) + 0.5))
+                        totalrequirements_i = int(totalrequirements)
+                        if totalrequirements_i == 0:
+                            row['percentFunded'] = ''
+                        else:
+                            row['percentFunded'] = str(int((int(totalfunding) / totalrequirements_i * 100) + 0.5))
                 else:
                     row['percentFunded'] = ''
             except DownloadError:
@@ -496,7 +506,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                     dffund_cluster['id'] = ''
                 df = dffund_cluster.merge(dfreq_cluster, on='id', how='outer', validate='1:1')
                 df.rename(columns={'name_x': 'clusterName'}, inplace=True)
-                df.clusterName.fillna(df.name_y, inplace=True)
+                df['clusterName'] = df.clusterName.fillna(df.name_y)
                 del df['name_y']
             else:
                 df = dfreq_cluster
@@ -555,7 +565,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 years_not_specified.append({'countryCode': countryiso, 'year': year, 'name': 'Not specified',
                                             'funding': not_specified})
         df_years_not_specified = DataFrame(data=years_not_specified, columns=list(dffundreq))
-        df_years_not_specified.fillna('', inplace=True)
+        df_years_not_specified = df_years_not_specified.fillna('')
         dffundreq = dffundreq.append(df_years_not_specified)
 
     dffundreq.sort_values(['year', 'endDate', 'name'], ascending=[False, False, True], inplace=True)

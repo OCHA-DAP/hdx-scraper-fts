@@ -89,17 +89,17 @@ class TestFTS:
     afgrequirements = [{'locations': [{'iso3': 'AFG', 'id': 1, 'name': 'Afghanistan', 'adminLevel': 0}], 'id': 645,
                      'emergencies': [], 'code': 'HAFG18', 'years': [{'id': 39, 'year': '2018'}],
                      'startDate': '2018-01-01T00:00:00.000Z', 'endDate': '2018-12-31T00:00:00.000Z',
-                     'name': 'Afghanistan 2018',
+                     'name': 'Afghanistan 2018', 'revisionState': None,
                      'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}],
                      'revisedRequirements': 437000000},
                        {'locations': [{'iso3': 'AFG', 'id': 1, 'name': 'Afghanistan', 'adminLevel': 0}], 'id': 544,
                      'emergencies': [], 'code': 'HAFG17', 'years': [{'id': 38, 'year': '2017'}],
                      'startDate': '2017-01-01T00:00:00.000Z', 'endDate': '2017-12-31T00:00:00.000Z',
-                     'name': 'Afghanistan 2017',
+                     'name': 'Afghanistan 2017', 'revisionState': None,
                      'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}],
                      'revisedRequirements': 409413812}]
 
-    cpvrequirements = [{'id': 222, 'name': 'West Africa 2007', 'code': 'CXWAF07', 'startDate': '2007-01-01T00:00:00.000Z',
+    cpvrequirements = [{'id': 222, 'name': 'West Africa 2007', 'code': 'CXWAF07', 'startDate': '2007-01-01T00:00:00.000Z', 'revisionState': None,
                          'endDate': '2007-12-31T00:00:00.000Z', 'currentReportingPeriodId': None, 'isForHPCProjects': False,
                          'locations': [{'id': 41, 'iso3': 'CPV', 'name': 'Cape Verde', 'adminLevel': 0}], 'emergencies': [], 'years': [{'id': 28, 'year': '2007'}],
                          'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 309081675, 'revisedRequirements': 361026890}]
