@@ -450,6 +450,9 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
                 loc_req_objects = loc_data['requirements']['objects']
                 if loc_req_objects:
                     for location in loc_req_objects:
+                        if 'name' not in location:
+                            logger.warning('%s requirements object does not have a location name!' % loc_funding_url)
+                            continue
                         if Country.get_iso3_country_code_fuzzy(location['name'])[0] != countryiso:
                             continue
                         totalrequirements = location['revisedRequirements']
