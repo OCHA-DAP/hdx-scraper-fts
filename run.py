@@ -29,7 +29,7 @@ def main():
     '''Generate dataset and create it in HDX'''
 
     with temp_dir('fts') as folder:
-        with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup, rate_limit=True) as downloader:
+        with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup, rate_limit={'calls': 1, 'period': 1}) as downloader:
             base_url = Configuration.read()['base_url']
             countries = get_countries(base_url, downloader)
             today = datetime.now()
@@ -49,7 +49,7 @@ def main():
                         dataset.preview_off()
                     else:
                         dataset.set_quickchart_resource(hxl_resource)
-                    dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False)
+                    dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False, updated_by_script='HDX Scraper: FTS')
                     resources = dataset.get_resources()
                     resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
                     dataset.reorder_resources(resource_ids, hxl_update=False)
