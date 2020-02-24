@@ -147,10 +147,15 @@ def get_countries(base_url, downloader):
     return json['data']
 
 
-def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, countryname, locationid, today):
+def generate_dataset_and_showcase(base_url, downloader, folder, country, today):
     '''
     api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
     '''
+    countryname = country['name']
+    if countryname == 'World':
+        logger.info('Ignoring  %s' % countryname)
+        return None, None, None
+    logger.info('Adding FTS data for %s' % countryname)
     latestyear = str(today.year)
     title = '%s - Requirements and Funding Data' % countryname
     slugified_name = slugify('FTS Requirements and Funding Data for %s' % countryname).lower()
@@ -164,6 +169,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
     dataset.set_dataset_date_from_datetime(today)
     dataset.set_expected_update_frequency('Every day')
     dataset.set_subnational(False)
+    countryiso = country['iso3']
     if countryiso is None:
         logger.error('%s has a problem! Iso3 is None!' % title)
         return None, None, None
@@ -180,7 +186,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, countryiso, coun
         'name': '%s-showcase' % slugified_name,
         'title': 'FTS %s Summary Page' % countryname,
         'notes': 'Click the image on the right to go to the FTS funding summary page for %s' % countryname,
-        'url': 'https://fts.unocha.org/countries/%s/flows/%s' % (locationid, latestyear),
+        'url': 'https://fts.unocha.org/countries/%s/flows/%s' % (country['id'], latestyear),
         'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg'
     })
     showcase.add_tags(tags)

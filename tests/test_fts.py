@@ -364,12 +364,20 @@ class TestFTS:
     def test_generate_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('fts') as folder:
             today = datetime.strptime('01062018', '%d%m%Y').date()
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, None, 'None', 1, today)
+            country = {'name': 'World'}
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
 
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, 'ABC', 'ABC', 1, today)
+            country = {'iso3': None, 'name': 'ABC'}
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today)
+            assert dataset is None
+            assert showcase is None
+            assert hxl_resource is None
+
+            country = {'iso3': 'ABC', 'name': 'ABC'}
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
@@ -415,24 +423,26 @@ class TestFTS:
         with temp_dir('fts') as folder:
             today = datetime.strptime('01062017', '%d%m%Y').date()
             test = 'nofundnoreq'
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, 'AFG', 'Afghanistan', 1, today)
+            country = {'iso3': 'AFG', 'name': 'Afghanistan', 'id': 1}
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
             test = 'nofund'
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, 'AFG', 'Afghanistan', 1, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today)
             compare_afg(dataset, showcase, hxl_resource, expected_resources=afgresources[1:], expected_hxl_resource=None, prefix=test)
             test = 'noreq'
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, 'AFG', 'Afghanistan', 1, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today)
             compare_afg(dataset, showcase, hxl_resource, expected_hxl_resource=None, prefix=test)
 
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, 'AFG', 'Afghanistan', 1, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, country, today)
             compare_afg(dataset, showcase, hxl_resource)
 
     def test_generate_cpv_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('fts') as folder:
             today = datetime.strptime('01062018', '%d%m%Y').date()
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, 'CPV', 'Cape Verde', 1, today)
+            country = {'iso3': 'CPV', 'name': 'Cape Verde', 'id': 1}
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, country, today)
             assert dataset == {'groups': [{'name': 'cpv'}], 'name': 'fts-requirements-and-funding-data-for-cape-verde',
                                'title': 'Cape Verde - Requirements and Funding Data',
                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
@@ -463,7 +473,8 @@ class TestFTS:
     def test_generate_alb_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('fts') as folder:
             today = datetime.strptime('01062018', '%d%m%Y').date()
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://albsite/', downloader, folder, 'ALB', 'Albania', 1, today)
+            country = {'iso3': 'ALB', 'name': 'Albania', 'id': 1}
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://albsite/', downloader, folder, country, today)
             assert dataset == {'groups': [{'name': 'alb'}], 'name': 'fts-requirements-and-funding-data-for-albania',
                                'title': 'Albania - Requirements and Funding Data',
                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
