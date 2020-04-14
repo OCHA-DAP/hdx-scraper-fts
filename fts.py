@@ -672,14 +672,17 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today, 
         generate_requirements_funding_resource(requirements_url, funding_url, downloader, folder, countryname,
                                                countryiso, 'countryCode', dataset)
     if dffundreq is None:
-        if len(fund_boundaries_info) != 0:
+        hxl_resource = None
+        if len(fund_boundaries_info) == 0:
+            logger.warning('No requirements or funding data available')
+            return None, None, None
+        else:
             logger.error('We have latest year funding data but no overall funding data for %s' % title)
-            generate_flows_files(fund_boundaries_info, planidcodemapping)
-            return dataset, showcase, None
-        logger.warning('No requirements or funding data available')
-        return None, None, None
+    else:
+        hxl_resource = generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping,
+                                                                      countryname, countryiso, dffundreq,
+                                                                      incompleteplans, dataset)
+        generate_requirements_funding_file(base_url, downloader, countryiso, dffundreq, file_to_upload_hxldffundreq)
 
-    hxl_resource = generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, dataset)
     generate_flows_files(fund_boundaries_info, planidcodemapping)
-    generate_requirements_funding_file(base_url, downloader, countryiso, dffundreq, file_to_upload_hxldffundreq)
     return dataset, showcase, hxl_resource
