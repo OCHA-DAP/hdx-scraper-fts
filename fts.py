@@ -416,28 +416,6 @@ def generate_requirements_funding_file(base_url, downloader, countryiso, dffundr
     hxldffundreq.to_csv(file_to_upload_hxldffundreq, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
 
-def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emergencyid, today, notes):
-    # https://api.hpc.tools/v1/public/emergency/id/911
-    latestyear = str(today.year)
-    emergency_url = '%semergency/id/%d' % (base_url, emergencyid)
-    data = download_data(emergency_url, downloader)
-    name = data['name']
-    glideid = data.get('glideId')
-    date = data['date']
-    slugified_name = slugify('FTS Funding Data for %s' % name).lower()
-    title = '%s Funding Data' % name
-    description = '%s  \n  \nGlide Id=%s, Date=%s' % (notes, glideid, date)
-    showcase_url = 'https://fts.unocha.org/emergencies/%d/flows/%s' % (emergencyid, latestyear)
-    dataset, showcase = get_dataset_and_showcase(slugified_name, title, description, today, name, showcase_url)
-    dataset.add_other_location('world')
-    funding_url = '%s/fts/flow?emergencyid=%d&year=%s' % (base_url, emergencyid, latestyear)
-    fund_boundaries_info = generate_flows_resources(funding_url, downloader, folder, dataset, str(emergencyid), name,
-                                                    latestyear)
-    for fund_boundary_info in fund_boundaries_info:
-        fund_boundary_info[0].to_csv(fund_boundary_info[1], encoding='utf-8', index=False, date_format='%Y-%m-%d')
-    return dataset, showcase
-
-
 def generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, dataset):
     def fill_row(planid, row):
         plan_url = '%splan/id/%s' % (base_url, planid)
@@ -637,6 +615,27 @@ def generate_requirements_funding_cluster_resource(base_url, downloader, folder,
     resource.set_file_to_upload(file_to_upload)
     dataset.add_update_resource(resource)
     return hxl_resource
+
+
+def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emergencyid, today, notes):
+    # https://api.hpc.tools/v1/public/emergency/id/911
+    latestyear = str(today.year)
+    emergency_url = '%semergency/id/%d' % (base_url, emergencyid)
+    data = download_data(emergency_url, downloader)
+    name = data['name']
+    glideid = data.get('glideId')
+    date = data['date']
+    slugified_name = slugify('FTS Funding Data for %s' % name).lower()
+    title = '%s Funding Data' % name
+    description = '%s  \n  \nGlide Id=%s, Date=%s' % (notes, glideid, date)
+    showcase_url = 'https://fts.unocha.org/emergencies/%d/flows/%s' % (emergencyid, latestyear)
+    dataset, showcase = get_dataset_and_showcase(slugified_name, title, description, today, name, showcase_url)
+    dataset.add_other_location('world')
+    funding_url = '%s/fts/flow?emergencyid=%d&year=%s' % (base_url, emergencyid, latestyear)
+    fund_boundaries_info = generate_flows_resources(funding_url, downloader, folder, dataset, str(emergencyid), name,
+                                                    latestyear)
+    generate_flows_files(fund_boundaries_info, dict())
+    return dataset, showcase
 
 
 def generate_dataset_and_showcase(base_url, downloader, folder, country, today, notes):
