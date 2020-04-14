@@ -397,49 +397,7 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
     return dataset, showcase
 
 
-def generate_dataset_and_showcase(base_url, downloader, folder, country, today, notes):
-    '''
-    api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
-    '''
-    countryname = country['name']
-    if countryname == 'World':
-        logger.info('Ignoring  %s' % countryname)
-        return None, None, None
-    logger.info('Adding FTS data for %s' % countryname)
-    latestyear = str(today.year)
-    slugified_name = slugify('FTS Requirements and Funding Data for %s' % countryname).lower()
-    title = '%s - Requirements and Funding Data' % countryname
-    showcase_url = 'https://fts.unocha.org/countries/%s/flows/%s' % (country['id'], latestyear)
-    dataset, showcase = get_dataset_and_showcase(slugified_name, title, notes, today, countryname, showcase_url)
-
-    countryiso = country['iso3']
-    if countryiso is None:
-        logger.error('%s has a problem! Iso3 is None!' % title)
-        return None, None, None
-    try:
-        dataset.add_country_location(countryiso)
-    except HDXError as e:
-        logger.error('%s has a problem! %s' % (title, e))
-        return None, None, None
-
-    funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
-    fund_boundaries_info = generate_flows_resources(funding_url, downloader, folder, dataset, countryiso.lower(),
-                                                    countryname, latestyear)
-    requirements_url = '%splan/country/%s' % (base_url, countryiso)
-    funding_url = '%sfts/flow?groupby=plan&countryISO3=%s' % (base_url, countryiso)
-    dffundreq, planidcodemapping, incompleteplans, file_to_upload_hxldffundreq = \
-        generate_requirements_funding_resource(requirements_url, funding_url, downloader, folder, countryname,
-                                               countryiso, 'countryCode', dataset)
-    if dffundreq is None:
-        if len(fund_boundaries_info) != 0:
-            logger.error('We have latest year funding data but no overall funding data for %s' % title)
-            for fund_boundary_info in fund_boundaries_info:
-                fund_boundary_info[0].to_csv(fund_boundary_info[1], encoding='utf-8', index=False,
-                                             date_format='%Y-%m-%d')
-            return dataset, showcase, None
-        logger.warning('No requirements or funding data available')
-        return None, None, None
-
+def generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, fund_boundaries_info, dataset, file_to_upload_hxldffundreq):
     def fill_row(planid, row):
         plan_url = '%splan/id/%s' % (base_url, planid)
         try:  # Added for Haiti missing plan 237 issue
@@ -633,7 +591,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today, 
 
     if len(combined) == 0:
         logger.warning('No cluster data available')
-        return dataset, showcase, None
+        return False, None
 
     df = combined.merge(dffundreq, on='id')
     df.rename(columns={'name_x': 'name', 'revisedRequirements_x': 'revisedRequirements', 'totalFunding_x': 'totalFunding'}, inplace=True)
@@ -674,5 +632,52 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today, 
     resource = Resource(resource_data)
     resource.set_file_to_upload(file_to_upload)
     dataset.add_update_resource(resource)
+    return True, hxl_resource
+
+
+def generate_dataset_and_showcase(base_url, downloader, folder, country, today, notes):
+    '''
+    api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
+    '''
+    countryname = country['name']
+    if countryname == 'World':
+        logger.info('Ignoring  %s' % countryname)
+        return None, None, None
+    logger.info('Adding FTS data for %s' % countryname)
+    latestyear = str(today.year)
+    slugified_name = slugify('FTS Requirements and Funding Data for %s' % countryname).lower()
+    title = '%s - Requirements and Funding Data' % countryname
+    showcase_url = 'https://fts.unocha.org/countries/%s/flows/%s' % (country['id'], latestyear)
+    dataset, showcase = get_dataset_and_showcase(slugified_name, title, notes, today, countryname, showcase_url)
+
+    countryiso = country['iso3']
+    if countryiso is None:
+        logger.error('%s has a problem! Iso3 is None!' % title)
+        return None, None, None
+    try:
+        dataset.add_country_location(countryiso)
+    except HDXError as e:
+        logger.error('%s has a problem! %s' % (title, e))
+        return None, None, None
+
+    funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
+    fund_boundaries_info = generate_flows_resources(funding_url, downloader, folder, dataset, countryiso.lower(),
+                                                    countryname, latestyear)
+    requirements_url = '%splan/country/%s' % (base_url, countryiso)
+    funding_url = '%sfts/flow?groupby=plan&countryISO3=%s' % (base_url, countryiso)
+    dffundreq, planidcodemapping, incompleteplans, file_to_upload_hxldffundreq = \
+        generate_requirements_funding_resource(requirements_url, funding_url, downloader, folder, countryname,
+                                               countryiso, 'countryCode', dataset)
+    if dffundreq is None:
+        if len(fund_boundaries_info) != 0:
+            logger.error('We have latest year funding data but no overall funding data for %s' % title)
+            for fund_boundary_info in fund_boundaries_info:
+                fund_boundary_info[0].to_csv(fund_boundary_info[1], encoding='utf-8', index=False,
+                                             date_format='%Y-%m-%d')
+            return dataset, showcase, None
+        logger.warning('No requirements or funding data available')
+        return None, None, None
+
+    success, hxl_resource = generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, fund_boundaries_info, dataset, file_to_upload_hxldffundreq)
 
     return dataset, showcase, hxl_resource
