@@ -397,7 +397,7 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
     return dataset, showcase
 
 
-def generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, fund_boundaries_info, dataset, file_to_upload_hxldffundreq):
+def generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, dataset):
     def fill_row(planid, row):
         plan_url = '%splan/id/%s' % (base_url, planid)
         try:  # Added for Haiti missing plan 237 issue
@@ -552,46 +552,9 @@ def generate_requirements_funding_cluster_resource(base_url, downloader, folder,
 
         combined = combined.append(df, ignore_index=True)
 
-    for fund_boundary_info in fund_boundaries_info:
-        fund_boundary_info[0]['destPlanCode'] = fund_boundary_info[0].destPlanId.map(planidcodemapping).fillna(fund_boundary_info[0].destPlanCode)
-        fund_boundary_info[0].to_csv(fund_boundary_info[1], encoding='utf-8', index=False, date_format='%Y-%m-%d')
-
-    years_url = '%sfts/flow?countryISO3=%s&groupby=year' % (base_url, countryiso)
-    ## get totals from year call and subtract all plans in that year
-    # 691121294 - 611797140 (2018 SDN)
-    data = download_data(years_url, downloader)
-    data = data['report3']['fundingTotals']['objects']
-    if len(data) != 0:
-        years_not_specified = list()
-        for year_data in data[0].get('objectsBreakdown'):
-            year = year_data.get('name')
-            if year:
-                year_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, year)
-                data = download_data(year_url, downloader)
-                if len(data['flows']) == 0:
-                    continue
-                totalfunding = data['incoming']['fundingTotal']
-                funding_in_year = lookup_values_by_key(dffundreq, 'year', "'%s'" % year, 'funding')
-                if funding_in_year.empty:
-                    not_specified = str(int(totalfunding))
-                else:
-                    not_specified = str(int(totalfunding - to_numeric(funding_in_year, errors='coerce').sum()))
-                if year == 'Not specified':
-                    year = '1000'
-                years_not_specified.append({'countryCode': countryiso, 'year': year, 'name': 'Not specified',
-                                            'funding': not_specified})
-        df_years_not_specified = DataFrame(data=years_not_specified, columns=list(dffundreq))
-        df_years_not_specified = df_years_not_specified.fillna('')
-        dffundreq = dffundreq.append(df_years_not_specified)
-
-    dffundreq.sort_values(['year', 'endDate', 'name'], ascending=[False, False, True], inplace=True)
-    dffundreq['year'] = dffundreq['year'].replace('1000', 'Not specified')
-    hxldffundreq = hxlate(dffundreq, hxl_names)
-    hxldffundreq.to_csv(file_to_upload_hxldffundreq, encoding='utf-8', index=False, date_format='%Y-%m-%d')
-
     if len(combined) == 0:
         logger.warning('No cluster data available')
-        return False, None
+        return None
 
     df = combined.merge(dffundreq, on='id')
     df.rename(columns={'name_x': 'name', 'revisedRequirements_x': 'revisedRequirements', 'totalFunding_x': 'totalFunding'}, inplace=True)
@@ -632,7 +595,7 @@ def generate_requirements_funding_cluster_resource(base_url, downloader, folder,
     resource = Resource(resource_data)
     resource.set_file_to_upload(file_to_upload)
     dataset.add_update_resource(resource)
-    return True, hxl_resource
+    return hxl_resource
 
 
 def generate_dataset_and_showcase(base_url, downloader, folder, country, today, notes):
@@ -678,6 +641,42 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today, 
         logger.warning('No requirements or funding data available')
         return None, None, None
 
-    success, hxl_resource = generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, fund_boundaries_info, dataset, file_to_upload_hxldffundreq)
+    hxl_resource = generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, dataset)
+    for fund_boundary_info in fund_boundaries_info:
+        fund_boundary_info[0]['destPlanCode'] = fund_boundary_info[0].destPlanId.map(planidcodemapping).fillna(fund_boundary_info[0].destPlanCode)
+        fund_boundary_info[0].to_csv(fund_boundary_info[1], encoding='utf-8', index=False, date_format='%Y-%m-%d')
+
+    years_url = '%sfts/flow?countryISO3=%s&groupby=year' % (base_url, countryiso)
+    ## get totals from year call and subtract all plans in that year
+    # 691121294 - 611797140 (2018 SDN)
+    data = download_data(years_url, downloader)
+    data = data['report3']['fundingTotals']['objects']
+    if len(data) != 0:
+        years_not_specified = list()
+        for year_data in data[0].get('objectsBreakdown'):
+            year = year_data.get('name')
+            if year:
+                year_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, year)
+                data = download_data(year_url, downloader)
+                if len(data['flows']) == 0:
+                    continue
+                totalfunding = data['incoming']['fundingTotal']
+                funding_in_year = lookup_values_by_key(dffundreq, 'year', "'%s'" % year, 'funding')
+                if funding_in_year.empty:
+                    not_specified = str(int(totalfunding))
+                else:
+                    not_specified = str(int(totalfunding - to_numeric(funding_in_year, errors='coerce').sum()))
+                if year == 'Not specified':
+                    year = '1000'
+                years_not_specified.append({'countryCode': countryiso, 'year': year, 'name': 'Not specified',
+                                            'funding': not_specified})
+        df_years_not_specified = DataFrame(data=years_not_specified, columns=list(dffundreq))
+        df_years_not_specified = df_years_not_specified.fillna('')
+        dffundreq = dffundreq.append(df_years_not_specified)
+
+    dffundreq.sort_values(['year', 'endDate', 'name'], ascending=[False, False, True], inplace=True)
+    dffundreq['year'] = dffundreq['year'].replace('1000', 'Not specified')
+    hxldffundreq = hxlate(dffundreq, hxl_names)
+    hxldffundreq.to_csv(file_to_upload_hxldffundreq, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
     return dataset, showcase, hxl_resource
