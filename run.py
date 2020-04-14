@@ -14,9 +14,9 @@ from os.path import join, expanduser
 
 from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
-from hdx.utilities.path import temp_dir, progress_storing_tempdir
+from hdx.utilities.path import progress_storing_tempdir, get_temp_dir
 
-from fts import generate_dataset_and_showcase, get_countries
+from fts import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase
 
 from hdx.facades.simple import facade
 
@@ -29,12 +29,28 @@ def main():
     '''Generate dataset and create it in HDX'''
 
     with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup, rate_limit={'calls': 1, 'period': 1}) as downloader:
-        base_url = Configuration.read()['base_url']
-        countries = get_countries(base_url, downloader)
-        logger.info('Number of datasets to upload: %d' % len(countries))
+        configuration = Configuration.read()
+        base_url = configuration['base_url']
+        notes = configuration['notes']
+        emergencies = configuration['emergencies']
         today = datetime.now()
+
+        logger.info('Number of emergency datasets to upload: %d' % len(emergencies))
+        folder = get_temp_dir('FTS')
+        for emergencyid in emergencies:
+            dataset, showcase = generate_emergency_dataset_and_showcase(base_url, downloader, folder, emergencyid,
+                                                                        today, notes)
+            if dataset is not None:
+                dataset.update_from_yaml()
+                dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False, updated_by_script='HDX Scraper: FTS')
+                showcase.create_in_hdx()
+                showcase.add_dataset(dataset)
+
+        countries = get_countries(base_url, downloader)
+        logger.info('Number of country datasets to upload: %d' % len(countries))
         for folder, country in progress_storing_tempdir('FTS', countries, 'iso3'):
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, country, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, country,
+                                                                            today, notes)
             if dataset is not None:
                 dataset.update_from_yaml()
                 if hxl_resource is None:

@@ -17,10 +17,14 @@ from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.path import temp_dir
 
-from fts import generate_dataset_and_showcase, get_countries
+from fts import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase
 
 
-class TestFTS:    
+class TestFTS:
+    emergency = {'id': 911, 'name': 'Coronavirus disease Outbreak - COVID -19', 'glideId': 'EP-2020-000012-CHN', 'date': '2020-01-30T16:23:01.558Z'}
+
+    emergencyflows = [{'id': '205905','amountUSD':6451613,'budgetYear': '2019','childFlowIds':None,'contributionType': 'financial','createdAt': '2020-04-01T10:17:46.952Z','date': '2020-02-03T00:00:00Z','decisionDate': '2020-02-03T00:00:00Z','description': 'WHO Strategic Preparedness and Response Plan to 2019 Novel COVID - 19 Coronavirus  (global and Iran)','grandBargainEarmarkingType':['softly earmarked'],'exchangeRate':0.775,'firstReportedDate': '2020-02-21T00:00:00Z','flowType': 'Standard','keywords':None,'newMoney':True,'originalAmount':5000000,'originalCurrency': 'GBP','method': 'Traditional aid','parentFlowId':None,'status': 'commitment','updatedAt': '2020-04-01T10:17:46.952Z','versionId':3,'sourceObjects':[{'type': 'Organization','id': '2917','name': 'United Kingdom, Government of','behavior': 'single','organizationTypes':['Government'],'organizationSubTypes':['National government']}, {'type': 'Location','id': '236','name': 'United Kingdom','behavior': 'single'}, {'type': 'UsageYear','id': '41','name': '2020','behavior': 'single'}],'destinationObjects':[{'type': 'Plan','id': '952','name': 'COVID-19 Global Humanitarian Response Plan','behavior': 'single'}, {'type': 'Organization','id': '4398','name': 'World Health Organization','behavior': 'single','organizationTypes':['UN agency']}, {'type': 'Cluster','id': '5335','name': 'COVID-19','behavior': 'single'}, {'type': 'GlobalCluster','id': '26513','name': 'COVID-19','behavior': 'single'}, {'type': 'Location','id': '62','name': 'Djibouti','behavior': 'shared'}, {'type': 'Location','id': '239','name': 'Uruguay','behavior': 'shared'}, {'type': 'Location','id': '95','name': 'Guyana','behavior': 'shared'}, {'type': 'Location','id': '116','name': 'Kenya','behavior': 'shared'}, {'type': 'Location','id': '249','name': 'Zambia','behavior': 'shared'}, {'type': 'Location','id': '51','name': 'Congo','behavior': 'shared'}, {'type': 'Location','id': '7','name': 'Angola','behavior': 'shared'}, {'type': 'Location','id': '221','name': 'Tanzania, United Republic of','behavior': 'shared'}, {'type': 'Location','id': '233','name': 'Uganda','behavior': 'shared'}, {'type': 'Location','id': '242','name': 'Venezuela, Bolivarian Republic of','behavior': 'shared'}, {'type': 'Location','id': '206','name': 'Somalia','behavior': 'shared'}, {'type': 'Location','id': '137','name': 'Mali','behavior': 'shared'}, {'type': 'Location','id': '44','name': 'Chad','behavior': 'shared'}, {'type': 'Location','id': '37','name': 'Burundi','behavior': 'shared'}, {'type': 'Location','id': '227','name': 'Trinidad and Tobago','behavior': 'shared'}, {'type': 'Location','id': '65','name': 'Ecuador','behavior': 'shared'}, {'type': 'Location','id': '234','name': 'Ukraine','behavior': 'shared'}, {'type': 'Location','id': '171','name': 'occupied Palestinian territory','behavior': 'shared'}, {'type': 'Location','id': '127','name': 'Libya','behavior': 'shared'}, {'type': 'Location','id': '43','name': 'Central African Republic','behavior': 'shared'}, {'type': 'Location','id': '1','name': 'Afghanistan','behavior': 'shared'}, {'type': 'Location','id': '124','name': 'Lebanon','behavior': 'shared'}, {'type': 'Location','id': '175','name': 'Peru','behavior': 'shared'}, {'type': 'Location','id': '64','name': 'Dominican Republic','behavior': 'shared'}, {'type': 'Location','id': '218','name': 'Syrian Arab Republic','behavior': 'shared'}, {'type': 'Location','id': '163','name': 'Nigeria','behavior': 'shared'}, {'type': 'Location','id': '106','name': 'Iraq','behavior': 'shared'}, {'type': 'Location','id': '52','name': 'Congo, The Democratic Republic of the','behavior': 'shared'}, {'type': 'Location','id': '19','name': 'Bangladesh','behavior': 'shared'}, {'type': 'Location','id': '114','name': 'Jordan','behavior': 'shared'}, {'type': 'Location','id': '172','name': 'Panama','behavior': 'shared'}, {'type': 'Location','id': '58','name': 'Curaçao','behavior': 'shared'}, {'type': 'Location','id': '212','name': 'Sudan','behavior': 'shared'}, {'type': 'Location','id': '162','name': 'Niger','behavior': 'shared'}, {'type': 'Location','id': '96','name': 'Haiti','behavior': 'shared'}, {'type': 'Location','id': '39','name': 'Cameroon','behavior': 'shared'}, {'type': 'Location','id': '118','name': "Korea, Democratic People's Republic of",'behavior': 'shared'}, {'type': 'Location','id': '66','name': 'Egypt','behavior': 'shared'}, {'type': 'Location','id': '144','name': 'Mexico','behavior': 'shared'}, {'type': 'Location','id': '54','name': 'Costa Rica','behavior': 'shared'}, {'type': 'Location','id': '49','name': 'Colombia','behavior': 'shared'}, {'type': 'Location','id': '45','name': 'Chile','behavior': 'shared'}, {'type': 'Location','id': '32','name': 'Brazil','behavior': 'shared'}, {'type': 'Location','id': '27','name': 'Bolivia, Plurinational State of','behavior': 'shared'}, {'type': 'Location','id': '13','name': 'Aruba','behavior': 'shared'}, {'type': 'Location','id': '11','name': 'Argentina','behavior': 'shared'}, {'type': 'Location','id': '185','name': 'Rwanda','behavior': 'shared'}, {'type': 'Location','id': '211','name': 'South Sudan','behavior': 'shared'}, {'type': 'Location','id': '153','name': 'Myanmar','behavior': 'shared'}, {'type': 'Location','id': '71','name': 'Ethiopia','behavior': 'shared'}, {'type': 'Location','id': '36','name': 'Burkina Faso','behavior': 'shared'}, {'type': 'Location','id': '248','name': 'Yemen','behavior': 'shared'}, {'type': 'Project','id': '165894','name': 'WHO','behavior': 'single','code': 'OCOVD20-COVD-165894-1'}, {'type': 'Emergency','id': '911','name': 'Coronavirus disease Outbreak - COVID -19','behavior': 'single'}, {'type': 'UsageYear','id': '41','name': '2020','behavior': 'single'}],'boundary': 'incoming','onBoundary': 'single','reportDetails':[{'sourceType': 'Primary','organization': 'World Health Organization','reportChannel': 'Email','date': '2020-04-01T00:00:00.000Z'}],'refCode': '#301150-101'}]
+
     countries = [{
         'id': 1,
         'iso3': 'AFG',
@@ -177,10 +181,11 @@ class TestFTS:
     def configuration(self):
         Configuration._create(hdx_read_only=True, user_agent='test',
                               project_config_yaml=join('tests', 'config', 'project_configuration.yml'))
-        Locations.set_validlocations([{'name': 'afg', 'title': 'Afghanistan'}, {'name': 'alb', 'title': 'Albania'}, {'name': 'cpv', 'title': 'Cape Verde'}])
+        Locations.set_validlocations([{'name': 'afg', 'title': 'Afghanistan'}, {'name': 'alb', 'title': 'Albania'}, {'name': 'cpv', 'title': 'Cape Verde'}, {'name': 'world', 'title': 'World'}])
         Country.countriesdata(False)
         Vocabulary._tags_dict = True
         Vocabulary._approved_vocabulary = {'tags': [{'name': 'hxl'}, {'name': 'financial tracking service - fts'}, {'name': 'aid funding'}], 'id': '4e61d464-4943-4e97-973a-84673c1aaa87', 'name': 'approved'}
+        return Configuration.read()
 
     @pytest.fixture(scope='function')
     def downloader(self):
@@ -193,9 +198,18 @@ class TestFTS:
             @staticmethod
             def download(url):
                 response = Response()
-                if 'groupby' not in url and 'location' in url:
+                if 'emergency/id/911' in url:
                     def fn():
-                        return {'data': TestFTS.countries}
+                        return {'data': TestFTS.emergency, 'status': 'ok'}
+                    response.json = fn
+                elif 'groupby' not in url and 'fts/flow?emergencyid=911&year=2020' in url:
+                    def fn():
+                        return {'data': {'incoming': {'fundingTotal': 538433495}, 'flows': TestFTS.emergencyflows},
+                                'meta': dict(), 'status': 'ok'}
+                    response.json = fn
+                elif 'groupby' not in url and 'location' in url:
+                    def fn():
+                        return {'data': TestFTS.countries, 'status': 'ok'}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=AFG&year=2017' in url:
                     def fn():
@@ -210,7 +224,7 @@ class TestFTS:
                                 data[0]['id'] = '149198X'
                             else:
                                 meta['nextLink'] = '%s&page=2' % url
-                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}, 'meta': meta}
+                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}, 'meta': meta, 'status': 'ok'}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=AFG&year=2018' in url:
                     def fn():
@@ -220,24 +234,24 @@ class TestFTS:
                         else:
                             data = [1]  # value is not used in test, just needs to be non empty list
                             incoming = 537301773
-                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}, 'meta': dict()}
+                        return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}, 'meta': dict(), 'status': 'ok'}
 
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=CPV&year=2007' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 1270424}, 'flows': [1]}, 'meta': dict()}
+                        return {'data': {'incoming': {'fundingTotal': 1270424}, 'flows': [1]}, 'meta': dict(), 'status': 'ok'}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=CPV&year=2018' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 568918}, 'flows': TestFTS.cpvflows}, 'meta': dict()}
+                        return {'data': {'incoming': {'fundingTotal': 568918}, 'flows': TestFTS.cpvflows}, 'meta': dict(), 'status': 'ok'}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2002' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 3384231}, 'flows': [1]}, 'meta': dict()}
+                        return {'data': {'incoming': {'fundingTotal': 3384231}, 'flows': [1]}, 'meta': dict(), 'status': 'ok'}
                     response.json = fn
                 elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2018' in url:
                     def fn():
-                        return {'data': {'incoming': {'fundingTotal': 86754}, 'flows': TestFTS.albflows}, 'meta': dict()}
+                        return {'data': {'incoming': {'fundingTotal': 86754}, 'flows': TestFTS.albflows}, 'meta': dict(), 'status': 'ok'}
                     response.json = fn
                 elif 'plan/country/AFG' in url:
                     def fn():
@@ -245,30 +259,30 @@ class TestFTS:
                             data = []
                         else:
                             data = TestFTS.afgrequirements
-                        return {'data': data}
+                        return {'data': data, 'status': 'ok'}
                     response.json = fn
                 elif 'plan/country/CPV' in url:
                     def fn():
-                        return {'data': TestFTS.cpvrequirements}
+                        return {'data': TestFTS.cpvrequirements, 'status': 'ok'}
                     response.json = fn
                 elif 'plan/country/ALB' in url:
                     def fn():
-                        return {'data': []}
+                        return {'data': [], 'status': 'ok'}
                     response.json = fn
                 elif 'fts/flow?countryISO3=AFG&groupby=year' in url:
                     def fn():
                         return {'data': {'report3': {
-                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.afgobjectsBreakdownByYear}]}}}}
+                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.afgobjectsBreakdownByYear}]}}}, 'status': 'ok'}
                     response.json = fn
                 elif 'fts/flow?countryISO3=CPV&groupby=year' in url:
                     def fn():
                         return {'data': {'report3': {
-                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.cpvobjectsBreakdownByYear}]}}}}
+                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.cpvobjectsBreakdownByYear}]}}}, 'status': 'ok'}
                     response.json = fn
                 elif 'fts/flow?countryISO3=ALB&groupby=year' in url:
                     def fn():
                         return {'data': {'report3': {
-                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByYear}]}}}}
+                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByYear}]}}}, 'status': 'ok'}
                     response.json = fn
                 elif 'fts/flow?groupby=plan&countryISO3=AFG' in url:
                     def fn():
@@ -278,17 +292,17 @@ class TestFTS:
                             data = None
                         else:
                             data = TestFTS.afgobjectsBreakdownByPlan
-                        return {'data': {'report3': {'fundingTotals': {'objects': [{'objectsBreakdown': data}]}}}}
+                        return {'data': {'report3': {'fundingTotals': {'objects': [{'objectsBreakdown': data}]}}}, 'status': 'ok'}
                     response.json = fn
                 elif 'fts/flow?groupby=plan&countryISO3=CPV' in url:
                     def fn():
                         return {'data': {'report3': {
-                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.cpvobjectsBreakdownByPlan}]}}}}
+                                'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.cpvobjectsBreakdownByPlan}]}}}, 'status': 'ok'}
                     response.json = fn
                 elif 'fts/flow?groupby=plan&countryISO3=ALB' in url:
                     def fn():
                         return {'data': {'report3': {
-                            'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByPlan}]}}}}
+                            'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByPlan}]}}}, 'status': 'ok'}
                     response.json = fn
                 elif 'fts/flow?planid=' in url:
                     def fn():
@@ -336,7 +350,7 @@ class TestFTS:
 
                         return {'data': {'report3': {'fundingTotals': {'objects': [{'totalBreakdown': fundtotaldata,
                                                                                     'objectsBreakdown': funddata}]}},
-                                         'requirements': {'objects': reqdata}}}
+                                         'requirements': {'objects': reqdata}}, 'status': 'ok'}
 
                     response.json = fn
                 elif 'plan/id/' in url:
@@ -352,7 +366,7 @@ class TestFTS:
                         plandata = None
 
                     def fn():
-                        return {'data': plandata}
+                        return {'data': plandata, 'status': 'ok'}
                     response.json = fn
                 return response
         return Download()
@@ -361,28 +375,57 @@ class TestFTS:
         countries = get_countries('http://afgsite/', downloader)
         assert countries == TestFTS.countries
 
+    def test_generate_emergency_dataset_and_showcase(self, configuration, downloader):
+        with temp_dir('fts') as folder:
+            notes = configuration['notes']
+            today = datetime.strptime('14042020', '%d%m%Y').date()
+            dataset, showcase = generate_emergency_dataset_and_showcase('http://cpvsite/', downloader, folder, 911,
+                                                                        today, notes)
+            assert dataset == {'name': 'fts-funding-data-for-coronavirus-disease-outbreak-covid-19',
+                               'title': 'Coronavirus disease Outbreak - COVID -19 Funding Data', 'notes': "FTS publishes data on humanitarian funding flows as reported by donors and recipient organizations. It presents all humanitarian funding to a country and funding that is specifically reported or that can be specifically mapped against funding requirements stated in humanitarian response plans. The data comes from OCHA's [Financial Tracking Service](https://fts.unocha.org/), is encoded as utf-8 and the second row of the CSV contains [HXL](http://hxlstandard.org) tags.  \n  \nGlide Id=EP-2020-000012-CHN, Date=2020-01-30T16:23:01.558Z",
+                               'maintainer': '196196be-6037-4488-8b71-d786adf4c081', 'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e',
+                               'dataset_date': '04/14/2020', 'data_update_frequency': '1', 'subnational': '0', 'groups': [{'name': 'world'}],
+                               'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+
+            resources = dataset.get_resources()
+            assert resources == [{'name': 'fts_incoming_funding_911.csv', 'description': 'FTS Incoming Funding Data for Coronavirus disease Outbreak - COVID -19 for 2020', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
+            for resource in resources:
+                resource_name = resource['name']
+                expected_file = join('tests', 'fixtures', resource_name)
+                actual_file = join(folder, resource_name)
+                assert_files_same(expected_file, actual_file)
+
+            assert showcase == {'name': 'fts-funding-data-for-coronavirus-disease-outbreak-covid-19-showcase',
+                                'title': 'FTS Coronavirus disease Outbreak - COVID -19 Summary Page',
+                                'notes': 'Click the image on the right to go to the FTS funding summary page for Coronavirus disease Outbreak - COVID -19',
+                                'url': 'https://fts.unocha.org/emergencies/911/flows/2020',
+                                'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
+                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+
     def test_generate_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('fts') as folder:
+            notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
             country = {'name': 'World'}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today, notes)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
 
-            country = {'iso3': None, 'name': 'ABC'}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today)
+            country = {'id': 'abc', 'iso3': None, 'name': 'ABC'}
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today, notes)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
 
-            country = {'iso3': 'ABC', 'name': 'ABC'}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today)
+            country = {'id': 'abc', 'iso3': 'ABC', 'name': 'ABC'}
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today, notes)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
 
     def test_generate_afg_dataset_and_showcase(self, configuration, downloader):
+        notes = configuration['notes']
         afgdataset = {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
                       'title': 'Afghanistan - Requirements and Funding Data',
                       'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
@@ -390,7 +433,7 @@ class TestFTS:
                                {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
                       'dataset_date': '06/01/2017',
                       'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
-                      'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0'}
+                      'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0', 'notes': notes}
         afgresources = [
             {'name': 'fts_incoming_funding_afg.csv', 'description': 'FTS Incoming Funding Data for Afghanistan for 2017',
              'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
@@ -424,25 +467,26 @@ class TestFTS:
             today = datetime.strptime('01062017', '%d%m%Y').date()
             test = 'nofundnoreq'
             country = {'iso3': 'AFG', 'name': 'Afghanistan', 'id': 1}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today, notes)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
             test = 'nofund'
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today, notes)
             compare_afg(dataset, showcase, hxl_resource, expected_resources=afgresources[1:], expected_hxl_resource=None, prefix=test)
             test = 'noreq'
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today, notes)
             compare_afg(dataset, showcase, hxl_resource, expected_hxl_resource=None, prefix=test)
 
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, country, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, country, today, notes)
             compare_afg(dataset, showcase, hxl_resource)
 
     def test_generate_cpv_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('fts') as folder:
+            notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
             country = {'iso3': 'CPV', 'name': 'Cape Verde', 'id': 1}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, country, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, country, today, notes)
             assert dataset == {'groups': [{'name': 'cpv'}], 'name': 'fts-requirements-and-funding-data-for-cape-verde',
                                'title': 'Cape Verde - Requirements and Funding Data',
                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
@@ -450,7 +494,7 @@ class TestFTS:
                                         {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
                                'dataset_date': '06/01/2018',
                                'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
-                               'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0'}
+                               'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0', 'notes': notes}
 
             resources = dataset.get_resources()
             assert resources == [{'name': 'fts_incoming_funding_cpv.csv', 'description': 'FTS Incoming Funding Data for Cape Verde for 2018', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
@@ -472,9 +516,10 @@ class TestFTS:
 
     def test_generate_alb_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('fts') as folder:
+            notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
             country = {'iso3': 'ALB', 'name': 'Albania', 'id': 1}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://albsite/', downloader, folder, country, today)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://albsite/', downloader, folder, country, today, notes)
             assert dataset == {'groups': [{'name': 'alb'}], 'name': 'fts-requirements-and-funding-data-for-albania',
                                'title': 'Albania - Requirements and Funding Data',
                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
@@ -482,7 +527,7 @@ class TestFTS:
                                         {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
                                'dataset_date': '06/01/2018',
                                'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
-                               'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0'}
+                               'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0', 'notes': notes}
 
             resources = dataset.get_resources()
             assert resources == [{'name': 'fts_incoming_funding_alb.csv', 'description': 'FTS Incoming Funding Data for Albania for 2018', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},

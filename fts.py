@@ -19,8 +19,7 @@ from hdx.location.country import Country
 from hdx.utilities.dictandlist import dict_of_lists_add
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.text import multiple_replace
-from pandas import DataFrame, concat, to_numeric, Series
-from pandas.io.json import json_normalize
+from pandas import DataFrame, concat, to_numeric, Series, json_normalize
 from slugify import slugify
 
 logger = logging.getLogger(__name__)
@@ -140,63 +139,52 @@ def remove_nonenan(df, colname):
     df[colname].replace(['nan', 'none'], ['', ''], inplace=True)
 
 
+def download(url, downloader):
+    r = downloader.download(url)
+    json = r.json()
+    status = json['status']
+    if status != 'ok':
+        raise FTSException('%s gives status %s' % (url, status))
+    return json
+
+
+def download_data(url, downloader):
+    return download(url, downloader)['data']
+
+
 def get_countries(base_url, downloader):
-    url = '%slocation' % base_url
-    response = downloader.download(url)
-    json = response.json()
-    return json['data']
+    return download_data('%slocation' % base_url, downloader)
 
 
-def generate_dataset_and_showcase(base_url, downloader, folder, country, today):
-    '''
-    api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
-    '''
-    countryname = country['name']
-    if countryname == 'World':
-        logger.info('Ignoring  %s' % countryname)
-        return None, None, None
-    logger.info('Adding FTS data for %s' % countryname)
-    latestyear = str(today.year)
-    title = '%s - Requirements and Funding Data' % countryname
-    slugified_name = slugify('FTS Requirements and Funding Data for %s' % countryname).lower()
-
+def get_dataset_and_showcase(slugified_name, title, description, today, country_emergency, showcase_url):
     dataset = Dataset({
         'name': slugified_name,
         'title': title,
+        'notes': description
     })
     dataset.set_maintainer('196196be-6037-4488-8b71-d786adf4c081')
     dataset.set_organization('fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e')
     dataset.set_dataset_date_from_datetime(today)
     dataset.set_expected_update_frequency('Every day')
     dataset.set_subnational(False)
-    countryiso = country['iso3']
-    if countryiso is None:
-        logger.error('%s has a problem! Iso3 is None!' % title)
-        return None, None, None
-    try:
-        dataset.add_country_location(countryiso)
-    except HDXError as e:
-        logger.error('%s has a problem! %s' % (title, e))
-        return None, None, None
-
     tags = ['hxl', 'financial tracking service - fts', 'aid funding']
     dataset.add_tags(tags)
-
     showcase = Showcase({
         'name': '%s-showcase' % slugified_name,
-        'title': 'FTS %s Summary Page' % countryname,
-        'notes': 'Click the image on the right to go to the FTS funding summary page for %s' % countryname,
-        'url': 'https://fts.unocha.org/countries/%s/flows/%s' % (country['id'], latestyear),
+        'title': 'FTS %s Summary Page' % country_emergency,
+        'notes': 'Click the image on the right to go to the FTS funding summary page for %s' % country_emergency,
+        'url': showcase_url,
         'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg'
     })
     showcase.add_tags(tags)
+    return dataset, showcase
 
+
+def generate_flows_resources(funding_url, downloader, folder, dataset, code, country_emergency, latestyear):
     fund_boundaries_info = list()
     fund_data = list()
-    funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
     while funding_url:
-        r = downloader.download(funding_url)
-        json = r.json()
+        json = download(funding_url, downloader)
         fund_data.extend(json['data']['flows'])
         funding_url = json['meta'].get('nextLink')
 
@@ -245,7 +233,8 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today):
                     else:
                         if len(values) > 1:
                             outputstr = 'Multiple'
-                            logger.error('Multiple used instead of %s for %s in %s' % (values, keyname, countryname))
+                            logger.error('Multiple used instead of %s for %s in %s' % (values, keyname,
+                                                                                       country_emergency))
                         else:
                             outputstr = values[0]
                     outputdicts[keyname] = outputstr
@@ -283,25 +272,77 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today):
         for boundary, dffundbound in dffunddet.groupby(['boundary']):
             # add HXL tags
             dffundbound = hxlate(dffundbound, funding_hxl_names)
-            filename = 'fts_%s_funding_%s.csv' % (boundary, countryiso.lower())
+            filename = 'fts_%s_funding_%s.csv' % (boundary, code)
             fund_boundaries_info.append((dffundbound, join(folder, filename)))
 
             resource_data = {
                 'name': filename.lower(),
-                'description': 'FTS %s Funding Data for %s for %s' % (boundary.capitalize(), countryname, latestyear),
+                'description': 'FTS %s Funding Data for %s for %s' % (boundary.capitalize(), country_emergency, latestyear),
                 'format': 'csv'
             }
             resource = Resource(resource_data)
             resource.set_file_to_upload(fund_boundaries_info[-1][1])
             dataset.add_update_resource(resource)
+    return fund_boundaries_info
+
+
+def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emergencyid, today, notes):
+    # https://api.hpc.tools/v1/public/emergency/id/911
+    latestyear = str(today.year)
+    emergency_url = '%semergency/id/%d' % (base_url, emergencyid)
+    data = download_data(emergency_url, downloader)
+    name = data['name']
+    glideid = data.get('glideId')
+    date = data['date']
+    slugified_name = slugify('FTS Funding Data for %s' % name).lower()
+    title = '%s Funding Data' % name
+    description = '%s  \n  \nGlide Id=%s, Date=%s' % (notes, glideid, date)
+    showcase_url = 'https://fts.unocha.org/emergencies/%d/flows/%s' % (emergencyid, latestyear)
+    dataset, showcase = get_dataset_and_showcase(slugified_name, title, description, today, name, showcase_url)
+    dataset.add_other_location('world')
+    funding_url = '%s/fts/flow?emergencyid=%d&year=%s' % (base_url, emergencyid, latestyear)
+    fund_boundaries_info = generate_flows_resources(funding_url, downloader, folder, dataset, str(emergencyid), name,
+                                                    latestyear)
+    for fund_boundary_info in fund_boundaries_info:
+        fund_boundary_info[0].to_csv(fund_boundary_info[1], encoding='utf-8', index=False, date_format='%Y-%m-%d')
+    return dataset, showcase
+
+
+def generate_dataset_and_showcase(base_url, downloader, folder, country, today, notes):
+    '''
+    api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
+    '''
+    countryname = country['name']
+    if countryname == 'World':
+        logger.info('Ignoring  %s' % countryname)
+        return None, None, None
+    logger.info('Adding FTS data for %s' % countryname)
+    latestyear = str(today.year)
+    slugified_name = slugify('FTS Requirements and Funding Data for %s' % countryname).lower()
+    title = '%s - Requirements and Funding Data' % countryname
+    showcase_url = 'https://fts.unocha.org/countries/%s/flows/%s' % (country['id'], latestyear)
+    dataset, showcase = get_dataset_and_showcase(slugified_name, title, notes, today, countryname, showcase_url)
+
+    countryiso = country['iso3']
+    if countryiso is None:
+        logger.error('%s has a problem! Iso3 is None!' % title)
+        return None, None, None
+    try:
+        dataset.add_country_location(countryiso)
+    except HDXError as e:
+        logger.error('%s has a problem! %s' % (title, e))
+        return None, None, None
+
+    funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
+    fund_boundaries_info = generate_flows_resources(funding_url, downloader, folder, dataset, countryiso.lower(),
+                                                    countryname, latestyear)
 
     planidcodemapping = dict()
     requirements_url = '%splan/country/%s' % (base_url, countryiso)
     funding_url = '%sfts/flow?groupby=plan&countryISO3=%s' % (base_url, countryiso)
-    r = downloader.download(requirements_url)
-    req_data = r.json()['data']
-    r = downloader.download(funding_url)
-    data = r.json()['data']['report3']['fundingTotals']['objects']
+    req_data = download_data(requirements_url, downloader)
+    fund_data = download_data(funding_url, downloader)
+    data = fund_data['report3']['fundingTotals']['objects']
     if len(data) == 0:
         fund_data = None
     else:
@@ -390,11 +431,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today):
     def fill_row(planid, row):
         plan_url = '%splan/id/%s' % (base_url, planid)
         try:  # Added for Haiti missing plan 237 issue
-            r = downloader.download(plan_url)
+            data = download_data(plan_url, downloader)
         except DownloadError:
             logger.error('Problem with downloading %s!' % plan_url)
             return False
-        data = r.json()['data']
         error = data.get('message')
         if error:
             raise FTSException(error)
@@ -430,8 +470,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today):
                 continue
             loc_funding_url = '%sfts/flow?planid=%s&groupby=location' % (base_url, planid)
             try:
-                r = downloader.download(loc_funding_url)
-                loc_data = r.json()['data']
+                loc_data = download_data(loc_funding_url, downloader)
                 loc_fund_objects = loc_data['report3']['fundingTotals']['objects']
                 totalfunding = row['funding']
                 try:
@@ -491,8 +530,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today):
 
         funding_url = '%sfts/flow?planid=%s&groupby=cluster' % (base_url, planid)
         try:
-            r = downloader.download(funding_url)
-            data = r.json()['data']
+            data = download_data(funding_url, downloader)
             fund_objects = data['report3']['fundingTotals']['objects']
             if len(fund_objects) == 0:
                 logger.warning('%s has no funding objects!' % funding_url)
@@ -551,16 +589,15 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today):
     years_url = '%sfts/flow?countryISO3=%s&groupby=year' % (base_url, countryiso)
     ## get totals from year call and subtract all plans in that year
     # 691121294 - 611797140 (2018 SDN)
-    r = downloader.download(years_url)
-    data = r.json()['data']['report3']['fundingTotals']['objects']
+    data = download_data(years_url, downloader)
+    data = data['report3']['fundingTotals']['objects']
     if len(data) != 0:
         years_not_specified = list()
         for year_data in data[0].get('objectsBreakdown'):
             year = year_data.get('name')
             if year:
                 year_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, year)
-                r = downloader.download(year_url)
-                data = r.json()['data']
+                data = download_data(year_url, downloader)
                 if len(data['flows']) == 0:
                     continue
                 totalfunding = data['incoming']['fundingTotal']

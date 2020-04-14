@@ -1,2 +1,5 @@
 # Collector specific configuration
 base_url: "https://api.hpc.tools/v1/public/"
+notes: "FTS publishes data on humanitarian funding flows as reported by donors and recipient organizations. It presents all humanitarian funding to a country and funding that is specifically reported or that can be specifically mapped against funding requirements stated in humanitarian response plans. The data comes from OCHA's [Financial Tracking Service](https://fts.unocha.org/), is encoded as utf-8 and the second row of the CSV contains [HXL](http://hxlstandard.org) tags."
+emergencies:
+  - 911
