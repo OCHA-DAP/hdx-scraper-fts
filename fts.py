@@ -541,7 +541,7 @@ def generate_requirements_funding_resource(base_url, all_plans, plans, funding_u
     return dffundreq, planidcodemapping, incompleteplans
 
 
-def generate_requirements_funding_cluster_resource(base_url, downloader, folder, countryname, countryiso, dffundreq, incompleteplans, all_plans, dataset):
+def generate_requirements_funding_cluster(base_url, downloader, countryiso, dffundreq, incompleteplans, all_plans):
     combined = DataFrame()
     for i, row in dffundreq.iterrows():
         planid = row['id']
@@ -633,7 +633,7 @@ def generate_requirements_funding_cluster_resource(base_url, downloader, folder,
 
     if len(combined) == 0:
         logger.warning('No cluster data available')
-        return None
+        return None, False
 
     df = combined.merge(dffundreq, on='id')
     df.rename(columns={'name_x': 'name', 'revisedRequirements_x': 'revisedRequirements', 'totalFunding_x': 'totalFunding'}, inplace=True)
@@ -653,28 +653,37 @@ def generate_requirements_funding_cluster_resource(base_url, downloader, folder,
     df.sort_values(['endDate', 'name', 'clusterName'], ascending=[False, True, True], inplace=True)
     df['clusterName'].replace('zzz', 'Shared Funding', inplace=True)
     s = df['clusterName']
-    hxl_resource = None
-    filename = 'fts_requirements_funding_cluster_%s.csv' % countryiso.lower()
-    resource_name = filename.lower()
+    hxl_resource = False
     if not s[~s.isin(['Shared Funding', 'Multi-sector', 'Not specified'])].empty:
         s = df['percentFunded'] == ''
         if not s[~s.isin([True])].empty:
-            hxl_resource = resource_name
+            hxl_resource = True
     df.rename(index=str, columns=rename_columns, inplace=True)
-    df = hxlate(df, hxl_names)
+    return df, hxl_resource
 
+
+def generate_requirements_funding_cluster_resource(base_url, downloader, folder, countryname, countryiso, dffundreq,
+                                                   incompleteplans, all_plans, dataset):
+    filename = 'fts_requirements_funding_cluster_%s.csv' % countryiso.lower()
+    df, hxl_resource = generate_requirements_funding_cluster(base_url, downloader, countryiso, dffundreq, incompleteplans, all_plans)
+    if df is None:
+        return None
+
+    df = hxlate(df, hxl_names)
     file_to_upload = join(folder, filename)
     df.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
     resource_data = {
-        'name': resource_name,
+        'name': filename,
         'description': 'FTS Annual Requirements and Funding Data by Cluster for %s' % countryname,
         'format': 'csv'
     }
     resource = Resource(resource_data)
     resource.set_file_to_upload(file_to_upload)
     dataset.add_update_resource(resource)
-    return hxl_resource
+    if hxl_resource:
+        return filename
+    return None
 
 
 def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emergency, all_plans, plans_by_emergency, today, notes):
