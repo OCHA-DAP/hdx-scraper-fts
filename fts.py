@@ -398,26 +398,91 @@ def generate_requirements_funding_dataframe(plans, funding_url, downloader, name
     return dffundreq, planidcodemapping, incompleteplans
 
 
-def generate_requirements_funding_resource(plans, funding_url, downloader, folder, name, code, columnname, dataset):
-    dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding_dataframe(plans, funding_url, downloader, name, code, columnname)
-    if dffundreq is None:
-        return None, None, None, None
+def row_correction_requirements_funding(base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, countryiso):
+    for i, row in dffundreq.iterrows():
+        planid = row['id']
+        if planid == '' or planid == 'undefined':
+            planname = row['name']
+            if planname == 'Not specified' or planname == '':
+                continue
+            raise FTSException('Plan Name: %s is invalid!' % planname)
+        else:
+            if planid in incompleteplans:
+                logger.warning('Not reading location info for plan id %s which is incomplete!' % planid)
+                continue
+            loc_funding_url = '%sfts/flow?planid=%s&groupby=location' % (base_url, planid)
+            try:
+                loc_data = download_data(loc_funding_url, downloader)
+                loc_fund_objects = loc_data['report3']['fundingTotals']['objects']
+                totalfunding = row['funding']
+                try:
+                    origfunding = int(totalfunding)
+                except ValueError:
+                    origfunding = None
+                totalrequirements = row['requirements']
+                try:
+                    origrequirements = int(totalrequirements)
+                except ValueError:
+                    origrequirements = None
+                if len(loc_fund_objects) != 0:
+                    for location in loc_fund_objects[0]['objectsBreakdown']:
+                        if Country.get_iso3_country_code_fuzzy(location['name'])[0] != countryiso:
+                            continue
+                        totalfunding = location['totalFunding']
+                        if isinstance(totalfunding, int):
+                            if origfunding != totalfunding:
+                                #logger.warning('Overriding funding')
+                                dffundreq.at[i, 'funding'] = totalfunding
+                        break
+                loc_req_objects = loc_data['requirements']['objects']
+                if loc_req_objects:
+                    for location in loc_req_objects:
+                        if 'name' not in location:
+                            logger.warning('%s requirements object does not have a location name!' % loc_funding_url)
+                            continue
+                        if Country.get_iso3_country_code_fuzzy(location['name'])[0] != countryiso:
+                            continue
+                        totalrequirements = location['revisedRequirements']
+                        if isinstance(totalrequirements, int):
+                            if origrequirements != totalrequirements:
+                                #logger.warning('Overriding requirements for %s' % planid)
+                                dffundreq.at[i, 'requirements'] = totalrequirements
+                        break
+                if totalrequirements:
+                    if totalfunding == '':
+                        dffundreq.at[i, 'percentFunded'] = ''
+                    else:
+                        totalrequirements_i = int(totalrequirements)
+                        if totalrequirements_i == 0:
+                            dffundreq.at[i, 'percentFunded'] = ''
+                        else:
+                            dffundreq.at[i, 'percentFunded'] = str(int((int(totalfunding) / totalrequirements_i * 100) + 0.5))
+                else:
+                    dffundreq.at[i, 'percentFunded'] = ''
+            except DownloadError:
+                logger.error('Problem with downloading %s!' % loc_funding_url)
 
-    filename = 'fts_requirements_funding_%s.csv' % code.lower()
-    file_to_upload_hxldffundreq = join(folder, filename)
+            data = all_plans.get(planid)
+            if data is None:
+                logger.error('Missing plan id %s!' % planid)
+                continue
+            error = data.get('message')
+            if error:
+                logger.error(error)
+                continue
+            code = data['planVersion']['code']
+            planidcodemapping[planid] = code
+            dffundreq.at[i, 'code'] = code
+            dffundreq.at[i, 'startDate'] = str(data['planVersion']['startDate'])[:10]
+            dffundreq.at[i, 'endDate'] = str(data['planVersion']['endDate'])[:10]
+            years = data['years']
+            if len(years) > 1:
+                logger.error('More than one year listed in plan %s for %s!' % (planid, countryiso))
+            dffundreq.at[i, 'year'] = years[0]['year']
+    return dffundreq
 
-    resource_data = {
-        'name': filename.lower(),
-        'description': 'FTS Annual Requirements and Funding Data for %s' % name,
-        'format': 'csv'
-    }
-    resource = Resource(resource_data)
-    resource.set_file_to_upload(file_to_upload_hxldffundreq)
-    dataset.add_update_resource(resource)
-    return dffundreq, planidcodemapping, incompleteplans, file_to_upload_hxldffundreq
 
-
-def generate_requirements_funding_file(base_url, downloader, countryiso, dffundreq, file_to_upload_hxldffundreq):
+def add_not_specified(base_url, downloader, countryiso, dffundreq):
     years_url = '%sfts/flow?countryISO3=%s&groupby=year' % (base_url, countryiso)
     ## get totals from year call and subtract all plans in that year
     # 691121294 - 611797140 (2018 SDN)
@@ -448,37 +513,35 @@ def generate_requirements_funding_file(base_url, downloader, countryiso, dffundr
 
     dffundreq.sort_values(['year', 'endDate', 'name'], ascending=[False, False, True], inplace=True)
     dffundreq['year'] = dffundreq['year'].replace('1000', 'Not specified')
+    return dffundreq
+
+
+def generate_requirements_funding_resource(base_url, all_plans, plans, funding_url, downloader, folder, name, code, columnname, dataset):
+    dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding_dataframe(plans, funding_url, downloader, name, code, columnname)
+    if dffundreq is None:
+        return None, None, None
+
+    dffundreq = row_correction_requirements_funding(base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, code)
+
+    dffundreq = add_not_specified(base_url, downloader, code, dffundreq)
+
     hxldffundreq = hxlate(dffundreq, hxl_names)
+    filename = 'fts_requirements_funding_%s.csv' % code.lower()
+    file_to_upload_hxldffundreq = join(folder, filename)
     hxldffundreq.to_csv(file_to_upload_hxldffundreq, encoding='utf-8', index=False, date_format='%Y-%m-%d')
+
+    resource_data = {
+        'name': filename.lower(),
+        'description': 'FTS Annual Requirements and Funding Data for %s' % name,
+        'format': 'csv'
+    }
+    resource = Resource(resource_data)
+    resource.set_file_to_upload(file_to_upload_hxldffundreq)
+    dataset.add_update_resource(resource)
+    return dffundreq, planidcodemapping, incompleteplans
 
 
 def generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, all_plans, dataset):
-    def fill_row(planid, row):
-        data = all_plans.get(planid)
-        if data is None:
-            logger.error('Missing plan id %s!' % planid)
-            return False
-        error = data.get('message')
-        if error:
-            raise FTSException(error)
-        code = data['planVersion']['code']
-        planidcodemapping[planid] = code
-        row['code'] = code
-        row['startDate'] = str(data['planVersion']['startDate'])[:10]
-        row['endDate'] = str(data['planVersion']['endDate'])[:10]
-        years = data['years']
-        if len(years) > 1:
-            logger.error('More than one year listed in plan %s for %s!' % (planid, countryname))
-        row['year'] = years[0]['year']
-        locations = data['locations']
-        if len(locations) == 0:
-            return True
-        for location in data['locations']:
-            adminlevel = location.get('adminlevel', location.get('adminLevel'))
-            if adminlevel == 0 and location['iso3'] != countryiso:
-                return True
-        return False
-
     combined = DataFrame()
     for i, row in dffundreq.iterrows():
         planid = row['id']
@@ -489,67 +552,30 @@ def generate_requirements_funding_cluster_resource(base_url, downloader, folder,
             raise FTSException('Plan Name: %s is invalid!' % planname)
         else:
             if planid in incompleteplans:
-                logger.warning('Not reading location and cluster info for plan id %s which is incomplete!' % planid)
+                logger.warning('Not reading cluster info for plan id %s which is incomplete!' % planid)
                 continue
-            loc_funding_url = '%sfts/flow?planid=%s&groupby=location' % (base_url, planid)
-            try:
-                loc_data = download_data(loc_funding_url, downloader)
-                loc_fund_objects = loc_data['report3']['fundingTotals']['objects']
-                totalfunding = row['funding']
-                try:
-                    origfunding = int(totalfunding)
-                except ValueError:
-                    origfunding = None
-                totalrequirements = row['requirements']
-                try:
-                    origrequirements = int(totalrequirements)
-                except ValueError:
-                    origrequirements = None
-                if len(loc_fund_objects) != 0:
-                    for location in loc_fund_objects[0]['objectsBreakdown']:
-                        if Country.get_iso3_country_code_fuzzy(location['name'])[0] != countryiso:
-                            continue
-                        totalfunding = location['totalFunding']
-                        if isinstance(totalfunding, int):
-                            if origfunding != totalfunding:
-                                #logger.warning('Overriding funding')
-                                row['funding'] = totalfunding
+            data = all_plans.get(planid)
+            if data is None:
+                logger.error('Missing plan id %s!' % planid)
+                continue
+            error = data.get('message')
+            if error:
+                logger.error(error)
+                continue
+            locations = data['locations']
+            if len(locations) == 0:
+                logger.warning('Plan %s spans multiple locations - ignoring in cluster breakdown!' % planid)
+                continue
+            else:
+                found = False
+                for location in data['locations']:
+                    adminlevel = location.get('adminlevel', location.get('adminLevel'))
+                    if adminlevel == 0 and location['iso3'] != countryiso:
+                        found = True
                         break
-                loc_req_objects = loc_data['requirements']['objects']
-                if loc_req_objects:
-                    for location in loc_req_objects:
-                        if 'name' not in location:
-                            logger.warning('%s requirements object does not have a location name!' % loc_funding_url)
-                            continue
-                        if Country.get_iso3_country_code_fuzzy(location['name'])[0] != countryiso:
-                            continue
-                        totalrequirements = location['revisedRequirements']
-                        if isinstance(totalrequirements, int):
-                            if origrequirements != totalrequirements:
-                                #logger.warning('Overriding requirements for %s' % planid)
-                                row['requirements'] = totalrequirements
-                        break
-                if totalrequirements:
-                    if totalfunding == '':
-                        row['percentFunded'] = ''
-                    else:
-                        totalrequirements_i = int(totalrequirements)
-                        if totalrequirements_i == 0:
-                            row['percentFunded'] = ''
-                        else:
-                            row['percentFunded'] = str(int((int(totalfunding) / totalrequirements_i * 100) + 0.5))
-                else:
-                    row['percentFunded'] = ''
-            except DownloadError:
-                logger.error('Problem with downloading %s!' % loc_funding_url)
-
-            try:
-                if fill_row(planid, row):
+                if found:
                     logger.warning('Plan %s spans multiple locations - ignoring in cluster breakdown!' % planid)
                     continue
-            except FTSException as ex:
-                logger.error(ex)
-                continue
 
         funding_url = '%sfts/flow?planid=%s&groupby=cluster' % (base_url, planid)
         try:
@@ -703,8 +729,8 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
                                                     countryname, latestyear)
     plans = plans_by_country[countryiso]
     funding_url = '%sfts/flow?groupby=plan&countryISO3=%s' % (base_url, countryiso)
-    dffundreq, planidcodemapping, incompleteplans, file_to_upload_hxldffundreq = \
-        generate_requirements_funding_resource(plans, funding_url, downloader, folder, countryname,
+    dffundreq, planidcodemapping, incompleteplans = \
+        generate_requirements_funding_resource(base_url, all_plans, plans, funding_url, downloader, folder, countryname,
                                                countryiso, 'countryCode', dataset)
     if dffundreq is None:
         hxl_resource = None
@@ -717,7 +743,6 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
         hxl_resource = generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping,
                                                                       countryname, countryiso, dffundreq,
                                                                       incompleteplans, all_plans, dataset)
-        generate_requirements_funding_file(base_url, downloader, countryiso, dffundreq, file_to_upload_hxldffundreq)
 
     generate_flows_files(fund_boundaries_info, planidcodemapping)
     return dataset, showcase, hxl_resource
