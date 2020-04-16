@@ -323,7 +323,7 @@ def generate_flows_files(fund_boundaries_info, planidcodemapping):
         fund_boundary_info[0].to_csv(fund_boundary_info[1], encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
 
-def generate_requirements_funding_resource(plans, funding_url, downloader, folder, name, code, columnname, dataset):
+def generate_requirements_funding_dataframe(plans, funding_url, downloader, name, code, columnname):
     planidcodemapping = dict()
     fund_data = download_data(funding_url, downloader)
     data = fund_data['report3']['fundingTotals']['objects']
@@ -335,7 +335,7 @@ def generate_requirements_funding_resource(plans, funding_url, downloader, folde
     columns_to_keep.insert(0, columnname)
     if len(plans) == 0:
         if not fund_data:
-            return None, None, None, None
+            return None, None, None
         logger.warning('No requirements data, only funding data available')
         dffund = json_normalize(fund_data)
         dffund = drop_columns_except(dffund, columns_to_keep)
@@ -395,6 +395,13 @@ def generate_requirements_funding_resource(plans, funding_url, downloader, folde
     remove_fractions(dffundreq, 'percentFunded')
     remove_nonenan(dffundreq, 'percentFunded')
     dffundreq.rename(index=str, columns=rename_columns, inplace=True)
+    return dffundreq, planidcodemapping, incompleteplans
+
+
+def generate_requirements_funding_resource(plans, funding_url, downloader, folder, name, code, columnname, dataset):
+    dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding_dataframe(plans, funding_url, downloader, name, code, columnname)
+    if dffundreq is None:
+        return None, None, None, None
 
     filename = 'fts_requirements_funding_%s.csv' % code.lower()
     file_to_upload_hxldffundreq = join(folder, filename)
