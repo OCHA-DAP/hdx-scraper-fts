@@ -98,6 +98,8 @@ country_emergency_columns_to_keep = ['id', 'name', 'code', 'startDate', 'endDate
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
 cluster_columns_to_keep = ['countryCode', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode',
                            'clusterName', 'revisedRequirements', 'totalFunding']
+columnlookup = {'location': 'countryCode', 'emergency': 'emergency_id'}
+urllookup = {'location': 'countryISO3', 'emergency': 'emergencyid'}
 
 
 class FTSException(Exception):
@@ -211,9 +213,11 @@ def get_dataset_and_showcase(slugified_name, title, description, today, country_
     return dataset, showcase
 
 
-def generate_flows_resources(funding_url, downloader, folder, dataset, code, country_emergency, latestyear):
+def generate_flows_resources(objecttype, base_url, downloader, folder, dataset, code, country_emergency, latestyear):
     fund_boundaries_info = list()
     fund_data = list()
+    base_funding_url = '%sfts/flow?%s=%s&' % (base_url, urllookup[objecttype], code)
+    funding_url = '%syear=%s' % (base_funding_url, latestyear)
     while funding_url:
         json = download(funding_url, downloader)
         fund_data.extend(json['data']['flows'])
@@ -303,11 +307,11 @@ def generate_flows_resources(funding_url, downloader, folder, dataset, code, cou
         for boundary, dffundbound in dffunddet.groupby(['boundary']):
             # add HXL tags
             dffundbound = hxlate(dffundbound, funding_hxl_names)
-            filename = 'fts_%s_funding_%s.csv' % (boundary, code)
+            filename = 'fts_%s_funding_%s.csv' % (boundary, code.lower())
             fund_boundaries_info.append((dffundbound, join(folder, filename)))
 
             resource_data = {
-                'name': filename.lower(),
+                'name': filename,
                 'description': 'FTS %s Funding Data for %s for %s' % (boundary.capitalize(), country_emergency, latestyear),
                 'format': 'csv'
             }
@@ -399,7 +403,7 @@ def generate_requirements_funding(plans, base_funding_url, downloader, name, cod
     return dffundreq, planidcodemapping, incompleteplans
 
 
-def row_correction_requirements_funding(base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, countryiso):
+def row_correction_requirements_funding(objecttype, base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, code):
     for i, row in dffundreq.iterrows():
         planid = row['id']
         if planid == '' or planid == 'undefined':
@@ -409,12 +413,12 @@ def row_correction_requirements_funding(base_url, downloader, dffundreq, all_pla
             raise FTSException('Plan Name: %s is invalid!' % planname)
         else:
             if planid in incompleteplans:
-                logger.warning('Not reading location info for plan id %s which is incomplete!' % planid)
+                logger.warning('Not reading %s info for plan id %s which is incomplete!' % (objecttype, planid))
                 continue
-            loc_funding_url = '%sfts/flow?planid=%s&groupby=location' % (base_url, planid)
+            funding_url = '%sfts/flow?planid=%s&groupby=%s' % (base_url, planid, objecttype)
             try:
-                loc_data = download_data(loc_funding_url, downloader)
-                loc_fund_objects = loc_data['report3']['fundingTotals']['objects']
+                data = download_data(funding_url, downloader)
+                fund_objects = data['report3']['fundingTotals']['objects']
                 totalfunding = row['funding']
                 try:
                     origfunding = int(totalfunding)
@@ -425,25 +429,25 @@ def row_correction_requirements_funding(base_url, downloader, dffundreq, all_pla
                     origrequirements = int(totalrequirements)
                 except ValueError:
                     origrequirements = None
-                if len(loc_fund_objects) != 0:
-                    for location in loc_fund_objects[0]['objectsBreakdown']:
-                        if Country.get_iso3_country_code_fuzzy(location['name'])[0] != countryiso:
+                if len(fund_objects) != 0:
+                    for object in fund_objects[0]['objectsBreakdown']:
+                        if Country.get_iso3_country_code_fuzzy(object['name'])[0] != code:
                             continue
-                        totalfunding = location['totalFunding']
+                        totalfunding = object['totalFunding']
                         if isinstance(totalfunding, int):
                             if origfunding != totalfunding:
                                 #logger.warning('Overriding funding')
                                 dffundreq.at[i, 'funding'] = totalfunding
                         break
-                loc_req_objects = loc_data['requirements']['objects']
-                if loc_req_objects:
-                    for location in loc_req_objects:
-                        if 'name' not in location:
-                            logger.warning('%s requirements object does not have a location name!' % loc_funding_url)
+                req_objects = data['requirements']['objects']
+                if req_objects:
+                    for object in req_objects:
+                        if 'name' not in object:
+                            logger.warning('%s requirements object does not have a %s name!' % (funding_url, objecttype))
                             continue
-                        if Country.get_iso3_country_code_fuzzy(location['name'])[0] != countryiso:
+                        if Country.get_iso3_country_code_fuzzy(object['name'])[0] != code:
                             continue
-                        totalrequirements = location['revisedRequirements']
+                        totalrequirements = object['revisedRequirements']
                         if isinstance(totalrequirements, int):
                             if origrequirements != totalrequirements:
                                 #logger.warning('Overriding requirements for %s' % planid)
@@ -461,7 +465,7 @@ def row_correction_requirements_funding(base_url, downloader, dffundreq, all_pla
                 else:
                     dffundreq.at[i, 'percentFunded'] = ''
             except DownloadError:
-                logger.error('Problem with downloading %s!' % loc_funding_url)
+                logger.error('Problem with downloading %s!' % funding_url)
 
             data = all_plans.get(planid)
             if data is None:
@@ -471,19 +475,19 @@ def row_correction_requirements_funding(base_url, downloader, dffundreq, all_pla
             if error:
                 logger.error(error)
                 continue
-            code = data['planVersion']['code']
-            planidcodemapping[planid] = code
-            dffundreq.at[i, 'code'] = code
+            planversioncode = data['planVersion']['code']
+            planidcodemapping[planid] = planversioncode
+            dffundreq.at[i, 'code'] = planversioncode
             dffundreq.at[i, 'startDate'] = str(data['planVersion']['startDate'])[:10]
             dffundreq.at[i, 'endDate'] = str(data['planVersion']['endDate'])[:10]
             years = data['years']
             if len(years) > 1:
-                logger.error('More than one year listed in plan %s for %s!' % (planid, countryiso))
+                logger.error('More than one year listed in plan %s for %s!' % (planid, code))
             dffundreq.at[i, 'year'] = years[0]['year']
     return dffundreq
 
 
-def add_not_specified(base_funding_url, downloader, countryiso, dffundreq):
+def add_not_specified(base_funding_url, downloader, code, columnname, dffundreq):
     years_url = '%sgroupby=year' % base_funding_url
     ## get totals from year call and subtract all plans in that year
     # 691121294 - 611797140 (2018 SDN)
@@ -506,7 +510,7 @@ def add_not_specified(base_funding_url, downloader, countryiso, dffundreq):
                     not_specified = str(int(totalfunding - to_numeric(funding_in_year, errors='coerce').sum()))
                 if year == 'Not specified':
                     year = '1000'
-                years_not_specified.append({'countryCode': countryiso, 'year': year, 'name': 'Not specified',
+                years_not_specified.append({columnname: code, 'year': year, 'name': 'Not specified',
                                             'funding': not_specified})
         df_years_not_specified = DataFrame(data=years_not_specified, columns=list(dffundreq))
         df_years_not_specified = df_years_not_specified.fillna('')
@@ -517,14 +521,15 @@ def add_not_specified(base_funding_url, downloader, countryiso, dffundreq):
     return dffundreq
 
 
-def generate_requirements_funding_resource(base_url, all_plans, plans, base_funding_url, downloader, folder, name, code, columnname, dataset):
+def generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, name, code, dataset):
+    base_funding_url = '%sfts/flow?%s=%s&' % (base_url, urllookup[objecttype], code)
+    columnname = columnlookup[objecttype]
     dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding(plans, base_funding_url, downloader, name, code, columnname)
     if dffundreq is None:
         return None, None, None
+    dffundreq = row_correction_requirements_funding(objecttype, base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, code)
 
-    dffundreq = row_correction_requirements_funding(base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, code)
-
-    dffundreq = add_not_specified(base_funding_url, downloader, code, dffundreq)
+    dffundreq = add_not_specified(base_funding_url, downloader, code, columnname, dffundreq)
 
     hxldffundreq = hxlate(dffundreq, hxl_names)
     filename = 'fts_requirements_funding_%s.csv' % code.lower()
@@ -702,9 +707,9 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
     showcase_url = 'https://fts.unocha.org/emergencies/%d/flows/%s' % (emergencyid, latestyear)
     dataset, showcase = get_dataset_and_showcase(slugified_name, title, description, today, name, showcase_url)
     dataset.add_other_location('world')
-    funding_url = '%s/fts/flow?emergencyid=%d&year=%s' % (base_url, emergencyid, latestyear)
-    fund_boundaries_info = generate_flows_resources(funding_url, downloader, folder, dataset, str(emergencyid), name,
-                                                    latestyear)
+    objecttype = 'emergency'
+    fund_boundaries_info = generate_flows_resources(objecttype, base_url, downloader, folder, dataset, str(emergencyid),
+                                                    name, latestyear)
     generate_flows_files(fund_boundaries_info, dict())
     return dataset, showcase
 
@@ -734,14 +739,13 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
         logger.error('%s has a problem! %s' % (title, e))
         return None, None, None
 
-    funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
-    fund_boundaries_info = generate_flows_resources(funding_url, downloader, folder, dataset, countryiso.lower(),
-                                                    countryname, latestyear)
+    objecttype = 'location'
+    fund_boundaries_info = generate_flows_resources(objecttype, base_url, downloader, folder, dataset,
+                                                    countryiso, countryname, latestyear)
     plans = plans_by_country[countryiso]
-    base_funding_url = '%sfts/flow?countryISO3=%s&' % (base_url, countryiso)
     dffundreq, planidcodemapping, incompleteplans = \
-        generate_requirements_funding_resource(base_url, all_plans, plans, base_funding_url, downloader, folder, countryname,
-                                               countryiso, 'countryCode', dataset)
+        generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, countryname,
+                                               countryiso, dataset)
     if dffundreq is None:
         hxl_resource = None
         if len(fund_boundaries_info) == 0:
