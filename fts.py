@@ -541,7 +541,7 @@ def generate_requirements_funding_resource(base_url, all_plans, plans, funding_u
     return dffundreq, planidcodemapping, incompleteplans
 
 
-def generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, all_plans, dataset):
+def generate_requirements_funding_cluster_resource(base_url, downloader, folder, countryname, countryiso, dffundreq, incompleteplans, all_plans, dataset):
     combined = DataFrame()
     for i, row in dffundreq.iterrows():
         planid = row['id']
@@ -740,9 +740,9 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
         else:
             logger.error('We have latest year funding data but no overall funding data for %s' % title)
     else:
-        hxl_resource = generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping,
-                                                                      countryname, countryiso, dffundreq,
-                                                                      incompleteplans, all_plans, dataset)
+        hxl_resource = generate_requirements_funding_cluster_resource(base_url, downloader, folder, countryname,
+                                                                      countryiso, dffundreq, incompleteplans, all_plans,
+                                                                      dataset)
 
     generate_flows_files(fund_boundaries_info, planidcodemapping)
     return dataset, showcase, hxl_resource
