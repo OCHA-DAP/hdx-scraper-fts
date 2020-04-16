@@ -17,7 +17,7 @@ from hdx.data.showcase import Showcase
 from hdx.data.dataset import Dataset
 from hdx.data.resource import Resource
 from hdx.location.country import Country
-from hdx.utilities.dictandlist import dict_of_lists_add
+from hdx.utilities.dictandlist import dict_of_lists_add, dict_of_sets_add
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.text import multiple_replace
 from pandas import DataFrame, concat, to_numeric, Series, json_normalize
@@ -157,6 +157,36 @@ def get_countries(base_url, downloader):
     return download_data('%slocation' % base_url, downloader)
 
 
+def get_plans(base_url, downloader, countries, today, start_year=1998):
+    all_plans = dict()
+    planids_by_country = dict()
+    planids_by_emergency = dict()
+    plans_by_country = dict()
+    plans_by_emergency = dict()
+    for country in countries:
+        countryiso = country['iso3']
+        plans_by_country[countryiso] = list()
+    for year in range(today.year, start_year, -1):
+        data = download_data('%splan/year/%d' % (base_url, year), downloader)
+        for plan in data:
+            plan_id = plan['id']
+            all_plans[str(plan_id)] = plan
+            for emergency in plan['emergencies']:
+                emergency_id = emergency['id']
+                if emergency_id not in planids_by_emergency or plan_id not in planids_by_emergency[emergency_id]:
+                    dict_of_sets_add(planids_by_emergency, emergency_id, plan_id)
+                    dict_of_lists_add(plans_by_emergency, emergency_id, plan)
+            for location in plan['locations']:
+                countryiso = location['iso3']
+                if not countryiso:
+                    continue
+                if countryiso not in planids_by_country or plan_id not in planids_by_country[countryiso]:
+                    dict_of_lists_add(planids_by_country, countryiso, plan_id)
+                    dict_of_lists_add(plans_by_country, countryiso, plan)
+
+    return all_plans, plans_by_emergency, plans_by_country
+
+
 def get_dataset_and_showcase(slugified_name, title, description, today, country_emergency, showcase_url):
     dataset = Dataset({
         'name': slugified_name,
@@ -293,9 +323,8 @@ def generate_flows_files(fund_boundaries_info, planidcodemapping):
         fund_boundary_info[0].to_csv(fund_boundary_info[1], encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
 
-def generate_requirements_funding_resource(requirements_url, funding_url, downloader, folder, name, code, columnname, dataset):
+def generate_requirements_funding_resource(plans, funding_url, downloader, folder, name, code, columnname, dataset):
     planidcodemapping = dict()
-    req_data = download_data(requirements_url, downloader)
     fund_data = download_data(funding_url, downloader)
     data = fund_data['report3']['fundingTotals']['objects']
     if len(data) == 0:
@@ -304,7 +333,7 @@ def generate_requirements_funding_resource(requirements_url, funding_url, downlo
         fund_data = data[0].get('objectsBreakdown')
     columns_to_keep = copy.deepcopy(country_emergency_columns_to_keep)
     columns_to_keep.insert(0, columnname)
-    if len(req_data) == 0:
+    if len(plans) == 0:
         if not fund_data:
             return None, None, None, None
         logger.warning('No requirements data, only funding data available')
@@ -315,7 +344,7 @@ def generate_requirements_funding_resource(requirements_url, funding_url, downlo
         dffundreq = dffund
         incompleteplans = list()
     else:
-        dfreq = json_normalize(req_data)
+        dfreq = json_normalize(plans)
         dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
         if bool(dfreq['years'].apply(lambda x: len(x) != 1).any()) is True:
             logger.error('More than one year listed in a plan for %s!' % name)
@@ -416,13 +445,11 @@ def generate_requirements_funding_file(base_url, downloader, countryiso, dffundr
     hxldffundreq.to_csv(file_to_upload_hxldffundreq, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
 
-def generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, dataset):
+def generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping, countryname, countryiso, dffundreq, incompleteplans, all_plans, dataset):
     def fill_row(planid, row):
-        plan_url = '%splan/id/%s' % (base_url, planid)
-        try:  # Added for Haiti missing plan 237 issue
-            data = download_data(plan_url, downloader)
-        except DownloadError:
-            logger.error('Problem with downloading %s!' % plan_url)
+        data = all_plans.get(planid)
+        if data is None:
+            logger.error('Missing plan id %s!' % planid)
             return False
         error = data.get('message')
         if error:
@@ -617,8 +644,9 @@ def generate_requirements_funding_cluster_resource(base_url, downloader, folder,
     return hxl_resource
 
 
-def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emergencyid, today, notes):
+def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emergency, all_plans, plans_by_emergency, today, notes):
     # https://api.hpc.tools/v1/public/emergency/id/911
+    emergencyid = emergency['emergency_id']
     latestyear = str(today.year)
     emergency_url = '%semergency/id/%d' % (base_url, emergencyid)
     data = download_data(emergency_url, downloader)
@@ -638,7 +666,7 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
     return dataset, showcase
 
 
-def generate_dataset_and_showcase(base_url, downloader, folder, country, today, notes):
+def generate_dataset_and_showcase(base_url, downloader, folder, country, all_plans, plans_by_country, today, notes):
     '''
     api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
     '''
@@ -666,10 +694,10 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today, 
     funding_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, latestyear)
     fund_boundaries_info = generate_flows_resources(funding_url, downloader, folder, dataset, countryiso.lower(),
                                                     countryname, latestyear)
-    requirements_url = '%splan/country/%s' % (base_url, countryiso)
+    plans = plans_by_country[countryiso]
     funding_url = '%sfts/flow?groupby=plan&countryISO3=%s' % (base_url, countryiso)
     dffundreq, planidcodemapping, incompleteplans, file_to_upload_hxldffundreq = \
-        generate_requirements_funding_resource(requirements_url, funding_url, downloader, folder, countryname,
+        generate_requirements_funding_resource(plans, funding_url, downloader, folder, countryname,
                                                countryiso, 'countryCode', dataset)
     if dffundreq is None:
         hxl_resource = None
@@ -681,7 +709,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, today, 
     else:
         hxl_resource = generate_requirements_funding_cluster_resource(base_url, downloader, folder, planidcodemapping,
                                                                       countryname, countryiso, dffundreq,
-                                                                      incompleteplans, dataset)
+                                                                      incompleteplans, all_plans, dataset)
         generate_requirements_funding_file(base_url, downloader, countryiso, dffundreq, file_to_upload_hxldffundreq)
 
     generate_flows_files(fund_boundaries_info, planidcodemapping)

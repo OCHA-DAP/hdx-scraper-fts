@@ -16,7 +16,7 @@ from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import progress_storing_tempdir, get_temp_dir
 
-from fts import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase
+from fts import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase, get_plans
 
 from hdx.facades.simple import facade
 
@@ -35,29 +35,32 @@ def main():
         emergencies = configuration['emergencies']
         today = datetime.now()
 
+        countries = get_countries(base_url, downloader)
+        all_plans, plans_by_emergency, plans_by_country = get_plans(base_url, downloader, countries, today)
+
         logger.info('Number of emergency datasets to upload: %d' % len(emergencies))
-        folder = get_temp_dir('FTS')
-        for emergencyid in emergencies:
-            dataset, showcase = generate_emergency_dataset_and_showcase(base_url, downloader, folder, emergencyid,
-                                                                        today, notes)
+        for info, emergency in progress_storing_tempdir('FTS', emergencies, 'emergency_id', store_batch=True):
+            folder = info['tempdir']
+            dataset, showcase = generate_emergency_dataset_and_showcase(base_url, downloader, folder, emergency,
+                                                                        all_plans, plans_by_emergency, today, notes)
             if dataset is not None:
                 dataset.update_from_yaml()
-                dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False, updated_by_script='HDX Scraper: FTS')
+                dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False, updated_by_script='HDX Scraper: FTS', batch=info['batch'])
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
-        countries = get_countries(base_url, downloader)
         logger.info('Number of country datasets to upload: %d' % len(countries))
-        for folder, country in progress_storing_tempdir('FTS', countries, 'iso3'):
+        for info, country in progress_storing_tempdir('FTS', countries, 'iso3', store_batch=True):
+            folder = info['tempdir']
             dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, country,
-                                                                            today, notes)
+                                                                            all_plans, plans_by_country, today, notes)
             if dataset is not None:
                 dataset.update_from_yaml()
                 if hxl_resource is None:
                     dataset.preview_off()
                 else:
                     dataset.set_quickchart_resource(hxl_resource)
-                dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False, updated_by_script='HDX Scraper: FTS')
+                dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False, updated_by_script='HDX Scraper: FTS', batch=info['batch'])
                 resources = dataset.get_resources()
                 resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
                 dataset.reorder_resources(resource_ids, hxl_update=False)

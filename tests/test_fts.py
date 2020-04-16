@@ -17,7 +17,7 @@ from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.path import temp_dir
 
-from fts import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase
+from fts import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase, get_plans
 
 
 class TestFTS:
@@ -169,13 +169,21 @@ class TestFTS:
 
     alblocation_objects = [{'name': 'Not specified', 'objectType': 'Location', 'revisedRequirements': 212686531, 'origRequirements': 236654801}]
 
-    plan645 = {'id': 645, 'planVersion': {'planId': 645, 'name': 'Afghanistan 2018', 'code': 'HAFG18', 'startDate': '2018-01-01T00:00:00.000Z', 'endDate': '2018-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [], 'years': [{'id': 39, 'year': '2018'}], 'locations': [{'id': 1, 'name': 'Afghanistan', 'iso3': 'AFG', 'adminlevel': 0}], 'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}], 'revisedRequirements': 598923998, 'meta': {'language': 'en'}}
+    plan645 = {'id': 645, 'revisionState': None, 'planVersion': {'planId': 645, 'name': 'Afghanistan 2018', 'code': 'HAFG18', 'startDate': '2018-01-01T00:00:00.000Z', 'endDate': '2018-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [], 'years': [{'id': 39, 'year': '2018'}], 'locations': [{'id': 1, 'name': 'Afghanistan', 'iso3': 'AFG', 'adminlevel': 0}], 'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}], 'revisedRequirements': 598923998, 'meta': {'language': 'en'}}
 
-    plan544 = {'id': 544, 'planVersion': {'planId': 544, 'name': 'Afghanistan 2017', 'code': 'HAFG17', 'startDate': '2017-01-01T00:00:00.000Z', 'endDate': '2017-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [], 'years': [{'id': 38, 'year': '2017'}], 'locations': [{'id': 1, 'name': 'Afghanistan', 'iso3': 'AFG', 'adminlevel': 0}, {'id': 25799575, 'name': 'Capital', 'iso3': None, 'adminlevel': 1}, {'id': 25799574, 'name': 'Central Highland', 'iso3': None, 'adminlevel': 1}], 'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}], 'revisedRequirements': 409413812, 'meta': {'language': 'en'}}
+    plan544 = {'id': 544, 'revisionState': 'none', 'planVersion': {'planId': 544, 'name': 'Afghanistan 2017', 'code': 'HAFG17', 'startDate': '2017-01-01T00:00:00.000Z', 'endDate': '2017-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [], 'years': [{'id': 38, 'year': '2017'}], 'locations': [{'id': 1, 'name': 'Afghanistan', 'iso3': 'AFG', 'adminlevel': 0}, {'id': 25799575, 'name': 'Capital', 'iso3': None, 'adminlevel': 1}, {'id': 25799574, 'name': 'Central Highland', 'iso3': None, 'adminlevel': 1}], 'categories': [{'id': 4, 'name': 'Humanitarian response plan', 'group': 'planType', 'code': None}], 'revisedRequirements': 409413812, 'meta': {'language': 'en'}}
 
-    plan90 = {'id': 90, 'planVersion': {'planId': 90, 'name': 'Southeastern Europe 2002', 'code': 'CXSEUR02', 'startDate': '2002-01-01T00:00:00.000Z', 'endDate': '2002-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [{'id': 10, 'name': 'Southeastern Europe 2000 - 2002'}], 'years': [{'id': 23, 'year': '2002'}], 'locations': [], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 236654801, 'revisedRequirements': 212686531, 'meta': {'language': 'en'}}
+    plan90 = {'id': 90, 'revisionState': None, 'planVersion': {'planId': 90, 'name': 'Southeastern Europe 2002', 'code': 'CXSEUR02', 'startDate': '2002-01-01T00:00:00.000Z', 'endDate': '2002-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [{'id': 10, 'name': 'Southeastern Europe 2000 - 2002'}], 'years': [{'id': 23, 'year': '2002'}], 'locations': [], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 236654801, 'revisedRequirements': 212686531, 'meta': {'language': 'en'}}
 
-    plan222 = {'id': 222, 'planVersion': {'planId': 222, 'name': 'West Africa 2007', 'code': 'CXWAF07', 'startDate': '2007-01-01T00:00:00.000Z', 'endDate': '2007-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [], 'years': [{'id': 28, 'year': '2007'}], 'locations': [{'id': 55, 'iso3': 'CIV', 'name': "Côte d'Ivoire", 'adminLevel': 0}, {'id': 126, 'iso3': 'LBR', 'name': 'Liberia', 'adminLevel': 0}, {'id': 137, 'iso3': 'MLI', 'name': 'Mali', 'adminLevel': 0}, {'id': 93, 'iso3': 'GIN', 'name': 'Guinea', 'adminLevel': 0}, {'id': 84, 'iso3': 'GHA', 'name': 'Ghana', 'adminLevel': 0}, {'id': 162, 'iso3': 'NER', 'name': 'Niger', 'adminLevel': 0}, {'id': 197, 'iso3': 'SEN', 'name': 'Senegal', 'adminLevel': 0}, {'id': 224, 'iso3': 'TGO', 'name': 'Togo', 'adminLevel': 0}, {'id': 36, 'iso3': 'BFA', 'name': 'Burkina Faso', 'adminLevel': 0}, {'id': 141, 'iso3': 'MRT', 'name': 'Mauritania', 'adminLevel': 0}, {'id': 200, 'iso3': 'SLE', 'name': 'Sierra Leone', 'adminLevel': 0}, {'id': 24, 'iso3': 'BEN', 'name': 'Benin', 'adminLevel': 0}, {'id': 41, 'iso3': 'CPV', 'name': 'Cape Verde', 'adminLevel': 0}, {'id': 94, 'iso3': 'GNB', 'name': 'Guinea-Bissau', 'adminLevel': 0}], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 309081675, 'revisedRequirements': 361026890, 'meta': {'language': 'en'}}
+    plan222 = {'id': 222, 'revisionState': None, 'planVersion': {'planId': 222, 'name': 'West Africa 2007', 'code': 'CXWAF07', 'startDate': '2007-01-01T00:00:00.000Z', 'endDate': '2007-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [], 'years': [{'id': 28, 'year': '2007'}], 'locations': [{'id': 55, 'iso3': 'CIV', 'name': "Côte d'Ivoire", 'adminLevel': 0}, {'id': 126, 'iso3': 'LBR', 'name': 'Liberia', 'adminLevel': 0}, {'id': 137, 'iso3': 'MLI', 'name': 'Mali', 'adminLevel': 0}, {'id': 93, 'iso3': 'GIN', 'name': 'Guinea', 'adminLevel': 0}, {'id': 84, 'iso3': 'GHA', 'name': 'Ghana', 'adminLevel': 0}, {'id': 162, 'iso3': 'NER', 'name': 'Niger', 'adminLevel': 0}, {'id': 197, 'iso3': 'SEN', 'name': 'Senegal', 'adminLevel': 0}, {'id': 224, 'iso3': 'TGO', 'name': 'Togo', 'adminLevel': 0}, {'id': 36, 'iso3': 'BFA', 'name': 'Burkina Faso', 'adminLevel': 0}, {'id': 141, 'iso3': 'MRT', 'name': 'Mauritania', 'adminLevel': 0}, {'id': 200, 'iso3': 'SLE', 'name': 'Sierra Leone', 'adminLevel': 0}, {'id': 24, 'iso3': 'BEN', 'name': 'Benin', 'adminLevel': 0}, {'id': 41, 'iso3': 'CPV', 'name': 'Cape Verde', 'adminLevel': 0}, {'id': 94, 'iso3': 'GNB', 'name': 'Guinea-Bissau', 'adminLevel': 0}], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 309081675, 'revisedRequirements': 361026890, 'meta': {'language': 'en'}}
+
+    all_plans = {'90': plan90, '222': plan222, '544': plan544, '645': plan645}
+
+    plans_by_emergency = {10: [plan90]}
+
+    plans_by_country = {'AFG': [plan544, plan645], 'ALB': list()}
+    for countryiso in ['CIV', 'LBR', 'MLI', 'GIN', 'GHA', 'NER', 'SEN', 'TGO', 'BFA', 'MRT', 'SLE', 'BEN', 'CPV', 'GNB']:
+        plans_by_country[countryiso] = [plan222]
 
     @pytest.fixture(scope='function')
     def configuration(self):
@@ -198,7 +206,11 @@ class TestFTS:
             @staticmethod
             def download(url):
                 response = Response()
-                if 'emergency/id/911' in url:
+                if 'plan/year/2020' in url:
+                    def fn():
+                        return {'data': [TestFTS.plan90, TestFTS.plan222, TestFTS.plan544, TestFTS.plan645], 'status': 'ok'}
+                    response.json = fn
+                elif 'emergency/id/911' in url:
                     def fn():
                         return {'data': TestFTS.emergency, 'status': 'ok'}
                     response.json = fn
@@ -252,22 +264,6 @@ class TestFTS:
                 elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2018' in url:
                     def fn():
                         return {'data': {'incoming': {'fundingTotal': 86754}, 'flows': TestFTS.albflows}, 'meta': dict(), 'status': 'ok'}
-                    response.json = fn
-                elif 'plan/country/AFG' in url:
-                    def fn():
-                        if 'noreq' in url:
-                            data = []
-                        else:
-                            data = TestFTS.afgrequirements
-                        return {'data': data, 'status': 'ok'}
-                    response.json = fn
-                elif 'plan/country/CPV' in url:
-                    def fn():
-                        return {'data': TestFTS.cpvrequirements, 'status': 'ok'}
-                    response.json = fn
-                elif 'plan/country/ALB' in url:
-                    def fn():
-                        return {'data': [], 'status': 'ok'}
                     response.json = fn
                 elif 'fts/flow?countryISO3=AFG&groupby=year' in url:
                     def fn():
@@ -353,21 +349,6 @@ class TestFTS:
                                          'requirements': {'objects': reqdata}}, 'status': 'ok'}
 
                     response.json = fn
-                elif 'plan/id/' in url:
-                    if '645' in url:
-                        plandata = TestFTS.plan645
-                    elif '544' in url:
-                        plandata = TestFTS.plan544
-                    elif '90' in url:
-                        plandata = TestFTS.plan90
-                    elif '222' in url:
-                        plandata = TestFTS.plan222
-                    else:
-                        plandata = None
-
-                    def fn():
-                        return {'data': plandata, 'status': 'ok'}
-                    response.json = fn
                 return response
         return Download()
 
@@ -375,12 +356,20 @@ class TestFTS:
         countries = get_countries('http://afgsite/', downloader)
         assert countries == TestFTS.countries
 
+    def test_get_plans(self, downloader):
+        today = datetime.strptime('14042020', '%d%m%Y').date()
+        all_plans, plans_by_emergency, plans_by_country = get_plans('http://lala/', downloader, TestFTS.countries, today, start_year=2019)
+        assert all_plans == TestFTS.all_plans
+        assert plans_by_emergency == TestFTS.plans_by_emergency
+        assert plans_by_country == TestFTS.plans_by_country
+
     def test_generate_emergency_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('fts') as folder:
             notes = configuration['notes']
             today = datetime.strptime('14042020', '%d%m%Y').date()
-            dataset, showcase = generate_emergency_dataset_and_showcase('http://cpvsite/', downloader, folder, 911,
-                                                                        today, notes)
+            emergency = {'emergency_id': 911}
+            dataset, showcase = generate_emergency_dataset_and_showcase('http://lala/', downloader, folder, emergency,
+                                                                        None, None, today, notes)
             assert dataset == {'name': 'fts-funding-data-for-coronavirus-disease-outbreak-covid-19',
                                'title': 'Coronavirus disease Outbreak - COVID -19 Funding Data', 'notes': "FTS publishes data on humanitarian funding flows as reported by donors and recipient organizations. It presents all humanitarian funding to a country and funding that is specifically reported or that can be specifically mapped against funding requirements stated in humanitarian response plans. The data comes from OCHA's [Financial Tracking Service](https://fts.unocha.org/), is encoded as utf-8 and the second row of the CSV contains [HXL](http://hxlstandard.org) tags.  \n  \nGlide Id=EP-2020-000012-CHN, Date=2020-01-30T16:23:01.558Z",
                                'maintainer': '196196be-6037-4488-8b71-d786adf4c081', 'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e',
@@ -407,19 +396,19 @@ class TestFTS:
             notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
             country = {'name': 'World'}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today, notes)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, None, None, today, notes)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
 
             country = {'id': 'abc', 'iso3': None, 'name': 'ABC'}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today, notes)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, None, None, today, notes)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
 
             country = {'id': 'abc', 'iso3': 'ABC', 'name': 'ABC'}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, today, notes)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://abcsite/', downloader, folder, country, None, None, today, notes)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
@@ -465,28 +454,28 @@ class TestFTS:
 
         with temp_dir('fts') as folder:
             today = datetime.strptime('01062017', '%d%m%Y').date()
-            test = 'nofundnoreq'
             country = {'iso3': 'AFG', 'name': 'Afghanistan', 'id': 1}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today, notes)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, country, TestFTS.all_plans, TestFTS.plans_by_country, today, notes)
+            compare_afg(dataset, showcase, hxl_resource)
+            test = 'noreq'
+            plans_by_country = {'AFG': list()}
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, TestFTS.all_plans, plans_by_country, today, notes)
+            compare_afg(dataset, showcase, hxl_resource, expected_hxl_resource=None, prefix=test)
+            test = 'nofund'
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, TestFTS.all_plans, TestFTS.plans_by_country, today, notes)
+            compare_afg(dataset, showcase, hxl_resource, expected_resources=afgresources[1:], expected_hxl_resource=None, prefix=test)
+            test = 'nofundnoreq'
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, TestFTS.all_plans, plans_by_country, today, notes)
             assert dataset is None
             assert showcase is None
             assert hxl_resource is None
-            test = 'nofund'
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today, notes)
-            compare_afg(dataset, showcase, hxl_resource, expected_resources=afgresources[1:], expected_hxl_resource=None, prefix=test)
-            test = 'noreq'
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, today, notes)
-            compare_afg(dataset, showcase, hxl_resource, expected_hxl_resource=None, prefix=test)
-
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, country, today, notes)
-            compare_afg(dataset, showcase, hxl_resource)
 
     def test_generate_cpv_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('fts') as folder:
             notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
             country = {'iso3': 'CPV', 'name': 'Cape Verde', 'id': 1}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, country, today, notes)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, country, TestFTS.all_plans, TestFTS.plans_by_country, today, notes)
             assert dataset == {'groups': [{'name': 'cpv'}], 'name': 'fts-requirements-and-funding-data-for-cape-verde',
                                'title': 'Cape Verde - Requirements and Funding Data',
                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
@@ -519,7 +508,7 @@ class TestFTS:
             notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
             country = {'iso3': 'ALB', 'name': 'Albania', 'id': 1}
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://albsite/', downloader, folder, country, today, notes)
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://albsite/', downloader, folder, country, TestFTS.all_plans, TestFTS.plans_by_country, today, notes)
             assert dataset == {'groups': [{'name': 'alb'}], 'name': 'fts-requirements-and-funding-data-for-albania',
                                'title': 'Albania - Requirements and Funding Data',
                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
