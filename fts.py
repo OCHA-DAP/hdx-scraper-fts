@@ -323,8 +323,9 @@ def generate_flows_files(fund_boundaries_info, planidcodemapping):
         fund_boundary_info[0].to_csv(fund_boundary_info[1], encoding='utf-8', index=False, date_format='%Y-%m-%d')
 
 
-def generate_requirements_funding_dataframe(plans, funding_url, downloader, name, code, columnname):
+def generate_requirements_funding(plans, base_funding_url, downloader, name, code, columnname):
     planidcodemapping = dict()
+    funding_url = '%sgroupby=plan' % base_funding_url
     fund_data = download_data(funding_url, downloader)
     data = fund_data['report3']['fundingTotals']['objects']
     if len(data) == 0:
@@ -516,8 +517,8 @@ def add_not_specified(base_url, downloader, countryiso, dffundreq):
     return dffundreq
 
 
-def generate_requirements_funding_resource(base_url, all_plans, plans, funding_url, downloader, folder, name, code, columnname, dataset):
-    dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding_dataframe(plans, funding_url, downloader, name, code, columnname)
+def generate_requirements_funding_resource(base_url, all_plans, plans, base_funding_url, downloader, folder, name, code, columnname, dataset):
+    dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding(plans, base_funding_url, downloader, name, code, columnname)
     if dffundreq is None:
         return None, None, None
 
@@ -737,9 +738,9 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
     fund_boundaries_info = generate_flows_resources(funding_url, downloader, folder, dataset, countryiso.lower(),
                                                     countryname, latestyear)
     plans = plans_by_country[countryiso]
-    funding_url = '%sfts/flow?groupby=plan&countryISO3=%s' % (base_url, countryiso)
+    base_funding_url = '%sfts/flow?countryISO3=%s&' % (base_url, countryiso)
     dffundreq, planidcodemapping, incompleteplans = \
-        generate_requirements_funding_resource(base_url, all_plans, plans, funding_url, downloader, folder, countryname,
+        generate_requirements_funding_resource(base_url, all_plans, plans, base_funding_url, downloader, folder, countryname,
                                                countryiso, 'countryCode', dataset)
     if dffundreq is None:
         hxl_resource = None

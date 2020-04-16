@@ -280,7 +280,7 @@ class TestFTS:
                         return {'data': {'report3': {
                                 'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByYear}]}}}, 'status': 'ok'}
                     response.json = fn
-                elif 'fts/flow?groupby=plan&countryISO3=AFG' in url:
+                elif 'fts/flow?countryISO3=AFG&groupby=plan' in url:
                     def fn():
                         if 'fundnoid' in url:
                             data = TestFTS.objectsBreakdownByPlannoid
@@ -290,12 +290,12 @@ class TestFTS:
                             data = TestFTS.afgobjectsBreakdownByPlan
                         return {'data': {'report3': {'fundingTotals': {'objects': [{'objectsBreakdown': data}]}}}, 'status': 'ok'}
                     response.json = fn
-                elif 'fts/flow?groupby=plan&countryISO3=CPV' in url:
+                elif 'fts/flow?countryISO3=CPV&groupby=plan' in url:
                     def fn():
                         return {'data': {'report3': {
                                 'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.cpvobjectsBreakdownByPlan}]}}}, 'status': 'ok'}
                     response.json = fn
-                elif 'fts/flow?groupby=plan&countryISO3=ALB' in url:
+                elif 'fts/flow?countryISO3=ALB&groupby=plan' in url:
                     def fn():
                         return {'data': {'report3': {
                             'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByPlan}]}}}, 'status': 'ok'}
