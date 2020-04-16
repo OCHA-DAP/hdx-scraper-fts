@@ -483,8 +483,8 @@ def row_correction_requirements_funding(base_url, downloader, dffundreq, all_pla
     return dffundreq
 
 
-def add_not_specified(base_url, downloader, countryiso, dffundreq):
-    years_url = '%sfts/flow?countryISO3=%s&groupby=year' % (base_url, countryiso)
+def add_not_specified(base_funding_url, downloader, countryiso, dffundreq):
+    years_url = '%sgroupby=year' % base_funding_url
     ## get totals from year call and subtract all plans in that year
     # 691121294 - 611797140 (2018 SDN)
     data = download_data(years_url, downloader)
@@ -494,7 +494,7 @@ def add_not_specified(base_url, downloader, countryiso, dffundreq):
         for year_data in data[0].get('objectsBreakdown'):
             year = year_data.get('name')
             if year:
-                year_url = '%sfts/flow?countryISO3=%s&year=%s' % (base_url, countryiso, year)
+                year_url = '%syear=%s' % (base_funding_url, year)
                 data = download_data(year_url, downloader)
                 if len(data['flows']) == 0:
                     continue
@@ -524,7 +524,7 @@ def generate_requirements_funding_resource(base_url, all_plans, plans, base_fund
 
     dffundreq = row_correction_requirements_funding(base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, code)
 
-    dffundreq = add_not_specified(base_url, downloader, code, dffundreq)
+    dffundreq = add_not_specified(base_funding_url, downloader, code, dffundreq)
 
     hxldffundreq = hxlate(dffundreq, hxl_names)
     filename = 'fts_requirements_funding_%s.csv' % code.lower()
