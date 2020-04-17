@@ -6,8 +6,7 @@ from hdx.data.resource import Resource
 from hdx.location.country import Country
 from hdx.utilities.dictandlist import dict_of_lists_add
 from hdx.utilities.text import multiple_replace
-from pandas import DataFrame
-from pandas.io.json import json_normalize
+from pandas import DataFrame, json_normalize
 
 from fts.helpers import urllookup, download, country_all_columns_to_keep, rename_columns, funding_hxl_names
 from fts.pandas_helpers import drop_columns_except, hxlate

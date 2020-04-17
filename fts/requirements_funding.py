@@ -5,8 +5,7 @@ from os.path import join
 from hdx.data.resource import Resource
 from hdx.location.country import Country
 from hdx.utilities.downloader import DownloadError
-from pandas import Series, to_numeric, DataFrame
-from pandas.io.json import json_normalize
+from pandas import DataFrame, json_normalize, to_numeric, Series
 
 from fts.helpers import download_data, country_emergency_columns_to_keep, rename_columns, FTSException, urllookup, \
     columnlookup, hxl_names
@@ -93,6 +92,7 @@ def generate_requirements_funding(plans, base_funding_url, downloader, name, cod
 
 
 def row_correction_requirements_funding(objecttype, base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, code):
+    planids = list()
     for i, row in dffundreq.iterrows():
         planid = row['id']
         if planid == '' or planid == 'undefined':
@@ -100,88 +100,90 @@ def row_correction_requirements_funding(objecttype, base_url, downloader, dffund
             if planname == 'Not specified' or planname == '':
                 continue
             raise FTSException('Plan Name: %s is invalid!' % planname)
-        else:
-            if planid in incompleteplans:
-                logger.warning('Not reading %s info for plan id %s which is incomplete!' % (objecttype, planid))
-                continue
-            funding_url = '%sfts/flow?planid=%s&groupby=%s' % (base_url, planid, objecttype)
+        if planid in incompleteplans:
+            logger.warning('Not reading %s info for plan id %s which is incomplete!' % (objecttype, planid))
+            continue
+
+        data = all_plans.get(planid)
+        if data is None:
+            logger.error('Missing plan id %s!' % planid)
+            continue
+        error = data.get('message')
+        if error:
+            logger.error(error)
+            continue
+        planversioncode = data['planVersion']['code']
+        planidcodemapping[planid] = planversioncode
+        dffundreq.at[i, 'code'] = planversioncode
+        dffundreq.at[i, 'startDate'] = str(data['planVersion']['startDate'])[:10]
+        dffundreq.at[i, 'endDate'] = str(data['planVersion']['endDate'])[:10]
+        years = data['years']
+        if len(years) > 1:
+            logger.error('More than one year listed in plan %s for %s!' % (planid, code))
+        dffundreq.at[i, 'year'] = years[0]['year']
+
+        funding_url = '%sfts/flow?planid=%s&groupby=%s' % (base_url, planid, objecttype)
+        try:
+            data = download_data(funding_url, downloader)
+            fund_objects = data['report3']['fundingTotals']['objects']
+            totalfunding = row['funding']
             try:
-                data = download_data(funding_url, downloader)
-                fund_objects = data['report3']['fundingTotals']['objects']
-                totalfunding = row['funding']
-                try:
-                    origfunding = int(totalfunding)
-                except ValueError:
-                    origfunding = None
-                totalrequirements = row['requirements']
-                try:
-                    origrequirements = int(totalrequirements)
-                except ValueError:
-                    origrequirements = None
-                if len(fund_objects) != 0:
-                    for object in fund_objects[0]['objectsBreakdown']:
-                        if objecttype == 'location':
-                            if Country.get_iso3_country_code_fuzzy(object['name'])[0] != code:
-                                continue
-                        else:
-                            if object['code'] != code:
-                                continue
-                        totalfunding = object['totalFunding']
-                        if isinstance(totalfunding, int):
-                            if origfunding != totalfunding:
-                                #logger.warning('Overriding funding')
-                                dffundreq.at[i, 'funding'] = totalfunding
-                        break
-                req_objects = data['requirements']['objects']
-                if req_objects:
-                    for object in req_objects:
-                        if 'name' not in object:
-                            logger.warning('%s requirements object does not have a %s name!' % (funding_url, objecttype))
+                origfunding = int(totalfunding)
+            except ValueError:
+                origfunding = None
+            totalrequirements = row['requirements']
+            try:
+                origrequirements = int(totalrequirements)
+            except ValueError:
+                origrequirements = None
+            if len(fund_objects) != 0:
+                for object in fund_objects[0]['objectsBreakdown']:
+                    if objecttype == 'location':
+                        if Country.get_iso3_country_code_fuzzy(object['name'])[0] != code:
                             continue
-                        if objecttype == 'location':
-                            if Country.get_iso3_country_code_fuzzy(object['name'])[0] != code:
-                                continue
-                        else:
-                            if object['code'] != code:
-                                continue
-                        totalrequirements = object['revisedRequirements']
-                        if isinstance(totalrequirements, int):
-                            if origrequirements != totalrequirements:
-                                #logger.warning('Overriding requirements for %s' % planid)
-                                dffundreq.at[i, 'requirements'] = totalrequirements
-                        break
-                if totalrequirements:
-                    if totalfunding == '':
+                    else:
+                        if object['code'] != code:
+                            continue
+                    totalfunding = object['totalFunding']
+                    if isinstance(totalfunding, int):
+                        if origfunding != totalfunding:
+                            #logger.warning('Overriding funding')
+                            dffundreq.at[i, 'funding'] = totalfunding
+                    break
+            req_objects = data['requirements']['objects']
+            if req_objects:
+                for object in req_objects:
+                    if 'name' not in object:
+                        logger.warning('%s requirements object does not have a %s name!' % (funding_url, objecttype))
+                        continue
+                    if objecttype == 'location':
+                        if Country.get_iso3_country_code_fuzzy(object['name'])[0] != code:
+                            continue
+                    else:
+                        if object['code'] != code:
+                            continue
+                    totalrequirements = object['revisedRequirements']
+                    if isinstance(totalrequirements, int):
+                        if origrequirements != totalrequirements:
+                            #logger.warning('Overriding requirements for %s' % planid)
+                            dffundreq.at[i, 'requirements'] = totalrequirements
+                    break
+            if totalrequirements:
+                if totalfunding == '':
+                    dffundreq.at[i, 'percentFunded'] = ''
+                else:
+                    totalrequirements_i = int(totalrequirements)
+                    if totalrequirements_i == 0:
                         dffundreq.at[i, 'percentFunded'] = ''
                     else:
-                        totalrequirements_i = int(totalrequirements)
-                        if totalrequirements_i == 0:
-                            dffundreq.at[i, 'percentFunded'] = ''
-                        else:
-                            dffundreq.at[i, 'percentFunded'] = str(int((int(totalfunding) / totalrequirements_i * 100) + 0.5))
-                else:
-                    dffundreq.at[i, 'percentFunded'] = ''
-            except DownloadError:
-                logger.error('Problem with downloading %s!' % funding_url)
+                        dffundreq.at[i, 'percentFunded'] = str(int((int(totalfunding) / totalrequirements_i * 100) + 0.5))
+            else:
+                dffundreq.at[i, 'percentFunded'] = ''
+        except DownloadError:
+            logger.error('Problem with downloading %s!' % funding_url)
+        planids.append(planid)
 
-            data = all_plans.get(planid)
-            if data is None:
-                logger.error('Missing plan id %s!' % planid)
-                continue
-            error = data.get('message')
-            if error:
-                logger.error(error)
-                continue
-            planversioncode = data['planVersion']['code']
-            planidcodemapping[planid] = planversioncode
-            dffundreq.at[i, 'code'] = planversioncode
-            dffundreq.at[i, 'startDate'] = str(data['planVersion']['startDate'])[:10]
-            dffundreq.at[i, 'endDate'] = str(data['planVersion']['endDate'])[:10]
-            years = data['years']
-            if len(years) > 1:
-                logger.error('More than one year listed in plan %s for %s!' % (planid, code))
-            dffundreq.at[i, 'year'] = years[0]['year']
-    return dffundreq
+    return dffundreq, planids
 
 
 def add_not_specified(base_funding_url, downloader, code, columnname, dffundreq):
@@ -223,8 +225,8 @@ def generate_requirements_funding_resource(objecttype, base_url, all_plans, plan
     columnname = columnlookup[objecttype]
     dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding(plans, base_funding_url, downloader, name, code, columnname)
     if dffundreq is None:
-        return None, None, None
-    dffundreq = row_correction_requirements_funding(objecttype, base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, code)
+        return None, None, None, None
+    dffundreq, planids = row_correction_requirements_funding(objecttype, base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, code)
 
     dffundreq = add_not_specified(base_funding_url, downloader, code, columnname, dffundreq)
 
@@ -241,4 +243,4 @@ def generate_requirements_funding_resource(objecttype, base_url, all_plans, plan
     resource = Resource(resource_data)
     resource.set_file_to_upload(file_to_upload_hxldffundreq)
     dataset.add_update_resource(resource)
-    return dffundreq, planidcodemapping, incompleteplans
+    return dffundreq, planids, planidcodemapping, incompleteplans

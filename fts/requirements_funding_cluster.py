@@ -3,52 +3,33 @@ from os.path import join
 
 from hdx.data.resource import Resource
 from hdx.utilities.downloader import DownloadError
-from pandas import DataFrame, to_numeric
-from pandas.io.json import json_normalize
+from pandas import DataFrame, json_normalize, to_numeric
 
-from fts.helpers import FTSException, download_data, plan_columns_to_keep, cluster_columns_to_keep, rename_columns, \
-    hxl_names
+from fts.helpers import download_data, plan_columns_to_keep, cluster_columns_to_keep, rename_columns, hxl_names
 from fts.pandas_helpers import drop_columns_except, remove_nonenan, remove_fractions, hxlate
 
 logger = logging.getLogger(__name__)
 
 
-def generate_requirements_funding_cluster(base_url, downloader, countryiso, dffundreq, incompleteplans, all_plans):
+def generate_requirements_funding_cluster(base_url, downloader, countryiso, planids, dffundreq, all_plans):
     combined = DataFrame()
-    for i, row in dffundreq.iterrows(): # change this
-        planid = row['id']
-        if planid == '' or planid == 'undefined':
-            planname = row['name']
-            if planname == 'Not specified' or planname == '':
-                continue
-            raise FTSException('Plan Name: %s is invalid!' % planname)
+    for planid in planids:
+        data = all_plans.get(planid)
+        locations = data['locations']
+        # when the time comes to do cluster breakdowns by emergency, the test here would be for len(emergencies) I think
+        if len(locations) == 0:
+            logger.warning('Plan %s spans multiple locations - ignoring in cluster breakdown!' % planid)
+            continue
         else:
-            if planid in incompleteplans:
-                logger.warning('Not reading cluster info for plan id %s which is incomplete!' % planid)
-                continue
-            data = all_plans.get(planid)
-            if data is None:
-                logger.error('Missing plan id %s!' % planid)
-                continue
-            error = data.get('message')
-            if error:
-                logger.error(error)
-                continue
-            locations = data['locations']
-            # when the time comes to do cluster breakdowns by emergency, the test here would be for len(emergencies) I think
-            if len(locations) == 0:
+            found = False
+            for location in data['locations']:
+                adminlevel = location.get('adminlevel', location.get('adminLevel'))
+                if adminlevel == 0 and location['iso3'] != countryiso:
+                    found = True
+                    break
+            if found:
                 logger.warning('Plan %s spans multiple locations - ignoring in cluster breakdown!' % planid)
                 continue
-            else:
-                found = False
-                for location in data['locations']:
-                    adminlevel = location.get('adminlevel', location.get('adminLevel'))
-                    if adminlevel == 0 and location['iso3'] != countryiso:
-                        found = True
-                        break
-                if found:
-                    logger.warning('Plan %s spans multiple locations - ignoring in cluster breakdown!' % planid)
-                    continue
 
         funding_url = '%sfts/flow?planid=%s&groupby=cluster' % (base_url, planid)
         try:
@@ -135,10 +116,10 @@ def generate_requirements_funding_cluster(base_url, downloader, countryiso, dffu
     return df, hxl_resource
 
 
-def generate_requirements_funding_cluster_resource(base_url, downloader, folder, countryname, countryiso, dffundreq,
-                                                   incompleteplans, all_plans, dataset):
+def generate_requirements_funding_cluster_resource(base_url, downloader, folder, countryname, countryiso, planids,
+                                                   dffundreq, all_plans, dataset):
     filename = 'fts_requirements_funding_cluster_%s.csv' % countryiso.lower()
-    df, hxl_resource = generate_requirements_funding_cluster(base_url, downloader, countryiso, dffundreq, incompleteplans, all_plans)
+    df, hxl_resource = generate_requirements_funding_cluster(base_url, downloader, countryiso, planids, dffundreq, all_plans)
     if df is None:
         return None
 
