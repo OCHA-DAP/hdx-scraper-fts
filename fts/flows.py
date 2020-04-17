@@ -15,7 +15,7 @@ from fts.pandas_helpers import drop_columns_except, hxlate
 logger = logging.getLogger(__name__)
 
 
-def generate_flows_resources(objecttype, base_url, downloader, folder, dataset, code, country_emergency, latestyear):
+def generate_flows_resources(objecttype, base_url, downloader, folder, dataset, code, name, latestyear):
     fund_boundaries_info = list()
     fund_data = list()
     base_funding_url = '%sfts/flow?%s=%s&' % (base_url, urllookup[objecttype], code)
@@ -27,7 +27,7 @@ def generate_flows_resources(objecttype, base_url, downloader, folder, dataset, 
 
     dffunddet = json_normalize(fund_data)
 
-    def add_objects(name):
+    def add_objects(objectName):
         def flatten_objects(x):
             outputdicts = OrderedDict()
             typedicts = OrderedDict()
@@ -44,7 +44,7 @@ def generate_flows_resources(objecttype, base_url, downloader, folder, dataset, 
                             dict_of_lists_add(typedict, key, value)
                 typedicts[infodicttype] = typedict
             for objectType in typedicts:
-                prefix = '%s%s' % (name, objectType)
+                prefix = '%s%s' % (objectName, objectType)
                 for key in typedicts[objectType]:
                     keyname = '%s%s' % (prefix, key.capitalize())
                     values = typedicts[objectType][key]
@@ -71,13 +71,13 @@ def generate_flows_resources(objecttype, base_url, downloader, folder, dataset, 
                         if len(values) > 1:
                             outputstr = 'Multiple'
                             logger.error('Multiple used instead of %s for %s in %s' % (values, keyname,
-                                                                                       country_emergency))
+                                                                                       name))
                         else:
                             outputstr = values[0]
                     outputdicts[keyname] = outputstr
             return outputdicts
 
-        typedicts = dffunddet['%sObjects' % name].apply(flatten_objects)
+        typedicts = dffunddet['%sObjects' % objectName].apply(flatten_objects)
         return dffunddet.join(DataFrame(list(typedicts)))
 
     if 'sourceObjects' in dffunddet:
@@ -114,7 +114,7 @@ def generate_flows_resources(objecttype, base_url, downloader, folder, dataset, 
 
             resource_data = {
                 'name': filename,
-                'description': 'FTS %s Funding Data for %s for %s' % (boundary.capitalize(), country_emergency, latestyear),
+                'description': 'FTS %s Funding Data for %s for %s' % (boundary.capitalize(), name, latestyear),
                 'format': 'csv'
             }
             resource = Resource(resource_data)
