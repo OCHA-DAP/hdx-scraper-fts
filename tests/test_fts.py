@@ -17,7 +17,7 @@ from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.path import temp_dir
 
-from fts import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase, get_plans
+from fts.fts import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase, get_plans
 
 
 class TestFTS:
