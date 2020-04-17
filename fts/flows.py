@@ -14,7 +14,7 @@ from fts.pandas_helpers import drop_columns_except, hxlate
 logger = logging.getLogger(__name__)
 
 
-def generate_flows_resources(objecttype, base_url, downloader, folder, dataset, code, name, latestyear):
+def generate_flows_resources(objecttype, base_url, downloader, folder, dataset, code, name, latestyear, filecode):
     fund_boundaries_info = list()
     fund_data = list()
     base_funding_url = '%sfts/flow?%s=%s&' % (base_url, urllookup[objecttype], code)
@@ -108,7 +108,7 @@ def generate_flows_resources(objecttype, base_url, downloader, folder, dataset, 
         for boundary, dffundbound in dffunddet.groupby(['boundary']):
             # add HXL tags
             dffundbound = hxlate(dffundbound, funding_hxl_names)
-            filename = 'fts_%s_funding_%s.csv' % (boundary, code.lower())
+            filename = 'fts_%s_funding_%s.csv' % (boundary, filecode.lower())
             fund_boundaries_info.append((dffundbound, join(folder, filename)))
 
             resource_data = {

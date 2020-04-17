@@ -72,7 +72,7 @@ plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'to
 cluster_columns_to_keep = ['countryCode', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode',
                            'clusterName', 'revisedRequirements', 'totalFunding']
 columnlookup = {'location': 'countryCode', 'emergency': 'emergency_id'}
-urllookup = {'location': 'countryISO3', 'emergency': 'emergencyid'}
+urllookup = {'location': 'locationid', 'emergency': 'emergencyid'}
 
 
 class FTSException(Exception):
