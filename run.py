@@ -16,7 +16,7 @@ from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import progress_storing_tempdir
 
-from fts.fts import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase, get_plans
+from fts.main import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase, get_plans
 
 from hdx.facades.simple import facade
 

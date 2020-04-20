@@ -71,8 +71,9 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
     dataset, showcase = get_dataset_and_showcase(slugified_name, title, description, today, name, showcase_url)
     dataset.add_other_location('world')
     objecttype = 'emergency'
-    fund_boundaries_info = generate_flows_resources(objecttype, base_url, downloader, folder, dataset, str(emergencyid),
-                                                    name, latestyear)
+    emergencyid = str(emergencyid)
+    fund_boundaries_info = generate_flows_resources(objecttype, base_url, downloader, folder, dataset, emergencyid,
+                                                    name, latestyear, emergencyid)
     generate_flows_files(fund_boundaries_info, dict())
     return dataset, showcase
 
@@ -86,10 +87,11 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
         logger.info('Ignoring  %s' % countryname)
         return None, None, None
     logger.info('Adding FTS data for %s' % countryname)
+    countryid = str(country['id'])
     latestyear = str(today.year)
     slugified_name = slugify('FTS Requirements and Funding Data for %s' % countryname).lower()
     title = '%s - Requirements and Funding Data' % countryname
-    showcase_url = 'https://fts.unocha.org/countries/%s/flows/%s' % (country['id'], latestyear)
+    showcase_url = 'https://fts.unocha.org/countries/%s/flows/%s' % (countryid, latestyear)
     dataset, showcase = get_dataset_and_showcase(slugified_name, title, notes, today, countryname, showcase_url)
 
     countryiso = country['iso3']
@@ -101,14 +103,13 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
     except HDXError as e:
         logger.error('%s has a problem! %s' % (title, e))
         return None, None, None
-
     objecttype = 'location'
     fund_boundaries_info = generate_flows_resources(objecttype, base_url, downloader, folder, dataset,
-                                                    countryiso, countryname, latestyear)
+                                                    countryid, countryname, latestyear, countryiso)
     plans = plans_by_country[countryiso]
     dffundreq, planids, planidcodemapping, incompleteplans = \
         generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, countryname,
-                                               countryiso, dataset)
+                                               countryid, dataset, countryiso)
     if dffundreq is None:
         hxl_resource = None
         if len(fund_boundaries_info) == 0:

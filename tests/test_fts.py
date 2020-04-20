@@ -17,7 +17,7 @@ from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.path import temp_dir
 
-from fts.fts import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase, get_plans
+from fts.main import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase, get_plans
 
 
 class TestFTS:
@@ -219,11 +219,11 @@ class TestFTS:
                         return {'data': {'incoming': {'fundingTotal': 538433495}, 'flows': TestFTS.emergencyflows},
                                 'meta': dict(), 'status': 'ok'}
                     response.json = fn
-                elif 'groupby' not in url and 'location' in url:
+                elif 'groupby' not in url and 'flow' not in url and 'location' in url:
                     def fn():
                         return {'data': TestFTS.countries, 'status': 'ok'}
                     response.json = fn
-                elif 'groupby' not in url and 'fts/flow?countryISO3=AFG&year=2017' in url:
+                elif 'groupby' not in url and 'fts/flow?locationid=1&year=2017' in url:
                     def fn():
                         meta = dict()
                         if 'nofund' in url:
@@ -238,7 +238,7 @@ class TestFTS:
                                 meta['nextLink'] = '%s&page=2' % url
                         return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}, 'meta': meta, 'status': 'ok'}
                     response.json = fn
-                elif 'groupby' not in url and 'fts/flow?countryISO3=AFG&year=2018' in url:
+                elif 'groupby' not in url and 'fts/flow?locationid=1&year=2018' in url:
                     def fn():
                         if 'nofund' in url:
                             data = []
@@ -249,38 +249,38 @@ class TestFTS:
                         return {'data': {'incoming': {'fundingTotal': incoming}, 'flows': data}, 'meta': dict(), 'status': 'ok'}
 
                     response.json = fn
-                elif 'groupby' not in url and 'fts/flow?countryISO3=CPV&year=2007' in url:
+                elif 'groupby' not in url and 'fts/flow?locationid=41&year=2007' in url:
                     def fn():
                         return {'data': {'incoming': {'fundingTotal': 1270424}, 'flows': [1]}, 'meta': dict(), 'status': 'ok'}
                     response.json = fn
-                elif 'groupby' not in url and 'fts/flow?countryISO3=CPV&year=2018' in url:
+                elif 'groupby' not in url and 'fts/flow?locationid=41&year=2018' in url:
                     def fn():
                         return {'data': {'incoming': {'fundingTotal': 568918}, 'flows': TestFTS.cpvflows}, 'meta': dict(), 'status': 'ok'}
                     response.json = fn
-                elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2002' in url:
+                elif 'groupby' not in url and 'fts/flow?locationid=3&year=2002' in url:
                     def fn():
                         return {'data': {'incoming': {'fundingTotal': 3384231}, 'flows': [1]}, 'meta': dict(), 'status': 'ok'}
                     response.json = fn
-                elif 'groupby' not in url and 'fts/flow?countryISO3=ALB&year=2018' in url:
+                elif 'groupby' not in url and 'fts/flow?locationid=3&year=2018' in url:
                     def fn():
                         return {'data': {'incoming': {'fundingTotal': 86754}, 'flows': TestFTS.albflows}, 'meta': dict(), 'status': 'ok'}
                     response.json = fn
-                elif 'fts/flow?countryISO3=AFG&groupby=year' in url:
+                elif 'fts/flow?locationid=1&groupby=year' in url:
                     def fn():
                         return {'data': {'report3': {
                                 'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.afgobjectsBreakdownByYear}]}}}, 'status': 'ok'}
                     response.json = fn
-                elif 'fts/flow?countryISO3=CPV&groupby=year' in url:
+                elif 'fts/flow?locationid=41&groupby=year' in url:
                     def fn():
                         return {'data': {'report3': {
                                 'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.cpvobjectsBreakdownByYear}]}}}, 'status': 'ok'}
                     response.json = fn
-                elif 'fts/flow?countryISO3=ALB&groupby=year' in url:
+                elif 'fts/flow?locationid=3&groupby=year' in url:
                     def fn():
                         return {'data': {'report3': {
                                 'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByYear}]}}}, 'status': 'ok'}
                     response.json = fn
-                elif 'fts/flow?countryISO3=AFG&groupby=plan' in url:
+                elif 'fts/flow?locationid=1&groupby=plan' in url:
                     def fn():
                         if 'fundnoid' in url:
                             data = TestFTS.objectsBreakdownByPlannoid
@@ -290,12 +290,12 @@ class TestFTS:
                             data = TestFTS.afgobjectsBreakdownByPlan
                         return {'data': {'report3': {'fundingTotals': {'objects': [{'objectsBreakdown': data}]}}}, 'status': 'ok'}
                     response.json = fn
-                elif 'fts/flow?countryISO3=CPV&groupby=plan' in url:
+                elif 'fts/flow?locationid=41&groupby=plan' in url:
                     def fn():
                         return {'data': {'report3': {
                                 'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.cpvobjectsBreakdownByPlan}]}}}, 'status': 'ok'}
                     response.json = fn
-                elif 'fts/flow?countryISO3=ALB&groupby=plan' in url:
+                elif 'fts/flow?locationid=3&groupby=plan' in url:
                     def fn():
                         return {'data': {'report3': {
                             'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.albobjectsBreakdownByPlan}]}}}, 'status': 'ok'}
@@ -474,7 +474,7 @@ class TestFTS:
         with temp_dir('fts') as folder:
             notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
-            country = {'iso3': 'CPV', 'name': 'Cape Verde', 'id': 1}
+            country = {'iso3': 'CPV', 'name': 'Cape Verde', 'id': 41}
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://cpvsite/', downloader, folder, country, TestFTS.all_plans, TestFTS.plans_by_country, today, notes)
             assert dataset == {'groups': [{'name': 'cpv'}], 'name': 'fts-requirements-and-funding-data-for-cape-verde',
                                'title': 'Cape Verde - Requirements and Funding Data',
@@ -497,7 +497,7 @@ class TestFTS:
             assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
                                 'name': 'fts-requirements-and-funding-data-for-cape-verde-showcase',
                                 'notes': 'Click the image on the right to go to the FTS funding summary page for Cape Verde',
-                                'url': 'https://fts.unocha.org/countries/1/flows/2018', 'title': 'FTS Cape Verde Summary Page',
+                                'url': 'https://fts.unocha.org/countries/41/flows/2018', 'title': 'FTS Cape Verde Summary Page',
                                 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                          {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                          {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
@@ -507,7 +507,7 @@ class TestFTS:
         with temp_dir('fts') as folder:
             notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
-            country = {'iso3': 'ALB', 'name': 'Albania', 'id': 1}
+            country = {'iso3': 'ALB', 'name': 'Albania', 'id': 3}
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://albsite/', downloader, folder, country, TestFTS.all_plans, TestFTS.plans_by_country, today, notes)
             assert dataset == {'groups': [{'name': 'alb'}], 'name': 'fts-requirements-and-funding-data-for-albania',
                                'title': 'Albania - Requirements and Funding Data',
@@ -530,7 +530,7 @@ class TestFTS:
             assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
                                 'name': 'fts-requirements-and-funding-data-for-albania-showcase',
                                 'notes': 'Click the image on the right to go to the FTS funding summary page for Albania',
-                                'url': 'https://fts.unocha.org/countries/1/flows/2018', 'title': 'FTS Albania Summary Page',
+                                'url': 'https://fts.unocha.org/countries/3/flows/2018', 'title': 'FTS Albania Summary Page',
                                 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                          {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                          {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
