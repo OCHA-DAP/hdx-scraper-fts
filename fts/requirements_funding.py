@@ -27,15 +27,15 @@ def generate_requirements_funding(plans, base_funding_url, downloader, name, cod
     columns_to_keep = copy.deepcopy(country_emergency_columns_to_keep)
     columns_to_keep.insert(0, columnname)
     if len(plans) == 0:
+        incompleteplans = list()
         if not fund_data:
-            return None, None, None
+            return None, planidcodemapping, incompleteplans
         logger.warning('No requirements data, only funding data available')
         dffund = json_normalize(fund_data)
         dffund = drop_columns_except(dffund, columns_to_keep)
         dffund['percentFunded'] = ''
         dffund = dffund.fillna('')
         dffundreq = dffund
-        incompleteplans = list()
     else:
         dfreq = json_normalize(plans)
         dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
@@ -221,7 +221,7 @@ def generate_requirements_funding_resource(objecttype, base_url, all_plans, plan
     columnname = columnlookup[objecttype]
     dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding(plans, base_funding_url, downloader, name, outputcode, columnname)
     if dffundreq is None:
-        return None, None, None, None
+        return None, None, planidcodemapping, incompleteplans
     dffundreq, planids = row_correction_requirements_funding(objecttype, base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, name, code)
 
     dffundreq = add_not_specified(base_funding_url, downloader, outputcode, columnname, dffundreq)
