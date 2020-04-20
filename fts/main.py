@@ -40,7 +40,7 @@ def get_plans(base_url, downloader, countries, today, start_year=1998):
             plan_id = plan['id']
             all_plans[str(plan_id)] = plan
             for emergency in plan['emergencies']:
-                emergency_id = emergency['id']
+                emergency_id = str(emergency['id'])
                 if emergency_id not in planids_by_emergency or plan_id not in planids_by_emergency[emergency_id]:
                     dict_of_sets_add(planids_by_emergency, emergency_id, plan_id)
                     dict_of_lists_add(plans_by_emergency, emergency_id, plan)
@@ -58,23 +58,35 @@ def get_plans(base_url, downloader, countries, today, start_year=1998):
 def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emergency, all_plans, plans_by_emergency, today, notes):
     # https://api.hpc.tools/v1/public/emergency/id/911
     emergencyid = emergency['emergency_id']
+    if emergencyid is None:
+        logger.error('Emergency id is None!')
+        return None, None
     latestyear = str(today.year)
-    emergency_url = '%semergency/id/%d' % (base_url, emergencyid)
+    emergency_url = '%semergency/id/%s' % (base_url, emergencyid)
     data = download_data(emergency_url, downloader)
     name = data['name']
     glideid = data.get('glideId')
     date = data['date']
     slugified_name = slugify('FTS Funding Data for %s' % name).lower()
-    title = '%s Funding Data' % name
+    title = '%s Requirements and Funding Data' % name
     description = '%s  \n  \nGlide Id=%s, Date=%s' % (notes, glideid, date)
-    showcase_url = 'https://fts.unocha.org/emergencies/%d/flows/%s' % (emergencyid, latestyear)
+    showcase_url = 'https://fts.unocha.org/emergencies/%s/flows/%s' % (emergencyid, latestyear)
     dataset, showcase = get_dataset_and_showcase(slugified_name, title, description, today, name, showcase_url)
     dataset.add_other_location('world')
     objecttype = 'emergency'
-    emergencyid = str(emergencyid)
     fund_boundaries_info = generate_flows_resources(objecttype, base_url, downloader, folder, dataset, emergencyid,
                                                     name, latestyear, emergencyid)
-    generate_flows_files(fund_boundaries_info, dict())
+    plans = plans_by_emergency[emergencyid]
+    dffundreq, planids, planidcodemapping, incompleteplans = \
+        generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, name,
+                                               emergencyid, dataset, emergencyid)
+    if dffundreq is None:
+        if len(fund_boundaries_info) == 0:
+            logger.warning('No requirements or funding data available')
+            return None, None
+        else:
+            logger.error('We have latest year funding data but no overall funding data for %s' % title)
+    generate_flows_files(fund_boundaries_info, planidcodemapping)
     return dataset, showcase
 
 
@@ -86,18 +98,18 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
     if countryname == 'World':
         logger.info('Ignoring  %s' % countryname)
         return None, None, None
-    logger.info('Adding FTS data for %s' % countryname)
-    countryid = str(country['id'])
-    latestyear = str(today.year)
-    slugified_name = slugify('FTS Requirements and Funding Data for %s' % countryname).lower()
     title = '%s - Requirements and Funding Data' % countryname
-    showcase_url = 'https://fts.unocha.org/countries/%s/flows/%s' % (countryid, latestyear)
-    dataset, showcase = get_dataset_and_showcase(slugified_name, title, notes, today, countryname, showcase_url)
-
     countryiso = country['iso3']
     if countryiso is None:
         logger.error('%s has a problem! Iso3 is None!' % title)
         return None, None, None
+    logger.info('Adding FTS data for %s' % countryname)
+    countryid = str(country['id'])
+    latestyear = str(today.year)
+    slugified_name = slugify('FTS Requirements and Funding Data for %s' % countryname).lower()
+    showcase_url = 'https://fts.unocha.org/countries/%s/flows/%s' % (countryid, latestyear)
+    dataset, showcase = get_dataset_and_showcase(slugified_name, title, notes, today, countryname, showcase_url)
+
     try:
         dataset.add_country_location(countryiso)
     except HDXError as e:

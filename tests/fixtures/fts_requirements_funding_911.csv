@@ -1,0 +1,4 @@
+emergency_id,id,name,code,startDate,endDate,year,requirements,funding,percentFunded
+#crisis+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
+911,952,COVID-19 Global Humanitarian Response Plan,HCOVD20,2020-03-25,2020-12-31,2020,2012000000,605791042,30
+911,,Not specified,,,,2020,,-67357547,

@@ -21,10 +21,6 @@ from fts.main import generate_dataset_and_showcase, get_countries, generate_emer
 
 
 class TestFTS:
-    emergency = {'id': 911, 'name': 'Coronavirus disease Outbreak - COVID -19', 'glideId': 'EP-2020-000012-CHN', 'date': '2020-01-30T16:23:01.558Z'}
-
-    emergencyflows = [{'id': '205905','amountUSD':6451613,'budgetYear': '2019','childFlowIds':None,'contributionType': 'financial','createdAt': '2020-04-01T10:17:46.952Z','date': '2020-02-03T00:00:00Z','decisionDate': '2020-02-03T00:00:00Z','description': 'WHO Strategic Preparedness and Response Plan to 2019 Novel COVID - 19 Coronavirus  (global and Iran)','grandBargainEarmarkingType':['softly earmarked'],'exchangeRate':0.775,'firstReportedDate': '2020-02-21T00:00:00Z','flowType': 'Standard','keywords':None,'newMoney':True,'originalAmount':5000000,'originalCurrency': 'GBP','method': 'Traditional aid','parentFlowId':None,'status': 'commitment','updatedAt': '2020-04-01T10:17:46.952Z','versionId':3,'sourceObjects':[{'type': 'Organization','id': '2917','name': 'United Kingdom, Government of','behavior': 'single','organizationTypes':['Government'],'organizationSubTypes':['National government']}, {'type': 'Location','id': '236','name': 'United Kingdom','behavior': 'single'}, {'type': 'UsageYear','id': '41','name': '2020','behavior': 'single'}],'destinationObjects':[{'type': 'Plan','id': '952','name': 'COVID-19 Global Humanitarian Response Plan','behavior': 'single'}, {'type': 'Organization','id': '4398','name': 'World Health Organization','behavior': 'single','organizationTypes':['UN agency']}, {'type': 'Cluster','id': '5335','name': 'COVID-19','behavior': 'single'}, {'type': 'GlobalCluster','id': '26513','name': 'COVID-19','behavior': 'single'}, {'type': 'Location','id': '62','name': 'Djibouti','behavior': 'shared'}, {'type': 'Location','id': '239','name': 'Uruguay','behavior': 'shared'}, {'type': 'Location','id': '95','name': 'Guyana','behavior': 'shared'}, {'type': 'Location','id': '116','name': 'Kenya','behavior': 'shared'}, {'type': 'Location','id': '249','name': 'Zambia','behavior': 'shared'}, {'type': 'Location','id': '51','name': 'Congo','behavior': 'shared'}, {'type': 'Location','id': '7','name': 'Angola','behavior': 'shared'}, {'type': 'Location','id': '221','name': 'Tanzania, United Republic of','behavior': 'shared'}, {'type': 'Location','id': '233','name': 'Uganda','behavior': 'shared'}, {'type': 'Location','id': '242','name': 'Venezuela, Bolivarian Republic of','behavior': 'shared'}, {'type': 'Location','id': '206','name': 'Somalia','behavior': 'shared'}, {'type': 'Location','id': '137','name': 'Mali','behavior': 'shared'}, {'type': 'Location','id': '44','name': 'Chad','behavior': 'shared'}, {'type': 'Location','id': '37','name': 'Burundi','behavior': 'shared'}, {'type': 'Location','id': '227','name': 'Trinidad and Tobago','behavior': 'shared'}, {'type': 'Location','id': '65','name': 'Ecuador','behavior': 'shared'}, {'type': 'Location','id': '234','name': 'Ukraine','behavior': 'shared'}, {'type': 'Location','id': '171','name': 'occupied Palestinian territory','behavior': 'shared'}, {'type': 'Location','id': '127','name': 'Libya','behavior': 'shared'}, {'type': 'Location','id': '43','name': 'Central African Republic','behavior': 'shared'}, {'type': 'Location','id': '1','name': 'Afghanistan','behavior': 'shared'}, {'type': 'Location','id': '124','name': 'Lebanon','behavior': 'shared'}, {'type': 'Location','id': '175','name': 'Peru','behavior': 'shared'}, {'type': 'Location','id': '64','name': 'Dominican Republic','behavior': 'shared'}, {'type': 'Location','id': '218','name': 'Syrian Arab Republic','behavior': 'shared'}, {'type': 'Location','id': '163','name': 'Nigeria','behavior': 'shared'}, {'type': 'Location','id': '106','name': 'Iraq','behavior': 'shared'}, {'type': 'Location','id': '52','name': 'Congo, The Democratic Republic of the','behavior': 'shared'}, {'type': 'Location','id': '19','name': 'Bangladesh','behavior': 'shared'}, {'type': 'Location','id': '114','name': 'Jordan','behavior': 'shared'}, {'type': 'Location','id': '172','name': 'Panama','behavior': 'shared'}, {'type': 'Location','id': '58','name': 'Curaçao','behavior': 'shared'}, {'type': 'Location','id': '212','name': 'Sudan','behavior': 'shared'}, {'type': 'Location','id': '162','name': 'Niger','behavior': 'shared'}, {'type': 'Location','id': '96','name': 'Haiti','behavior': 'shared'}, {'type': 'Location','id': '39','name': 'Cameroon','behavior': 'shared'}, {'type': 'Location','id': '118','name': "Korea, Democratic People's Republic of",'behavior': 'shared'}, {'type': 'Location','id': '66','name': 'Egypt','behavior': 'shared'}, {'type': 'Location','id': '144','name': 'Mexico','behavior': 'shared'}, {'type': 'Location','id': '54','name': 'Costa Rica','behavior': 'shared'}, {'type': 'Location','id': '49','name': 'Colombia','behavior': 'shared'}, {'type': 'Location','id': '45','name': 'Chile','behavior': 'shared'}, {'type': 'Location','id': '32','name': 'Brazil','behavior': 'shared'}, {'type': 'Location','id': '27','name': 'Bolivia, Plurinational State of','behavior': 'shared'}, {'type': 'Location','id': '13','name': 'Aruba','behavior': 'shared'}, {'type': 'Location','id': '11','name': 'Argentina','behavior': 'shared'}, {'type': 'Location','id': '185','name': 'Rwanda','behavior': 'shared'}, {'type': 'Location','id': '211','name': 'South Sudan','behavior': 'shared'}, {'type': 'Location','id': '153','name': 'Myanmar','behavior': 'shared'}, {'type': 'Location','id': '71','name': 'Ethiopia','behavior': 'shared'}, {'type': 'Location','id': '36','name': 'Burkina Faso','behavior': 'shared'}, {'type': 'Location','id': '248','name': 'Yemen','behavior': 'shared'}, {'type': 'Project','id': '165894','name': 'WHO','behavior': 'single','code': 'OCOVD20-COVD-165894-1'}, {'type': 'Emergency','id': '911','name': 'Coronavirus disease Outbreak - COVID -19','behavior': 'single'}, {'type': 'UsageYear','id': '41','name': '2020','behavior': 'single'}],'boundary': 'incoming','onBoundary': 'single','reportDetails':[{'sourceType': 'Primary','organization': 'World Health Organization','reportChannel': 'Email','date': '2020-04-01T00:00:00.000Z'}],'refCode': '#301150-101'}]
-
     countries = [{
         'id': 1,
         'iso3': 'AFG',
@@ -38,6 +34,14 @@ class TestFTS:
         'iso3': 'CPV',
         'name': 'Cape Verde'}
     ]
+
+    emergency = {'id': 911, 'name': 'Coronavirus disease Outbreak - COVID -19', 'glideId': 'EP-2020-000012-CHN', 'date': '2020-01-30T16:23:01.558Z'}
+
+    emergencyflows = [{'id': '205905','amountUSD':6451613,'budgetYear': '2019','childFlowIds':None,'contributionType': 'financial','createdAt': '2020-04-01T10:17:46.952Z','date': '2020-02-03T00:00:00Z','decisionDate': '2020-02-03T00:00:00Z','description': 'WHO Strategic Preparedness and Response Plan to 2019 Novel COVID - 19 Coronavirus  (global and Iran)','grandBargainEarmarkingType':['softly earmarked'],'exchangeRate':0.775,'firstReportedDate': '2020-02-21T00:00:00Z','flowType': 'Standard','keywords':None,'newMoney':True,'originalAmount':5000000,'originalCurrency': 'GBP','method': 'Traditional aid','parentFlowId':None,'status': 'commitment','updatedAt': '2020-04-01T10:17:46.952Z','versionId':3,'sourceObjects':[{'type': 'Organization','id': '2917','name': 'United Kingdom, Government of','behavior': 'single','organizationTypes':['Government'],'organizationSubTypes':['National government']}, {'type': 'Location','id': '236','name': 'United Kingdom','behavior': 'single'}, {'type': 'UsageYear','id': '41','name': '2020','behavior': 'single'}],'destinationObjects':[{'type': 'Plan','id': '952','name': 'COVID-19 Global Humanitarian Response Plan','behavior': 'single'}, {'type': 'Organization','id': '4398','name': 'World Health Organization','behavior': 'single','organizationTypes':['UN agency']}, {'type': 'Cluster','id': '5335','name': 'COVID-19','behavior': 'single'}, {'type': 'GlobalCluster','id': '26513','name': 'COVID-19','behavior': 'single'}, {'type': 'Location','id': '62','name': 'Djibouti','behavior': 'shared'}, {'type': 'Location','id': '239','name': 'Uruguay','behavior': 'shared'}, {'type': 'Location','id': '95','name': 'Guyana','behavior': 'shared'}, {'type': 'Location','id': '116','name': 'Kenya','behavior': 'shared'}, {'type': 'Location','id': '249','name': 'Zambia','behavior': 'shared'}, {'type': 'Location','id': '51','name': 'Congo','behavior': 'shared'}, {'type': 'Location','id': '7','name': 'Angola','behavior': 'shared'}, {'type': 'Location','id': '221','name': 'Tanzania, United Republic of','behavior': 'shared'}, {'type': 'Location','id': '233','name': 'Uganda','behavior': 'shared'}, {'type': 'Location','id': '242','name': 'Venezuela, Bolivarian Republic of','behavior': 'shared'}, {'type': 'Location','id': '206','name': 'Somalia','behavior': 'shared'}, {'type': 'Location','id': '137','name': 'Mali','behavior': 'shared'}, {'type': 'Location','id': '44','name': 'Chad','behavior': 'shared'}, {'type': 'Location','id': '37','name': 'Burundi','behavior': 'shared'}, {'type': 'Location','id': '227','name': 'Trinidad and Tobago','behavior': 'shared'}, {'type': 'Location','id': '65','name': 'Ecuador','behavior': 'shared'}, {'type': 'Location','id': '234','name': 'Ukraine','behavior': 'shared'}, {'type': 'Location','id': '171','name': 'occupied Palestinian territory','behavior': 'shared'}, {'type': 'Location','id': '127','name': 'Libya','behavior': 'shared'}, {'type': 'Location','id': '43','name': 'Central African Republic','behavior': 'shared'}, {'type': 'Location','id': '1','name': 'Afghanistan','behavior': 'shared'}, {'type': 'Location','id': '124','name': 'Lebanon','behavior': 'shared'}, {'type': 'Location','id': '175','name': 'Peru','behavior': 'shared'}, {'type': 'Location','id': '64','name': 'Dominican Republic','behavior': 'shared'}, {'type': 'Location','id': '218','name': 'Syrian Arab Republic','behavior': 'shared'}, {'type': 'Location','id': '163','name': 'Nigeria','behavior': 'shared'}, {'type': 'Location','id': '106','name': 'Iraq','behavior': 'shared'}, {'type': 'Location','id': '52','name': 'Congo, The Democratic Republic of the','behavior': 'shared'}, {'type': 'Location','id': '19','name': 'Bangladesh','behavior': 'shared'}, {'type': 'Location','id': '114','name': 'Jordan','behavior': 'shared'}, {'type': 'Location','id': '172','name': 'Panama','behavior': 'shared'}, {'type': 'Location','id': '58','name': 'Curaçao','behavior': 'shared'}, {'type': 'Location','id': '212','name': 'Sudan','behavior': 'shared'}, {'type': 'Location','id': '162','name': 'Niger','behavior': 'shared'}, {'type': 'Location','id': '96','name': 'Haiti','behavior': 'shared'}, {'type': 'Location','id': '39','name': 'Cameroon','behavior': 'shared'}, {'type': 'Location','id': '118','name': "Korea, Democratic People's Republic of",'behavior': 'shared'}, {'type': 'Location','id': '66','name': 'Egypt','behavior': 'shared'}, {'type': 'Location','id': '144','name': 'Mexico','behavior': 'shared'}, {'type': 'Location','id': '54','name': 'Costa Rica','behavior': 'shared'}, {'type': 'Location','id': '49','name': 'Colombia','behavior': 'shared'}, {'type': 'Location','id': '45','name': 'Chile','behavior': 'shared'}, {'type': 'Location','id': '32','name': 'Brazil','behavior': 'shared'}, {'type': 'Location','id': '27','name': 'Bolivia, Plurinational State of','behavior': 'shared'}, {'type': 'Location','id': '13','name': 'Aruba','behavior': 'shared'}, {'type': 'Location','id': '11','name': 'Argentina','behavior': 'shared'}, {'type': 'Location','id': '185','name': 'Rwanda','behavior': 'shared'}, {'type': 'Location','id': '211','name': 'South Sudan','behavior': 'shared'}, {'type': 'Location','id': '153','name': 'Myanmar','behavior': 'shared'}, {'type': 'Location','id': '71','name': 'Ethiopia','behavior': 'shared'}, {'type': 'Location','id': '36','name': 'Burkina Faso','behavior': 'shared'}, {'type': 'Location','id': '248','name': 'Yemen','behavior': 'shared'}, {'type': 'Project','id': '165894','name': 'WHO','behavior': 'single','code': 'OCOVD20-COVD-165894-1'}, {'type': 'Emergency','id': '911','name': 'Coronavirus disease Outbreak - COVID -19','behavior': 'single'}, {'type': 'UsageYear','id': '41','name': '2020','behavior': 'single'}],'boundary': 'incoming','onBoundary': 'single','reportDetails':[{'sourceType': 'Primary','organization': 'World Health Organization','reportChannel': 'Email','date': '2020-04-01T00:00:00.000Z'}],'refCode': '#301150-101'}]
+
+    E911objectsBreakdownByPlan = [{'type': 'Plan', 'direction': 'destination', 'name': 'Not specified', 'totalFunding': 347313587, 'singleFunding': 347313587, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}, {'type': 'Plan', 'direction': 'destination', 'id': '952', 'name': 'COVID-19 Global Humanitarian Response Plan', 'totalFunding': 605791042, 'singleFunding': 605791042, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
+
+    E911objectsBreakdownByYear = [{'type': 'UsageYear', 'direction': 'destination', 'id': '41', 'name': '2020', 'totalFunding': 953104629, 'singleFunding': 953104629, 'overlapFunding': 0, 'sharedFunding': 0, 'onBoundaryFunding': 0}]
 
     afgflows = [{'firstReportedDate': '2016-11-09T00:00:00Z', 'contributionType': 'financial',
               'createdAt': '2017-05-15T15:20:52.142Z', 'budgetYear': '2016', 'date': '2017-04-17T00:00:00Z',
@@ -177,9 +181,11 @@ class TestFTS:
 
     plan222 = {'id': 222, 'revisionState': None, 'planVersion': {'planId': 222, 'name': 'West Africa 2007', 'code': 'CXWAF07', 'startDate': '2007-01-01T00:00:00.000Z', 'endDate': '2007-12-31T00:00:00.000Z', 'isForHPCProjects': False}, 'emergencies': [], 'years': [{'id': 28, 'year': '2007'}], 'locations': [{'id': 55, 'iso3': 'CIV', 'name': "Côte d'Ivoire", 'adminLevel': 0}, {'id': 126, 'iso3': 'LBR', 'name': 'Liberia', 'adminLevel': 0}, {'id': 137, 'iso3': 'MLI', 'name': 'Mali', 'adminLevel': 0}, {'id': 93, 'iso3': 'GIN', 'name': 'Guinea', 'adminLevel': 0}, {'id': 84, 'iso3': 'GHA', 'name': 'Ghana', 'adminLevel': 0}, {'id': 162, 'iso3': 'NER', 'name': 'Niger', 'adminLevel': 0}, {'id': 197, 'iso3': 'SEN', 'name': 'Senegal', 'adminLevel': 0}, {'id': 224, 'iso3': 'TGO', 'name': 'Togo', 'adminLevel': 0}, {'id': 36, 'iso3': 'BFA', 'name': 'Burkina Faso', 'adminLevel': 0}, {'id': 141, 'iso3': 'MRT', 'name': 'Mauritania', 'adminLevel': 0}, {'id': 200, 'iso3': 'SLE', 'name': 'Sierra Leone', 'adminLevel': 0}, {'id': 24, 'iso3': 'BEN', 'name': 'Benin', 'adminLevel': 0}, {'id': 41, 'iso3': 'CPV', 'name': 'Cape Verde', 'adminLevel': 0}, {'id': 94, 'iso3': 'GNB', 'name': 'Guinea-Bissau', 'adminLevel': 0}], 'categories': [{'id': 110, 'name': 'CAP', 'group': 'planType', 'code': None}], 'origRequirements': 309081675, 'revisedRequirements': 361026890, 'meta': {'language': 'en'}}
 
-    all_plans = {'90': plan90, '222': plan222, '544': plan544, '645': plan645}
+    plan952 = {'id':952, 'revisionState': 'planDataOnly', 'planVersion':{'id':1981, 'planId':952, 'name': 'COVID-19 Global Humanitarian Response Plan', 'code': 'HCOVD20', 'startDate': '2020-03-25', 'endDate': '2020-12-31', 'isForHPCProjects': False}, 'emergencies':[{'id':911, 'name': 'Coronavirus disease Outbreak - COVID -19', 'date': '2020-01-30T16:23:01.558Z', 'glideId': 'EP-2020-000012-CHN'}], 'locations':list(), 'years':[{'id':41, 'year': '2020'}], 'origRequirements':2012000000, 'revisedRequirements':2012000000}
 
-    plans_by_emergency = {10: [plan90]}
+    all_plans = {'90': plan90, '222': plan222, '544': plan544, '645': plan645, '952': plan952}
+
+    plans_by_emergency = {'10': [plan90], '911': [plan952]}
 
     plans_by_country = {'AFG': [plan544, plan645], 'ALB': list()}
     for countryiso in ['CIV', 'LBR', 'MLI', 'GIN', 'GHA', 'NER', 'SEN', 'TGO', 'BFA', 'MRT', 'SLE', 'BEN', 'CPV', 'GNB']:
@@ -206,10 +212,15 @@ class TestFTS:
             @staticmethod
             def download(url):
                 response = Response()
-                if 'plan/year/2020' in url:
+                if 'flow' not in url and 'location' in url:
                     def fn():
-                        return {'data': [TestFTS.plan90, TestFTS.plan222, TestFTS.plan544, TestFTS.plan645], 'status': 'ok'}
+                        return {'data': TestFTS.countries, 'status': 'ok'}
                     response.json = fn
+                elif 'plan/year/2020' in url:
+                    def fn():
+                        return {'data': [TestFTS.plan90, TestFTS.plan222, TestFTS.plan544, TestFTS.plan645, TestFTS.plan952], 'status': 'ok'}
+                    response.json = fn
+                # Emergencies tests
                 elif 'emergency/id/911' in url:
                     def fn():
                         return {'data': TestFTS.emergency, 'status': 'ok'}
@@ -219,10 +230,18 @@ class TestFTS:
                         return {'data': {'incoming': {'fundingTotal': 538433495}, 'flows': TestFTS.emergencyflows},
                                 'meta': dict(), 'status': 'ok'}
                     response.json = fn
-                elif 'groupby' not in url and 'flow' not in url and 'location' in url:
+                elif 'fts/flow?emergencyid=911&groupby=plan' in url:
                     def fn():
-                        return {'data': TestFTS.countries, 'status': 'ok'}
+                        return {'data': {'report3': {'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.E911objectsBreakdownByPlan}]}}},
+                                'status': 'ok'}
                     response.json = fn
+                elif 'fts/flow?emergencyid=911&groupby=year' in url:
+                    def fn():
+                        return {'data': {'report3': {
+                            'fundingTotals': {'objects': [{'objectsBreakdown': TestFTS.E911objectsBreakdownByYear}]}}},
+                            'status': 'ok'}
+                    response.json = fn
+                # Locations tests
                 elif 'groupby' not in url and 'fts/flow?locationid=1&year=2017' in url:
                     def fn():
                         meta = dict()
@@ -364,20 +383,26 @@ class TestFTS:
         assert plans_by_country == TestFTS.plans_by_country
 
     def test_generate_emergency_dataset_and_showcase(self, configuration, downloader):
-        with temp_dir('fts') as folder:
+        with temp_dir('FTS-TEST') as folder:
             notes = configuration['notes']
             today = datetime.strptime('14042020', '%d%m%Y').date()
-            emergency = {'emergency_id': 911}
+            emergency = {'emergency_id': None}
             dataset, showcase = generate_emergency_dataset_and_showcase('http://lala/', downloader, folder, emergency,
                                                                         None, None, today, notes)
+            assert dataset is None
+            assert showcase is None
+            emergency = configuration['emergencies'][0]
+            dataset, showcase = generate_emergency_dataset_and_showcase('http://lala/', downloader, folder, emergency,
+                                                                        TestFTS.all_plans, TestFTS.plans_by_emergency, today, notes)
             assert dataset == {'name': 'fts-funding-data-for-coronavirus-disease-outbreak-covid-19',
-                               'title': 'Coronavirus disease Outbreak - COVID -19 Funding Data', 'notes': "FTS publishes data on humanitarian funding flows as reported by donors and recipient organizations. It presents all humanitarian funding to a country and funding that is specifically reported or that can be specifically mapped against funding requirements stated in humanitarian response plans. The data comes from OCHA's [Financial Tracking Service](https://fts.unocha.org/), is encoded as utf-8 and the second row of the CSV contains [HXL](http://hxlstandard.org) tags.  \n  \nGlide Id=EP-2020-000012-CHN, Date=2020-01-30T16:23:01.558Z",
+                               'title': 'Coronavirus disease Outbreak - COVID -19 Requirements and Funding Data', 'notes': "FTS publishes data on humanitarian funding flows as reported by donors and recipient organizations. It presents all humanitarian funding to a country and funding that is specifically reported or that can be specifically mapped against funding requirements stated in humanitarian response plans. The data comes from OCHA's [Financial Tracking Service](https://fts.unocha.org/), is encoded as utf-8 and the second row of the CSV contains [HXL](http://hxlstandard.org) tags.  \n  \nGlide Id=EP-2020-000012-CHN, Date=2020-01-30T16:23:01.558Z",
                                'maintainer': '196196be-6037-4488-8b71-d786adf4c081', 'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e',
                                'dataset_date': '04/14/2020', 'data_update_frequency': '1', 'subnational': '0', 'groups': [{'name': 'world'}],
                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
 
             resources = dataset.get_resources()
-            assert resources == [{'name': 'fts_incoming_funding_911.csv', 'description': 'FTS Incoming Funding Data for Coronavirus disease Outbreak - COVID -19 for 2020', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
+            assert resources == [{'name': 'fts_incoming_funding_911.csv', 'description': 'FTS Incoming Funding Data for Coronavirus disease Outbreak - COVID -19 for 2020', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                 {'name': 'fts_requirements_funding_911.csv', 'description': 'FTS Annual Requirements and Funding Data for Coronavirus disease Outbreak - COVID -19', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
             for resource in resources:
                 resource_name = resource['name']
                 expected_file = join('tests', 'fixtures', resource_name)
@@ -392,7 +417,7 @@ class TestFTS:
                                 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
 
     def test_generate_dataset_and_showcase(self, configuration, downloader):
-        with temp_dir('fts') as folder:
+        with temp_dir('FTS-TEST') as folder:
             notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
             country = {'name': 'World'}
@@ -452,7 +477,7 @@ class TestFTS:
             assert showcase == afgshowcase
             assert hxl_resource == expected_hxl_resource
 
-        with temp_dir('fts') as folder:
+        with temp_dir('FTS-TEST') as folder:
             today = datetime.strptime('01062017', '%d%m%Y').date()
             country = {'iso3': 'AFG', 'name': 'Afghanistan', 'id': 1}
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, country, TestFTS.all_plans, TestFTS.plans_by_country, today, notes)
@@ -471,7 +496,7 @@ class TestFTS:
             assert hxl_resource is None
 
     def test_generate_cpv_dataset_and_showcase(self, configuration, downloader):
-        with temp_dir('fts') as folder:
+        with temp_dir('FTS-TEST') as folder:
             notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
             country = {'iso3': 'CPV', 'name': 'Cape Verde', 'id': 41}
@@ -504,7 +529,7 @@ class TestFTS:
             assert hxl_resource is None
 
     def test_generate_alb_dataset_and_showcase(self, configuration, downloader):
-        with temp_dir('fts') as folder:
+        with temp_dir('FTS-TEST') as folder:
             notes = configuration['notes']
             today = datetime.strptime('01062018', '%d%m%Y').date()
             country = {'iso3': 'ALB', 'name': 'Albania', 'id': 3}

@@ -42,6 +42,7 @@ funding_hxl_names = {
 }
 hxl_names = {
     'id': '#activity+appeal+id+fts_internal',
+    'emergency_id': '#crisis+code',
     'countryCode': '#country+code',
     'name': '#activity+appeal+name',
     'code': '#activity+appeal+id+external',
