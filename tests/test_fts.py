@@ -387,13 +387,15 @@ class TestFTS:
             notes = configuration['notes']
             today = datetime.strptime('14042020', '%d%m%Y').date()
             emergency = {'emergency_id': None}
-            dataset, showcase = generate_emergency_dataset_and_showcase('http://lala/', downloader, folder, emergency,
-                                                                        None, None, today, notes)
+            dataset, showcase, hxl_resource = \
+                generate_emergency_dataset_and_showcase('http://lala/', downloader, folder, emergency, None, None, today, notes)
             assert dataset is None
             assert showcase is None
+            assert hxl_resource is None
             emergency = configuration['emergencies'][0]
-            dataset, showcase = generate_emergency_dataset_and_showcase('http://lala/', downloader, folder, emergency,
-                                                                        TestFTS.all_plans, TestFTS.plans_by_emergency, today, notes)
+            dataset, showcase, hxl_resource = \
+                generate_emergency_dataset_and_showcase('http://lala/', downloader, folder, emergency,
+                                                        TestFTS.all_plans, TestFTS.plans_by_emergency, today, notes)
             assert dataset == {'name': 'fts-funding-data-for-coronavirus-disease-outbreak-covid-19',
                                'title': 'Coronavirus disease Outbreak - COVID -19 Requirements and Funding Data', 'notes': "FTS publishes data on humanitarian funding flows as reported by donors and recipient organizations. It presents all humanitarian funding to a country and funding that is specifically reported or that can be specifically mapped against funding requirements stated in humanitarian response plans. The data comes from OCHA's [Financial Tracking Service](https://fts.unocha.org/), is encoded as utf-8 and the second row of the CSV contains [HXL](http://hxlstandard.org) tags.  \n  \nGlide Id=EP-2020-000012-CHN, Date=2020-01-30T16:23:01.558Z",
                                'maintainer': '196196be-6037-4488-8b71-d786adf4c081', 'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e',
@@ -415,6 +417,7 @@ class TestFTS:
                                 'url': 'https://fts.unocha.org/emergencies/911/flows/2020',
                                 'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
                                 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'epidemics and outbreaks', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'covid-19', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+            assert hxl_resource == resources[1]
 
     def test_generate_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('FTS-TEST') as folder:
@@ -485,10 +488,10 @@ class TestFTS:
             test = 'noreq'
             plans_by_country = {'AFG': list()}
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, TestFTS.all_plans, plans_by_country, today, notes)
-            compare_afg(dataset, showcase, hxl_resource, expected_hxl_resource=None, prefix=test)
+            compare_afg(dataset, showcase, hxl_resource, expected_hxl_resource=afgresources[1], prefix=test)
             test = 'nofund'
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, TestFTS.all_plans, TestFTS.plans_by_country, today, notes)
-            compare_afg(dataset, showcase, hxl_resource, expected_resources=afgresources[1:], expected_hxl_resource=None, prefix=test)
+            compare_afg(dataset, showcase, hxl_resource, expected_resources=afgresources[1:], expected_hxl_resource=afgresources[1], prefix=test)
             test = 'nofundnoreq'
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, TestFTS.all_plans, plans_by_country, today, notes)
             assert dataset is None
@@ -526,7 +529,7 @@ class TestFTS:
                                 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                          {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                          {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
-            assert hxl_resource is None
+            assert hxl_resource == resources[1]
 
     def test_generate_alb_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('FTS-TEST') as folder:
@@ -559,4 +562,4 @@ class TestFTS:
                                 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                          {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                          {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
-            assert hxl_resource is None
+            assert hxl_resource == resources[1]
