@@ -14,7 +14,7 @@ from os.path import join, expanduser
 
 from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
-from hdx.utilities.path import progress_storing_tempdir, multiple_progress_storing_tempdir
+from hdx.utilities.path import multiple_progress_storing_tempdir
 
 from fts.main import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase, get_plans
 
