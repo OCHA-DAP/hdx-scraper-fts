@@ -130,8 +130,8 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
             logger.error('We have latest year funding data but no overall funding data for %s' % title)
     else:
         hxl_resource_c = generate_requirements_funding_cluster_resource(base_url, downloader, folder, countryname,
-                                                                      countryiso, planids, dffundreq, all_plans,
-                                                                      dataset)
+                                                                        countryiso, planids, dffundreq, all_plans,
+                                                                        dataset)
         if hxl_resource_c:
             hxl_resource = hxl_resource_c
 
