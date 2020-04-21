@@ -136,5 +136,5 @@ def generate_requirements_funding_cluster_resource(base_url, downloader, folder,
     resource.set_file_to_upload(file_to_upload)
     dataset.add_update_resource(resource)
     if hxl_resource:
-        return filename
+        return resource
     return None

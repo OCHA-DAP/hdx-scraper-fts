@@ -467,7 +467,7 @@ class TestFTS:
                      {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                      {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
 
-        def compare_afg(dataset, showcase, hxl_resource, expected_resources=afgresources, expected_hxl_resource='fts_requirements_funding_cluster_afg.csv', prefix=''):
+        def compare_afg(dataset, showcase, hxl_resource, expected_hxl_resource, expected_resources=afgresources, prefix=''):
             assert dataset == afgdataset
             resources = dataset.get_resources()
             assert resources == expected_resources
@@ -484,14 +484,14 @@ class TestFTS:
             today = datetime.strptime('01062017', '%d%m%Y').date()
             country = {'iso3': 'AFG', 'name': 'Afghanistan', 'id': 1}
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://afgsite/', downloader, folder, country, TestFTS.all_plans, TestFTS.plans_by_country, today, notes)
-            compare_afg(dataset, showcase, hxl_resource)
+            compare_afg(dataset, showcase, hxl_resource, afgresources[2])
             test = 'noreq'
             plans_by_country = {'AFG': list()}
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, TestFTS.all_plans, plans_by_country, today, notes)
-            compare_afg(dataset, showcase, hxl_resource, expected_hxl_resource=afgresources[1], prefix=test)
+            compare_afg(dataset, showcase, hxl_resource, afgresources[1], prefix=test)
             test = 'nofund'
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, TestFTS.all_plans, TestFTS.plans_by_country, today, notes)
-            compare_afg(dataset, showcase, hxl_resource, expected_resources=afgresources[1:], expected_hxl_resource=afgresources[1], prefix=test)
+            compare_afg(dataset, showcase, hxl_resource, afgresources[1], expected_resources=afgresources[1:], prefix=test)
             test = 'nofundnoreq'
             dataset, showcase, hxl_resource = generate_dataset_and_showcase('http://%s/' % test, downloader, folder, country, TestFTS.all_plans, plans_by_country, today, notes)
             assert dataset is None
