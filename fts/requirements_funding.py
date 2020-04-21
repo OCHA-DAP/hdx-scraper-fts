@@ -215,7 +215,7 @@ def add_not_specified(base_funding_url, downloader, code, columnname, dffundreq)
     return dffundreq
 
 
-def generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, name, code, dataset, outputcode):
+def generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, name, code, dataset, outputcode, filecode):
     base_funding_url = '%sfts/flow?%s=%s&' % (base_url, urllookup[objecttype], code)
     columnname = columnlookup[objecttype]
     dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding(plans, base_funding_url, downloader, name, outputcode, columnname)
@@ -226,7 +226,7 @@ def generate_requirements_funding_resource(objecttype, base_url, all_plans, plan
     dffundreq = add_not_specified(base_funding_url, downloader, outputcode, columnname, dffundreq)
 
     hxldffundreq = hxlate(dffundreq, hxl_names)
-    filename = 'fts_requirements_funding_%s.csv' % outputcode.lower()
+    filename = 'fts_requirements_funding_%s.csv' % filecode
     file_to_upload_hxldffundreq = join(folder, filename)
     hxldffundreq.to_csv(file_to_upload_hxldffundreq, encoding='utf-8', index=False, date_format='%Y-%m-%d')
 

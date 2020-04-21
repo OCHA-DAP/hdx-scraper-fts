@@ -93,7 +93,7 @@ def download_data(url, downloader):
     return download(url, downloader)['data']
 
 
-def get_dataset_and_showcase(slugified_name, title, description, today, country_emergency, showcase_url):
+def get_dataset_and_showcase(slugified_name, title, description, today, country_emergency, showcase_url, additional_tags=list()):
     dataset = Dataset({
         'name': slugified_name,
         'title': title,
@@ -105,6 +105,7 @@ def get_dataset_and_showcase(slugified_name, title, description, today, country_
     dataset.set_expected_update_frequency('Every day')
     dataset.set_subnational(False)
     tags = ['hxl', 'financial tracking service - fts', 'aid funding']
+    tags.extend(additional_tags)
     dataset.add_tags(tags)
     showcase = Showcase({
         'name': '%s-showcase' % slugified_name,

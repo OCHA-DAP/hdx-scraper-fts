@@ -197,8 +197,8 @@ class TestFTS:
                               project_config_yaml=join('tests', 'config', 'project_configuration.yml'))
         Locations.set_validlocations([{'name': 'afg', 'title': 'Afghanistan'}, {'name': 'alb', 'title': 'Albania'}, {'name': 'cpv', 'title': 'Cape Verde'}, {'name': 'world', 'title': 'World'}])
         Country.countriesdata(False)
-        Vocabulary._tags_dict = True
-        Vocabulary._approved_vocabulary = {'tags': [{'name': 'hxl'}, {'name': 'financial tracking service - fts'}, {'name': 'aid funding'}], 'id': '4e61d464-4943-4e97-973a-84673c1aaa87', 'name': 'approved'}
+        Vocabulary._tags_dict = {'ep-2020-000012-chn': {'Action to Take': 'merge', 'New Tag(s)': 'epidemics and outbreaks;covid-19'}}
+        Vocabulary._approved_vocabulary = {'tags': [{'name': 'hxl'}, {'name': 'financial tracking service - fts'}, {'name': 'aid funding'}, {'name': 'epidemics and outbreaks'}, {'name': 'covid-19'}], 'id': '4e61d464-4943-4e97-973a-84673c1aaa87', 'name': 'approved'}
         return Configuration.read()
 
     @pytest.fixture(scope='function')
@@ -398,7 +398,7 @@ class TestFTS:
                                'title': 'Coronavirus disease Outbreak - COVID -19 Requirements and Funding Data', 'notes': "FTS publishes data on humanitarian funding flows as reported by donors and recipient organizations. It presents all humanitarian funding to a country and funding that is specifically reported or that can be specifically mapped against funding requirements stated in humanitarian response plans. The data comes from OCHA's [Financial Tracking Service](https://fts.unocha.org/), is encoded as utf-8 and the second row of the CSV contains [HXL](http://hxlstandard.org) tags.  \n  \nGlide Id=EP-2020-000012-CHN, Date=2020-01-30T16:23:01.558Z",
                                'maintainer': '196196be-6037-4488-8b71-d786adf4c081', 'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e',
                                'dataset_date': '04/14/2020', 'data_update_frequency': '1', 'subnational': '0', 'groups': [{'name': 'world'}],
-                               'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+                               'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'epidemics and outbreaks', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'covid-19', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
 
             resources = dataset.get_resources()
             assert resources == [{'name': 'fts_incoming_funding_911.csv', 'description': 'FTS Incoming Funding Data for Coronavirus disease Outbreak - COVID -19 for 2020', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
@@ -414,7 +414,7 @@ class TestFTS:
                                 'notes': 'Click the image on the right to go to the FTS funding summary page for Coronavirus disease Outbreak - COVID -19',
                                 'url': 'https://fts.unocha.org/emergencies/911/flows/2020',
                                 'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
-                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'epidemics and outbreaks', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'covid-19', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
 
     def test_generate_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('FTS-TEST') as folder:

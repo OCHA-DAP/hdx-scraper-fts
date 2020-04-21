@@ -71,7 +71,7 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
     title = '%s Requirements and Funding Data' % name
     description = '%s  \n  \nGlide Id=%s, Date=%s' % (notes, glideid, date)
     showcase_url = 'https://fts.unocha.org/emergencies/%s/flows/%s' % (emergencyid, latestyear)
-    dataset, showcase = get_dataset_and_showcase(slugified_name, title, description, today, name, showcase_url)
+    dataset, showcase = get_dataset_and_showcase(slugified_name, title, description, today, name, showcase_url, [glideid])
     dataset.add_other_location('world')
     objecttype = 'emergency'
     fund_boundaries_info = generate_flows_resources(objecttype, base_url, downloader, folder, dataset, emergencyid,
@@ -79,7 +79,7 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
     plans = plans_by_emergency[emergencyid]
     dffundreq, planids, planidcodemapping, incompleteplans = \
         generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, name,
-                                               emergencyid, dataset, emergencyid)
+                                               emergencyid, dataset, glideid, emergencyid)
     if dffundreq is None:
         if len(fund_boundaries_info) == 0:
             logger.warning('No requirements or funding data available')
@@ -121,7 +121,7 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
     plans = plans_by_country[countryiso]
     dffundreq, planids, planidcodemapping, incompleteplans = \
         generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, countryname,
-                                               countryid, dataset, countryiso)
+                                               countryid, dataset, countryiso, countryiso.lower())
     if dffundreq is None:
         hxl_resource = None
         if len(fund_boundaries_info) == 0:
