@@ -43,28 +43,34 @@ def main():
         for i, info, nextdict in multiple_progress_storing_tempdir('FTS', [emergencies, countries], ['emergency_id', 'iso3']):
             folder = info['folder']
             if i == 0:
-                dataset, showcase = generate_emergency_dataset_and_showcase(base_url, downloader, folder, nextdict,
-                                                                            all_plans, plans_by_emergency, today, notes)
-                hxl_resource = None
-                hxl_update = True
+# for testing countries only
+#                continue
+                dataset, showcase, hxl_resource = \
+                    generate_emergency_dataset_and_showcase(base_url, downloader, folder, nextdict, all_plans,
+                                                            plans_by_emergency, today, notes)
             else:
+# for testing specific countries only
+#                if nextdict['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
+#                    continue
                 dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, nextdict,
                                                                                 all_plans, plans_by_country, today,
                                                                                 notes)
+            if dataset is not None:
+                dataset.update_from_yaml()
                 if hxl_resource is None:
                     dataset.preview_off()
                 else:
                     dataset.set_quickchart_resource(hxl_resource)
-                hxl_update = False
-
-            if dataset is not None:
-                dataset.update_from_yaml()
                 dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False,
                                       updated_by_script='HDX Scraper: FTS', batch=info['batch'])
-                resources = dataset.get_resources()
-                resource_ids = [x['id'] for x in sorted(resources, key=lambda x: len(x['name']), reverse=True)]
+                resources = sorted(dataset.get_resources(), key=lambda x: len(x['name']), reverse=True)
+                if hxl_resource and 'cluster' not in hxl_resource['name']:
+                    hxl_update = True
+                else:
+                    hxl_update = False
+                resource_ids = [x['id'] for x in resources]
                 dataset.reorder_resources(resource_ids, hxl_update=hxl_update)
-                if hxl_resource:
+                if hxl_resource and not hxl_update:
                     dataset.generate_resource_view()
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)

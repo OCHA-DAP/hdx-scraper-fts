@@ -60,7 +60,7 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
     emergencyid = emergency['emergency_id']
     if emergencyid is None:
         logger.error('Emergency id is None!')
-        return None, None
+        return None, None, None
     latestyear = str(today.year)
     emergency_url = '%semergency/id/%s' % (base_url, emergencyid)
     data = download_data(emergency_url, downloader)
@@ -77,7 +77,7 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
     fund_boundaries_info = generate_flows_resources(objecttype, base_url, downloader, folder, dataset, emergencyid,
                                                     name, latestyear, emergencyid)
     plans = plans_by_emergency[emergencyid]
-    dffundreq, planids, planidcodemapping, incompleteplans = \
+    dffundreq, planids, planidcodemapping, incompleteplans, hxl_resource = \
         generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, name,
                                                emergencyid, dataset, glideid, emergencyid)
     if dffundreq is None:
@@ -87,7 +87,7 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
         else:
             logger.error('We have latest year funding data but no overall funding data for %s' % title)
     generate_flows_files(fund_boundaries_info, planidcodemapping)
-    return dataset, showcase
+    return dataset, showcase, hxl_resource
 
 
 def generate_dataset_and_showcase(base_url, downloader, folder, country, all_plans, plans_by_country, today, notes):
@@ -119,20 +119,21 @@ def generate_dataset_and_showcase(base_url, downloader, folder, country, all_pla
     fund_boundaries_info = generate_flows_resources(objecttype, base_url, downloader, folder, dataset,
                                                     countryid, countryname, latestyear, countryiso)
     plans = plans_by_country[countryiso]
-    dffundreq, planids, planidcodemapping, incompleteplans = \
+    dffundreq, planids, planidcodemapping, incompleteplans, hxl_resource = \
         generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, countryname,
                                                countryid, dataset, countryiso, countryiso.lower())
     if dffundreq is None:
-        hxl_resource = None
         if len(fund_boundaries_info) == 0:
             logger.warning('No requirements or funding data available')
             return None, None, None
         else:
             logger.error('We have latest year funding data but no overall funding data for %s' % title)
     else:
-        hxl_resource = generate_requirements_funding_cluster_resource(base_url, downloader, folder, countryname,
+        hxl_resource_c = generate_requirements_funding_cluster_resource(base_url, downloader, folder, countryname,
                                                                       countryiso, planids, dffundreq, all_plans,
                                                                       dataset)
+        if hxl_resource_c:
+            hxl_resource = hxl_resource_c
 
     generate_flows_files(fund_boundaries_info, planidcodemapping)
     return dataset, showcase, hxl_resource

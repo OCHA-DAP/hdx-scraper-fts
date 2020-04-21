@@ -103,20 +103,20 @@ def row_correction_requirements_funding(objecttype, base_url, downloader, dffund
             logger.warning('Not reading %s info for plan id %s which is incomplete!' % (objecttype, planid))
             continue
 
-        data = all_plans.get(planid)
-        if data is None:
+        plan = all_plans.get(planid)
+        if plan is None:
             logger.error('Missing plan id %s!' % planid)
             continue
-        error = data.get('message')
+        error = plan.get('message')
         if error:
             logger.error(error)
             continue
-        planversioncode = data['planVersion']['code']
+        planversioncode = plan['planVersion']['code']
         planidcodemapping[planid] = planversioncode
         dffundreq.at[i, 'code'] = planversioncode
-        dffundreq.at[i, 'startDate'] = str(data['planVersion']['startDate'])[:10]
-        dffundreq.at[i, 'endDate'] = str(data['planVersion']['endDate'])[:10]
-        years = data['years']
+        dffundreq.at[i, 'startDate'] = str(plan['planVersion']['startDate'])[:10]
+        dffundreq.at[i, 'endDate'] = str(plan['planVersion']['endDate'])[:10]
+        years = plan['years']
         if len(years) > 1:
             logger.error('More than one year listed in plan %s for %s!' % (planid, name))
         dffundreq.at[i, 'year'] = years[0]['year']
@@ -135,12 +135,15 @@ def row_correction_requirements_funding(objecttype, base_url, downloader, dffund
                 origrequirements = int(totalrequirements)
             except ValueError:
                 origrequirements = None
+            name_to_id = dict()
             if len(fund_objects) != 0:
                 for object in fund_objects[0]['objectsBreakdown']:
-                    if 'id' not in object:
+                    if 'id' in object:
+                        if str(object['id']) != code:
+                            continue
+                    else:
                         continue
-                    if str(object['id']) != code:
-                        continue
+                    name_to_id = {object['name']: str(object['id'])}
                     totalfunding = object['totalFunding']
                     if isinstance(totalfunding, int):
                         if origfunding != totalfunding:
@@ -153,10 +156,15 @@ def row_correction_requirements_funding(objecttype, base_url, downloader, dffund
                     if 'name' not in object:
                         logger.warning('%s requirements object does not have a %s name!' % (funding_url, objecttype))
                         continue
-                    if 'id' not in object:
-                        continue
-                    if str(object['id']) != code:
-                        continue
+                    if 'id' in object:
+                        if str(object['id']) != code:
+                            continue
+                    else:
+                        object_id = name_to_id.get(object['name'])
+                        if not object_id:
+                            continue
+                        if object_id != code:
+                            continue
                     totalrequirements = object['revisedRequirements']
                     if isinstance(totalrequirements, int):
                         if origrequirements != totalrequirements:
@@ -220,7 +228,7 @@ def generate_requirements_funding_resource(objecttype, base_url, all_plans, plan
     columnname = columnlookup[objecttype]
     dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding(plans, base_funding_url, downloader, name, outputcode, columnname)
     if dffundreq is None:
-        return None, None, planidcodemapping, incompleteplans
+        return None, None, planidcodemapping, incompleteplans, None
     dffundreq, planids = row_correction_requirements_funding(objecttype, base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, name, code)
 
     dffundreq = add_not_specified(base_funding_url, downloader, outputcode, columnname, dffundreq)
@@ -238,4 +246,4 @@ def generate_requirements_funding_resource(objecttype, base_url, all_plans, plan
     resource = Resource(resource_data)
     resource.set_file_to_upload(file_to_upload_hxldffundreq)
     dataset.add_update_resource(resource)
-    return dffundreq, planids, planidcodemapping, incompleteplans
+    return dffundreq, planids, planidcodemapping, incompleteplans, resource
