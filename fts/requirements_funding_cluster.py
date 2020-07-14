@@ -5,7 +5,7 @@ from hdx.data.resource import Resource
 from hdx.utilities.downloader import DownloadError
 from pandas import DataFrame, json_normalize, to_numeric
 
-from fts.helpers import download_data, plan_columns_to_keep, cluster_columns_to_keep, rename_columns, hxl_names
+from fts.helpers import download_data, cluster_plan_columns_to_keep, cluster_columns_to_keep, rename_columns, hxl_names
 from fts.pandas_helpers import drop_columns_except, remove_nonenan, remove_fractions, hxlate
 
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ def generate_requirements_funding_cluster(base_url, downloader, countryiso, plan
                 continue
 
         df.rename(columns={'id': 'clusterCode'}, inplace=True)
-        df = drop_columns_except(df, plan_columns_to_keep)
+        df = drop_columns_except(df, cluster_plan_columns_to_keep)
         remove_nonenan(df, 'clusterCode')
         if fund_data_cluster is None:
             shared_funding = None

@@ -69,9 +69,11 @@ country_all_columns_to_keep = ['date', 'budgetYear', 'description', 'amountUSD',
                                'exchangeRate', 'id', 'refCode', 'createdAt', 'updatedAt']
 country_emergency_columns_to_keep = ['id', 'name', 'code', 'startDate', 'endDate', 'year', 'revisedRequirements',
                                      'totalFunding', 'percentFunded']
-plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
+cluster_plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
 cluster_columns_to_keep = ['countryCode', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode',
                            'clusterName', 'revisedRequirements', 'totalFunding']
+location_plan_columns_to_keep = ['countryCode', 'countryName', 'revisedRequirements', 'totalFunding']
+location_columns_to_keep = ['id', 'countryCode', 'countryName', 'revisedRequirements', 'totalFunding']
 columnlookup = {'location': 'countryCode', 'emergency': 'emergency_id'}
 urllookup = {'location': 'locationid', 'emergency': 'emergencyid'}
 

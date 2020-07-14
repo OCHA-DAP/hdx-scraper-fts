@@ -17,6 +17,7 @@ from fts.flows import generate_flows_resources, generate_flows_files
 from fts.helpers import download_data, get_dataset_and_showcase
 from fts.requirements_funding import generate_requirements_funding_resource
 from fts.requirements_funding_cluster import generate_requirements_funding_cluster_resource
+from fts.requirements_funding_location import generate_requirements_funding_location_resource
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,12 @@ def generate_emergency_dataset_and_showcase(base_url, downloader, folder, emerge
             return None, None
         else:
             logger.error('We have latest year funding data but no overall funding data for %s' % title)
+    else:
+        hxl_resource_c = generate_requirements_funding_location_resource(base_url, downloader, folder, emergencyid,
+                                                                         planids, dffundreq, dataset)
+#        if hxl_resource_c:
+#            hxl_resource = hxl_resource_c
+
     generate_flows_files(fund_boundaries_info, planidcodemapping)
     return dataset, showcase, hxl_resource
 
