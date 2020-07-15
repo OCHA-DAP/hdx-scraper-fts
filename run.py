@@ -14,7 +14,7 @@ from os.path import join, expanduser
 
 from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
-from hdx.utilities.path import multiple_progress_storing_tempdir
+from hdx.utilities.path import progress_storing_tempdir
 
 from fts.main import generate_dataset_and_showcase, get_countries, generate_emergency_dataset_and_showcase, get_plans
 
@@ -32,28 +32,21 @@ def main():
         configuration = Configuration.read()
         base_url = configuration['base_url']
         notes = configuration['notes']
-        emergencies = configuration['emergencies']
+#        emergencies = configuration['emergencies']
         today = datetime.now()
 
         countries = get_countries(base_url, downloader)
         all_plans, plans_by_emergency, plans_by_country = get_plans(base_url, downloader, countries, today)
 
-        logger.info('Number of emergency datasets to upload: %d' % len(emergencies))
+#        logger.info('Number of emergency datasets to upload: %d' % len(emergencies))
         logger.info('Number of country datasets to upload: %d' % len(countries))
-        for i, info, nextdict in multiple_progress_storing_tempdir('FTS', [emergencies, countries], ['emergency_id', 'iso3']):
+        for info, nextdict in progress_storing_tempdir('FTS', countries, 'iso3'):
             folder = info['folder']
-            if i == 0:
-# for testing countries only
-#                continue
-                dataset, showcase, hxl_resource = \
-                    generate_emergency_dataset_and_showcase(base_url, downloader, folder, nextdict, all_plans,
-                                                            plans_by_emergency, today, notes)
-            else:
 # for testing specific countries only
-#                if nextdict['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
-#                    continue
-                dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, nextdict,
-                                                                                all_plans, plans_by_country, today,
+#            if nextdict['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
+#                continue
+            dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, nextdict,
+                                                                            all_plans, plans_by_country, today,
                                                                                 notes)
             if dataset is not None:
                 dataset.update_from_yaml()
