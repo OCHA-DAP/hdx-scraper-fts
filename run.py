@@ -16,7 +16,9 @@ from hdx.hdx_configuration import Configuration
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import progress_storing_tempdir
 
-from fts.main import generate_dataset_and_showcase, get_countries, get_plans
+from fts.download import FTSDownload
+from fts.locations import Locations
+from fts.main import FTS
 
 from hdx.facades.simple import facade
 
@@ -30,22 +32,20 @@ def main():
 
     with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup, rate_limit={'calls': 1, 'period': 1}) as downloader:
         configuration = Configuration.read()
-        base_url = configuration['base_url']
+        ftsdownloader = FTSDownload(configuration, downloader)
         notes = configuration['notes']
         today = datetime.now()
 
-        countries = get_countries(base_url, downloader)
-        all_plans, plans_by_country = get_plans(base_url, downloader, countries, today)
+        locations = Locations(ftsdownloader)
+        logger.info('Number of country datasets to upload: %d' % len(locations.countries))
 
-        logger.info('Number of country datasets to upload: %d' % len(countries))
-        for info, country in progress_storing_tempdir('FTS', countries, 'iso3'):
+        fts = FTS(ftsdownloader, locations, today, notes)
+        for info, country in progress_storing_tempdir('FTS', locations.countries, 'iso3'):
             folder = info['folder']
 # for testing specific countries only
 #             if nextdict['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
 #                 continue
-            dataset, showcase, hxl_resource = generate_dataset_and_showcase(base_url, downloader, folder, country,
-                                                                            all_plans, plans_by_country, today,
-                                                                            notes)
+            dataset, showcase, hxl_resource = fts.generate_dataset_and_showcase(folder, country)
             if dataset is not None:
                 dataset.update_from_yaml()
                 if hxl_resource is None:

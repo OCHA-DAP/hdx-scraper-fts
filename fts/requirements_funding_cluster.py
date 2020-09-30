@@ -2,10 +2,6 @@ import logging
 from os.path import join
 
 from hdx.data.resource import Resource
-from hdx.utilities.downloader import DownloadError
-from pandas import DataFrame, json_normalize, to_numeric
-
-from fts.helpers import download_data, plan_columns_to_keep, cluster_columns_to_keep, rename_columns, hxl_names
 
 logger = logging.getLogger(__name__)
 
