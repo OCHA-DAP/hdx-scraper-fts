@@ -1,6 +1,6 @@
 import logging
 
-from fts.helpers import hxl_names
+from fts.helpers import hxl_names, custom_location_codes
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +24,11 @@ class RequirementsFunding:
                 funding = funding.get('totalFunding')
             countries[0]['requirements'] = requirements
             countries[0]['funding'] = funding
+            if progress:
+                progress = int(progress + 0.5)
             countries[0]['percentFunded'] = progress
         else:
-            if plan.get('customLocationCode') in ['GLBL', 'COVD']:
+            if plan.get('customLocationCode') in custom_location_codes:
                 return
             funding_url = f'fts/flow?planid={planid}&groupby=location'
             data = self.downloader.download_data(funding_url)
@@ -53,28 +55,32 @@ class RequirementsFunding:
                 funding = country_funding.get(countryid)
                 country['funding'] = funding
                 if requirements is not None and funding is not None:
-                    country['percentFunded'] = funding / requirements * 100
+                    country['percentFunded'] = int(funding / requirements * 100 + 0.5)
 
     def get_country_funding(self, countryid, plans_by_year, start_year=2010):
         funding_by_year = dict()
         if plans_by_year is not None:
             start_year = sorted(plans_by_year.keys())[0]
-        for year in range(self.today.year, start_year, -11):
+        for year in range(self.today.year + 5, start_year - 5, -11):
             data = self.downloader.download_data(f'country/{countryid}/summary/trends/{year}', use_v2=True)
             for object in data:
                 year = object['year']
-                if year < start_year:
-                    continue
-                funding_by_year[object['year']] = object['totalFunding']
+                funding = object['totalFunding']
+                if funding:
+                    funding_by_year[year] = funding
         return funding_by_year
 
     def generate_requirements_funding_resource(self, folder, dataset, plans_by_year, country):
         countryiso = country['iso3']
         funding_by_year = self.get_country_funding(country['id'], plans_by_year)
         rows = list()
-        for year, plans in plans_by_year.items():
-            not_specified_funding = funding_by_year[year]
-            for plan in plans:
+
+        all_years = sorted(set(plans_by_year.keys()) | set(funding_by_year.keys()), reverse=True)
+        for year in all_years:
+            not_specified_funding = funding_by_year.get(year, '')
+            for plan in plans_by_year.get(year, list()):
+                if plan.get('customLocationCode') in custom_location_codes:
+                    continue
                 planid = plan['id']
                 for country in plan['countries']:
                     if country['iso3'] != countryiso:
@@ -82,21 +88,18 @@ class RequirementsFunding:
                     requirements = country.get('requirements', '')
                     funding = country.get('funding', '')
                     percentFunded = country.get('percentFunded', '')
-                    if funding != '' and not_specified_funding is not None:
+                    if not_specified_funding and funding:
                         not_specified_funding -= funding
                     row = {'countryCode': countryiso, 'id': planid, 'name': plan['name'], 'code': plan['code'],
                            'startDate': plan['startDate'], 'endDate': plan['endDate'], 'year': year,
                            'requirements': requirements, 'funding': funding, 'percentFunded': percentFunded}
                     rows.append(row)
                     break
-            if not_specified_funding is None:
-                not_specified_funding = ''
-            row = {'countryCode': countryiso, 'id': '', 'name': '', 'code': '',
-                   'startDate': '', 'endDate': '', 'year': year,
-                   'requirements': '', 'funding': not_specified_funding, 'percentFunded': ''}
-            rows.append(row)
+            rows.append({'countryCode': countryiso, 'id': '', 'name': 'Not specified', 'code': '', 'startDate': '',
+                         'endDate': '', 'year': year, 'requirements': '', 'funding': not_specified_funding,
+                         'percentFunded': ''})
         if rows:
-            headers = rows[0].keys()
+            headers = list(rows[0].keys())
             filename = 'fts_requirements_funding_%s.csv' % countryiso.lower()
             resourcedata = {
                 'name': filename.lower(),

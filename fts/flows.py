@@ -69,7 +69,7 @@ class Flows:
                         outputstr = values[0]
                 if keyname in country_all_columns_to_keep:
                     newrow[keyname] = outputstr
-            return destPlanId
+        return destPlanId
 
     def generate_flows_resources(self, folder, dataset, latestyear, country):
         fund_boundaries_info = dict()
@@ -90,7 +90,9 @@ class Flows:
                 value = row[key]
                 shortened = srcdestmap.get(key)
                 if shortened:
-                    destPlanId = self.flatten_objects(value, shortened, newrow)
+                    newdestPlanId = self.flatten_objects(value, shortened, newrow)
+                    if newdestPlanId:
+                        destPlanId = int(newdestPlanId)
                     continue
                 if key == 'keywords':
                     if value:
@@ -124,7 +126,7 @@ class Flows:
 
         for boundary, rows in fund_boundaries_info.items():
             rows = sorted(rows, key=lambda k: k['date'], reverse=True)
-            headers = rows[0].keys()
+            headers = list(funding_hxl_names.keys())
             filename = 'fts_%s_funding_%s.csv' % (boundary, country['iso3'].lower())
             resourcedata = {
                 'name': filename,

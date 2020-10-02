@@ -2,26 +2,10 @@ from hdx.data.dataset import Dataset
 from hdx.data.showcase import Showcase
 
 funding_hxl_names = {
-    'amountUSD': '#value+funding+total+usd',
-    'boundary': '#financial+direction',
-    'onBoundary': '#financial+direction+type',
-    'budgetYear': '#date+year+budget',
-    'contributionType': '#financial+contribution+type',
-    'createdAt': '#date+created',
     'date': '#date',
-    'decisionDate': '#date+decision',
+    'budgetYear': '#date+year+budget',
     'description': '#description+notes',
-    'exchangeRate': '#financial+fx',
-    'firstReportedDate': '#date+reported',
-    'flowType': '#financial+contribution+type',
-    'id': '#activity+id+fts_internal',
-    'keywords': '#description+keywords',
-    'method': '#financial+method',
-    'originalAmount': '#value+funding+total',
-    'originalCurrency': '#value+funding+total+currency',
-    'refCode': '#activity+code',
-    'status': '#status+text',
-    'updatedAt': '#date+updated',
+    'amountUSD': '#value+funding+total+usd',
     'srcOrganization': '#org+name+funder',
     'srcOrganizationTypes': '#org+type+funder+list',
     'srcLocations': '#country+iso3+funder+list',
@@ -38,8 +22,25 @@ funding_hxl_names = {
     'destProjectCode': '#activity+project+code',
     'destEmergency': '#crisis+name',
     'destUsageYearStart': '#date+year+start+impl',
-    'destUsageYearEnd': '#date+year+end+impl'
+    'destUsageYearEnd': '#date+year+end+impl',
+    'contributionType': '#financial+contribution+type',
+    'flowType': '#financial+contribution+type',
+    'method': '#financial+method',
+    'boundary': '#financial+direction',
+    'onBoundary': '#financial+direction+type',
+    'status': '#status+text',
+    'firstReportedDate': '#date+reported',
+    'decisionDate': '#date+decision',
+    'keywords': '#description+keywords',
+    'originalAmount': '#value+funding+total',
+    'originalCurrency': '#value+funding+total+currency',
+    'exchangeRate': '#financial+fx',
+    'id': '#activity+id+fts_internal',
+    'refCode': '#activity+code',
+    'createdAt': '#date+created',
+    'updatedAt': '#date+updated',
 }
+
 hxl_names = {
     'id': '#activity+appeal+id+fts_internal',
     'emergency_id': '#crisis+code',
@@ -73,7 +74,7 @@ plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'to
 cluster_columns_to_keep = ['countryCode', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode',
                            'clusterName', 'revisedRequirements', 'totalFunding']
 
-
+custom_location_codes = ['GLBL', 'COVD']
 
 
 def get_dataset_and_showcase(slugified_name, title, description, today, country, showcase_url, additional_tags=list()):
