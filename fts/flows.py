@@ -64,17 +64,17 @@ class Flows:
                 else:
                     if len(values) > 1:
                         outputstr = 'Multiple'
-                        logger.error('Multiple used instead of %s for %s in %s (%s)' % (values, keyname, plan_id, shortened))
+                        logger.error(f'Multiple used instead of {values} for {keyname} in {plan_id} ({shortened})')
                     else:
                         outputstr = values[0]
                 if keyname in country_all_columns_to_keep:
                     newrow[keyname] = outputstr
         return destPlanId
 
-    def generate_flows_resources(self, folder, dataset, latestyear, country):
+    def generate_resources(self, folder, dataset, latestyear, country):
         fund_boundaries_info = dict()
         fund_data = list()
-        base_funding_url = 'fts/flow?locationid=%s&' % country['id']
+        base_funding_url = f'fts/flow?locationid={country["id"]}&'
         funding_url = self.downloader.get_url(f'{base_funding_url}year={latestyear}')
         while funding_url:
             json = self.downloader.download(url=funding_url)
@@ -124,13 +124,13 @@ class Flows:
             rows.append(newrow)
             fund_boundaries_info[boundary] = rows
 
-        for boundary, rows in fund_boundaries_info.items():
-            rows = sorted(rows, key=lambda k: k['date'], reverse=True)
+        for boundary in sorted(fund_boundaries_info.keys(), reverse=True):
+            rows = sorted(fund_boundaries_info[boundary], key=lambda k: k['date'], reverse=True)
             headers = list(funding_hxl_names.keys())
-            filename = 'fts_%s_funding_%s.csv' % (boundary, country['iso3'].lower())
+            filename = f'fts_{boundary}_funding_{country["iso3"].lower()}.csv'
             resourcedata = {
                 'name': filename,
-                'description': 'FTS %s Funding Data for %s for %s' % (boundary.capitalize(), country['name'], latestyear),
+                'description': f'FTS {boundary.capitalize()} Funding Data for {country["name"]} for {latestyear}',
                 'format': 'csv'
             }
             dataset.generate_resource_from_iterator(headers, rows, funding_hxl_names, folder, filename, resourcedata)

@@ -42,20 +42,22 @@ funding_hxl_names = {
 }
 
 hxl_names = {
-    'id': '#activity+appeal+id+fts_internal',
-    'emergency_id': '#crisis+code',
     'countryCode': '#country+code',
+    'id': '#activity+appeal+id+fts_internal',
     'name': '#activity+appeal+name',
     'code': '#activity+appeal+id+external',
-    'requirements': '#value+funding+required+usd',
-    'funding': '#value+funding+total+usd',
+    'typeId': '#activity+appeal+type+id+fts_internal',
+    'typeName': '#activity+appeal+type+name',
     'startDate': '#date+start',
     'endDate': '#date+end',
     'year': '#date+year',
-    'percentFunded': '#value+funding+pct',
     'clusterCode': '#sector+cluster+code',
-    'cluster': '#sector+cluster+name'
+    'cluster': '#sector+cluster+name',
+    'requirements': '#value+funding+required+usd',
+    'funding': '#value+funding+total+usd',
+    'percentFunded': '#value+funding+pct'
 }
+
 rename_columns = {
     'totalFunding': 'funding',
     'revisedRequirements': 'requirements',

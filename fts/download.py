@@ -21,7 +21,7 @@ class FTSDownload:
         json = r.json()
         status = json['status']
         if status != 'ok':
-            raise FTSException('%s gives status %s' % (url, status))
+            raise FTSException(f'{url} gives status {status}')
         return json
 
     def download_data(self, partial_url=None, use_v2=False, url=None):

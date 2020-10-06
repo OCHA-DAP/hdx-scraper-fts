@@ -52,15 +52,15 @@ def main():
                     dataset.preview_off()
                 else:
                     dataset.set_quickchart_resource(hxl_resource)
+                resource_names = [x['name'] for x in dataset.get_resources()]
                 dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False,
                                       updated_by_script='HDX Scraper: FTS', batch=info['batch'])
-                resources = sorted(dataset.get_resources(), key=lambda x: len(x['name']), reverse=True)
+                sorted_resources = sorted(dataset.get_resources(), key=lambda x: resource_names.index(x['name']))
                 if hxl_resource and 'cluster' not in hxl_resource['name']:
                     hxl_update = True
                 else:
                     hxl_update = False
-                resource_ids = [x['id'] for x in resources]
-                dataset.reorder_resources(resource_ids, hxl_update=hxl_update)
+                dataset.reorder_resources([x['id'] for x in reversed(sorted_resources)], hxl_update=hxl_update)
                 if hxl_resource and not hxl_update:
                     dataset.generate_resource_view()
                 showcase.create_in_hdx()

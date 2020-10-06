@@ -1,6 +1,9 @@
 import logging
 
+from hdx.utilities.downloader import DownloadError
+
 from fts.helpers import hxl_names, custom_location_codes
+from fts.requirements_funding_cluster import RequirementsFundingCluster
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +13,8 @@ class RequirementsFunding:
         self.downloader = downloader
         self.locations = locations
         self.today = today
+        self.cluster = RequirementsFundingCluster(downloader, locations)
+        self.globalcluster = RequirementsFundingCluster(downloader, locations, clusterlevel='global')
 
     def add_country_requirements_funding(self, planid, plan, countries):
         if len(countries) == 1:
@@ -70,7 +75,7 @@ class RequirementsFunding:
                     funding_by_year[year] = funding
         return funding_by_year
 
-    def generate_requirements_funding_resource(self, folder, dataset, plans_by_year, country):
+    def generate_resource(self, folder, dataset, plans_by_year, country, covid=None):
         countryiso = country['iso3']
         funding_by_year = self.get_country_funding(country['id'], plans_by_year)
         rows = list()
@@ -78,12 +83,16 @@ class RequirementsFunding:
         all_years = sorted(set(plans_by_year.keys()) | set(funding_by_year.keys()), reverse=True)
         for year in all_years:
             not_specified_funding = funding_by_year.get(year, '')
+            subrows = list()
             for plan in plans_by_year.get(year, list()):
                 if plan.get('customLocationCode') in custom_location_codes:
                     continue
                 planid = plan['id']
+                found_other_countries = False
                 for country in plan['countries']:
-                    if country['iso3'] != countryiso:
+                    adminlevel = country.get('adminlevel', country.get('adminLevel'))
+                    if adminlevel == 0 and country['iso3'] != countryiso:
+                        found_other_countries = True
                         continue
                     requirements = country.get('requirements', '')
                     funding = country.get('funding', '')
@@ -91,21 +100,38 @@ class RequirementsFunding:
                     if not_specified_funding and funding:
                         not_specified_funding -= funding
                     row = {'countryCode': countryiso, 'id': planid, 'name': plan['name'], 'code': plan['code'],
+                           'typeId': plan['planType']['id'], 'typeName': plan['planType']['id'],
                            'startDate': plan['startDate'], 'endDate': plan['endDate'], 'year': year,
                            'requirements': requirements, 'funding': funding, 'percentFunded': percentFunded}
-                    rows.append(row)
-                    break
-            rows.append({'countryCode': countryiso, 'id': '', 'name': 'Not specified', 'code': '', 'startDate': '',
-                         'endDate': '', 'year': year, 'requirements': '', 'funding': not_specified_funding,
-                         'percentFunded': ''})
-        if rows:
-            headers = list(rows[0].keys())
-            filename = 'fts_requirements_funding_%s.csv' % countryiso.lower()
-            resourcedata = {
-                'name': filename.lower(),
-                'description': 'FTS Annual Requirements and Funding Data for %s' % country['name'],
-                'format': 'csv'
-            }
-            success, results = dataset.generate_resource_from_iterator(headers, rows, hxl_names, folder, filename, resourcedata)
-            return results['resource']
-        return None
+                    subrows.append(row)
+
+                if found_other_countries:
+                    logger.warning('Plan %s spans multiple locations - ignoring in cluster breakdown!' % planid)
+                    continue
+            for row in sorted(subrows, key=lambda k: (k['typeId'], k['id'])):
+                rows.append(row)
+                requirements_clusters = self.cluster.generate_plan_requirements_funding(row)
+                if covid:
+                    covid.generate_plan_requirements_funding(row, requirements_clusters)
+                self.globalcluster.generate_plan_requirements_funding(row)
+
+            rows.append({'countryCode': countryiso, 'id': '', 'name': 'Not specified', 'code': '', 'typeId': '',
+                         'typeName': '', 'startDate': '', 'endDate': '', 'year': year, 'requirements': '',
+                         'funding': not_specified_funding, 'percentFunded': ''})
+        if not rows:
+            return None
+        if covid:
+            covid.generate_resource(folder, dataset, country)
+        headers = list(rows[0].keys())
+        filename = f'fts_requirements_funding_{countryiso.lower()}.csv'
+        resourcedata = {
+            'name': filename.lower(),
+            'description': f'FTS Annual Requirements and Funding Data for {country["name"]}',
+            'format': 'csv'
+        }
+        success, results = dataset.generate_resource_from_iterator(headers, rows, hxl_names, folder, filename, resourcedata)
+        self.globalcluster.generate_resource(folder, dataset, country)
+        cluster_resource = self.cluster.generate_resource(folder, dataset, country)
+        if cluster_resource:
+            return cluster_resource
+        return results['resource']
