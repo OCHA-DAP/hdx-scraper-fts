@@ -18,8 +18,8 @@ from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
 
 from fts.download import FTSDownload
-from locations import Locations
-from main import FTS
+from fts.locations import Locations
+from fts.main import FTS
 
 logger = logging.getLogger(__name__)
 
