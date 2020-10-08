@@ -112,4 +112,5 @@ class RequirementsFundingCluster:
         }
         success, results = dataset.generate_resource_from_iterator(headers, self.rows, hxl_names, folder, filename,
                                                                    resourcedata)
+        self.rows = list()
         return results['resource']

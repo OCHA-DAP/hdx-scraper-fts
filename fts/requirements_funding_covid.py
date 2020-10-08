@@ -15,6 +15,9 @@ class RequirementsFundingCovid:
         self.rows = list()
         self.get_covid_funding(plans_by_year_by_country)
 
+    def clear_rows(self):
+        self.rows = list()
+
     def get_covid_funding(self, plans_by_year_by_country, covidstartyear=2020):
         planids = set()
         for plans_by_year in plans_by_year_by_country.values():
@@ -64,4 +67,5 @@ class RequirementsFundingCovid:
         }
         success, results = dataset.generate_resource_from_iterator(headers, self.rows, hxl_names, folder, filename,
                                                                    resourcedata)
+        self.rows = list()
         return results['resource']
