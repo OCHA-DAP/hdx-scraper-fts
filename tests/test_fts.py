@@ -4,69 +4,124 @@
 Unit tests for fts.
 
 '''
-import copy
+import logging
 from datetime import datetime
 from os.path import join
 
 import pytest
+from hdx import hdx_locations
 from hdx.data.vocabulary import Vocabulary
 from hdx.hdx_configuration import Configuration
-from hdx.hdx_locations import Locations
 from hdx.location.country import Country
 from hdx.utilities.compare import assert_files_same
-from hdx.utilities.downloader import DownloadError
+from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
+
+from fts.download import FTSDownload
+from locations import Locations
+from main import FTS
+
+logger = logging.getLogger(__name__)
 
 
 class TestFTS:
-    countries = [{
-        'id': 1,
-        'iso3': 'AFG',
-        'name': 'Afghanistan'
-    }, {
-        'id': 3,
-        'iso3': 'ALB',
-        'name': 'Albania'
-    }, {
-        'id': 41,
-        'iso3': 'CPV',
-        'name': 'Cape Verde'}
-    ]
-
     @pytest.fixture(scope='function')
     def configuration(self):
         Configuration._create(hdx_read_only=True, user_agent='test',
                               project_config_yaml=join('tests', 'config', 'project_configuration.yml'))
-        Locations.set_validlocations([{'name': 'afg', 'title': 'Afghanistan'}, {'name': 'alb', 'title': 'Albania'}, {'name': 'cpv', 'title': 'Cape Verde'}, {'name': 'world', 'title': 'World'}])
+        hdx_locations.Locations.set_validlocations([{'name': 'afg', 'title': 'Afghanistan'}, {'name': 'pse', 'title': 'occupied Palestinian territory'}])
         Country.countriesdata(False)
-        Vocabulary._tags_dict = {'ep-2020-000012-chn': {'Action to Take': 'merge', 'New Tag(s)': 'epidemics and outbreaks;covid-19'}}
         Vocabulary._approved_vocabulary = {'tags': [{'name': 'hxl'}, {'name': 'financial tracking service - fts'}, {'name': 'aid funding'}, {'name': 'epidemics and outbreaks'}, {'name': 'covid-19'}], 'id': '4e61d464-4943-4e97-973a-84673c1aaa87', 'name': 'approved'}
         return Configuration.read()
 
-    @pytest.fixture(scope='function')
-    def downloader(self):
-        class Response:
-            @staticmethod
-            def json():
-                pass
+    def test_generate_dataset_and_showcase(self, configuration):
 
-        class Download:
-            @staticmethod
-            def download(url):
-                response = Response()
-                return response
-        return Download()
+        def check_resources(dsresources):
+            for resource in dsresources:
+                resource_name = resource['name']
+                expected_file = join('tests', 'fixtures', resource_name)
+                actual_file = join(folder, resource_name)
+                assert_files_same(expected_file, actual_file)
 
-    def test_get_countries(self, downloader):
-        countries = get_countries('http://afgsite/', downloader)
-        assert countries == TestFTS.countries
-
-    def test_get_plans(self, downloader):
-        today = datetime.strptime('14042020', '%d%m%Y').date()
-        all_plans, plans_by_emergency, plans_by_country = get_plans('http://lala/', downloader, TestFTS.countries, today, start_year=2019)
-        assert all_plans == TestFTS.all_plans
-        assert plans_by_emergency == TestFTS.plans_by_emergency
-        assert plans_by_country == TestFTS.plans_by_country
-
-    def test_generate_dataset_and_showcase(self, configuration, downloader):
         with temp_dir('FTS-TEST') as folder:
+            with Download(user_agent='test') as downloader:
+                ftsdownloader = FTSDownload(configuration, downloader, testpath=True)
+                notes = configuration['notes']
+                today = datetime.now()
+
+                locations = Locations(ftsdownloader)
+                logger.info('Number of country datasets to upload: %d' % len(locations.countries))
+
+                fts = FTS(ftsdownloader, locations, today, notes, start_year=2019)
+                dataset, showcase, hxl_resource = fts.generate_dataset_and_showcase(folder, locations.countries[0])
+                assert dataset == {'groups': [{'name': 'afg'}], 'name': 'fts-requirements-and-funding-data-for-afghanistan',
+                                   'title': 'Afghanistan - Requirements and Funding Data',
+                                   'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                            {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                            {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
+                                   'dataset_date': '10/08/2020',
+                                   'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
+                                   'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0', 'notes': notes}
+                resources = dataset.get_resources()
+                assert resources == [{'name': 'fts_internal_funding_afg.csv', 'description': 'FTS Internal Funding Data for Afghanistan for 2020',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_incoming_funding_afg.csv', 'description': 'FTS Incoming Funding Data for Afghanistan for 2020',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_requirements_funding_covid_afg.csv', 'description': 'FTS Annual Covid Requirements and Funding Data for Afghanistan',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_requirements_funding_afg.csv', 'description': 'FTS Annual Requirements and Funding Data for Afghanistan',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_requirements_funding_globalcluster_afg.csv', 'description': 'FTS Annual Requirements and Funding Data by Global Cluster for Afghanistan',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_requirements_funding_cluster_afg.csv', 'description': 'FTS Annual Requirements and Funding Data by Cluster for Afghanistan',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
+                check_resources(resources)
+                assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
+                                    'name': 'fts-requirements-and-funding-data-for-afghanistan-showcase',
+                                    'notes': 'Click the image on the right to go to the FTS funding summary page for Afghanistan',
+                                    'url': 'https://fts.unocha.org/countries/1/flows/2020', 'title': 'FTS Afghanistan Summary Page',
+                                    'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                             {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                             {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+                assert hxl_resource == resources[5]
+
+                dataset, showcase, hxl_resource = fts.generate_dataset_and_showcase(folder, locations.countries[1])
+                assert dataset == {'groups': [{'name': 'pse'}], 'name': 'fts-requirements-and-funding-data-for-occupied-palestinian-territory',
+                                   'title': 'occupied Palestinian territory - Requirements and Funding Data',
+                                   'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                            {'name': 'financial tracking service - fts',
+                                             'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                            {'name': 'aid funding',
+                                             'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
+                                   'dataset_date': '10/08/2020',
+                                   'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
+                                   'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0',
+                                   'notes': notes}
+
+                resources = dataset.get_resources()
+                assert resources == [{'name': 'fts_outgoing_funding_pse.csv', 'description': 'FTS Outgoing Funding Data for occupied Palestinian territory for 2020',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_internal_funding_pse.csv', 'description': 'FTS Internal Funding Data for occupied Palestinian territory for 2020',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_incoming_funding_pse.csv', 'description': 'FTS Incoming Funding Data for occupied Palestinian territory for 2020',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_requirements_funding_covid_pse.csv', 'description': 'FTS Annual Covid Requirements and Funding Data for occupied Palestinian territory',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_requirements_funding_pse.csv', 'description': 'FTS Annual Requirements and Funding Data for occupied Palestinian territory',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_requirements_funding_globalcluster_pse.csv', 'description': 'FTS Annual Requirements and Funding Data by Global Cluster for occupied Palestinian territory',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                     {'name': 'fts_requirements_funding_cluster_pse.csv', 'description': 'FTS Annual Requirements and Funding Data by Cluster for occupied Palestinian territory',
+                                      'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
+                check_resources(resources)
+                assert showcase == {
+                    'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
+                    'name': 'fts-requirements-and-funding-data-for-occupied-palestinian-territory-showcase',
+                    'notes': 'Click the image on the right to go to the FTS funding summary page for occupied Palestinian territory',
+                    'url': 'https://fts.unocha.org/countries/171/flows/2020', 'title': 'FTS occupied Palestinian territory Summary Page',
+                    'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                             {'name': 'financial tracking service - fts',
+                              'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                             {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+                assert hxl_resource == resources[6]
+

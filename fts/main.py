@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class FTS:
-    def __init__(self, downloader, locations, today, notes):
+    def __init__(self, downloader, locations, today, notes, start_year=1998):
         self.downloader = downloader
         self.locations = locations
         self.today = today
@@ -31,12 +31,12 @@ class FTS:
         self.planidcodemapping = dict()
         self.flows = Flows(downloader, locations, self.planidcodemapping)
         self.reqfund = RequirementsFunding(downloader, locations, today)
-        self.get_plans()
+        self.get_plans(start_year=start_year)
         self.covid = RequirementsFundingCovid(downloader, self.plans_by_year_by_country)
 
     def get_plans(self, start_year=1998):
         for year in range(self.today.year, start_year, -1):
-            data = self.downloader.download_data(f'fts/flow/plan/overview/progress/{year}', use_v2=True)
+            data = self.downloader.download(f'fts/flow/plan/overview/progress/{year}', use_v2=True)
             plans = data['plans']
             for plan in plans:
                 planid = plan['id']
@@ -87,7 +87,4 @@ class FTS:
             logger.error(f'We have latest year funding data but no overall funding data for {title}')
         else:
             hxl_resource = self.reqfund.generate_resource(folder, dataset, plans_by_year, country, self.covid)
-            if hxl_resource is not None:
-                logger.error(f'We have latest year funding data but no overall funding data for {title}')
-
         return dataset, showcase, hxl_resource

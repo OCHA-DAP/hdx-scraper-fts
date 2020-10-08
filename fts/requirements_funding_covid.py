@@ -22,14 +22,14 @@ class RequirementsFundingCovid:
                 if year < covidstartyear:
                     continue
                 planids.update(str(plan['id']) for plan in plans_by_year[year])
-        planids = ','.join(planids)
-        data = self.downloader.download_data(f'fts/flow?emergencyid=911&planid={planids}&groupby=plan')
+        planids = ','.join(sorted(planids))
+        data = self.downloader.download(f'fts/flow?emergencyid=911&planid={planids}&groupby=plan')
         for fundingobject in data['report3']['fundingTotals']['objects'][0]['singleFundingObjects']:
             self.covidfundingbyplan[fundingobject['id']] = fundingobject['totalFunding']
 
     def generate_plan_requirements_funding(self, inrow, requirements_clusters):
         planid = inrow['id']
-        data = self.downloader.download_data(f'public/governingEntity?planId={planid}&scopes=governingEntityVersion', use_v2=True)
+        data = self.downloader.download(f'public/governingEntity?planId={planid}&scopes=governingEntityVersion', use_v2=True)
         covid_ids = set()
         for clusterobj in data:
             tags = clusterobj['governingEntityVersion'].get('tags')

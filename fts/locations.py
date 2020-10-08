@@ -7,7 +7,7 @@ class Locations:
         self.name_to_id = dict()
         self.id_to_iso3 = dict()
         countries = set()
-        for country in downloader.download_data('location'):
+        for country in downloader.download('location'):
             countryiso = country['iso3']
             if countryiso is None:
                 continue
@@ -16,8 +16,8 @@ class Locations:
             self.name_to_iso3[countryname] = countryiso
             self.name_to_id[countryname] = countryid
             self.id_to_iso3[countryid] = countryiso
-            countryname = Country.get_country_name_from_iso3(countryiso)
-            if countryname is None:
+            hdxcountryname = Country.get_country_name_from_iso3(countryiso)
+            if hdxcountryname is None:
                 continue
             countries.add((countryname, countryiso, countryid))
         self.countries = [{'id': country[2], 'iso3': country[1], 'name': country[0]} for country in sorted(countries)]

@@ -36,7 +36,7 @@ class RequirementsFunding:
             if plan.get('customLocationCode') in custom_location_codes:
                 return
             funding_url = f'fts/flow?planid={planid}&groupby=location'
-            data = self.downloader.download_data(funding_url)
+            data = self.downloader.download(funding_url)
             requirements = data.get('requirements')
             country_requirements = dict()
             if requirements is not None:
@@ -67,7 +67,7 @@ class RequirementsFunding:
         if plans_by_year is not None:
             start_year = sorted(plans_by_year.keys())[0]
         for year in range(self.today.year + 5, start_year - 5, -11):
-            data = self.downloader.download_data(f'country/{countryid}/summary/trends/{year}', use_v2=True)
+            data = self.downloader.download(f'country/{countryid}/summary/trends/{year}', use_v2=True)
             for object in data:
                 year = object['year']
                 funding = object['totalFunding']

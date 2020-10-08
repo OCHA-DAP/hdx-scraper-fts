@@ -8,6 +8,7 @@ Caller script. Designed to call all other functions
 that register datasets in HDX.
 
 '''
+import argparse
 import logging
 from datetime import datetime
 from os.path import join, expanduser
@@ -27,12 +28,22 @@ logger = logging.getLogger(__name__)
 lookup = 'hdx-scraper-fts'
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--countries', default=None, help='Countries to run')
+    parser.add_argument('-y', '--years', default=None, help='Years to run')
+    parser.add_argument('-t', '--testfolder', default=None, help='Output test data to folder')
+    args = parser.parse_args()
+    return args
+
+
 def main():
     '''Generate dataset and create it in HDX'''
 
     with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup, rate_limit={'calls': 1, 'period': 1}) as downloader:
+        args = parse_args()
         configuration = Configuration.read()
-        ftsdownloader = FTSDownload(configuration, downloader)
+        ftsdownloader = FTSDownload(configuration, downloader, countryisos=args.countries, years=args.years, testfolder=args.testfolder)
         notes = configuration['notes']
         today = datetime.now()
 

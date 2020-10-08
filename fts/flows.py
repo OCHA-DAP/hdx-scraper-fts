@@ -77,7 +77,7 @@ class Flows:
         base_funding_url = f'fts/flow?locationid={country["id"]}&'
         funding_url = self.downloader.get_url(f'{base_funding_url}year={latestyear}')
         while funding_url:
-            json = self.downloader.download(url=funding_url)
+            json = self.downloader.download(url=funding_url, data=False)
             fund_data.extend(json['data']['flows'])
             funding_url = json['meta'].get('nextLink')
 

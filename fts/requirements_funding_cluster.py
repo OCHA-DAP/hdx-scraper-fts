@@ -18,7 +18,7 @@ class RequirementsFundingCluster:
     def get_requirements_funding_plan(self, inrow):
         planid = inrow['id']
         try:
-            data = self.downloader.download_data(f'fts/flow?planid={planid}&groupby={self.clusterlevel}cluster')
+            data = self.downloader.download(f'fts/flow?planid={planid}&groupby={self.clusterlevel}cluster')
         except DownloadError:
             logger.error(f'Problem with downloading cluster data for {planid}!')
             return None, None
