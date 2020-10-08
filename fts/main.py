@@ -70,7 +70,7 @@ class FTS:
         slugified_name = slugify(f'FTS Requirements and Funding Data for {countryname}').lower()
         showcase_url = f'https://fts.unocha.org/countries/{country["id"]}/flows/{latestyear}'
         dataset, showcase = get_dataset_and_showcase(slugified_name, title, self.notes, self.today, countryname,
-                                                     showcase_url)
+                                                     showcase_url, additional_tags=['covid-19'])
         try:
             dataset.add_country_location(countryiso)
         except HDXError as e:

@@ -58,7 +58,8 @@ class TestFTS:
                                    'title': 'Afghanistan - Requirements and Funding Data',
                                    'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                             {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
-                                            {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
+                                            {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                            {'name': 'covid-19', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
                                    'dataset_date': '10/08/2020',
                                    'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
                                    'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0', 'notes': notes}
@@ -82,17 +83,17 @@ class TestFTS:
                                     'url': 'https://fts.unocha.org/countries/1/flows/2020', 'title': 'FTS Afghanistan Summary Page',
                                     'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                              {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
-                                             {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+                                             {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                             {'name': 'covid-19', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
                 assert hxl_resource == resources[5]
 
                 dataset, showcase, hxl_resource = fts.generate_dataset_and_showcase(folder, locations.countries[1])
                 assert dataset == {'groups': [{'name': 'pse'}], 'name': 'fts-requirements-and-funding-data-for-occupied-palestinian-territory',
                                    'title': 'occupied Palestinian territory - Requirements and Funding Data',
                                    'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
-                                            {'name': 'financial tracking service - fts',
-                                             'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
-                                            {'name': 'aid funding',
-                                             'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
+                                            {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                            {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                                            {'name': 'covid-19', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
                                    'dataset_date': '10/08/2020',
                                    'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
                                    'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0',
@@ -120,8 +121,8 @@ class TestFTS:
                     'notes': 'Click the image on the right to go to the FTS funding summary page for occupied Palestinian territory',
                     'url': 'https://fts.unocha.org/countries/171/flows/2020', 'title': 'FTS occupied Palestinian territory Summary Page',
                     'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
-                             {'name': 'financial tracking service - fts',
-                              'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
-                             {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+                             {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                             {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
+                             {'name': 'covid-19', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
                 assert hxl_resource == resources[6]
 
