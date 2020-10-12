@@ -1,1 +1,1 @@
-{"data": [{"id": 1, "iso3": "AFG", "name": "Afghanistan", "adminLevel": 0, "pcode": null}, {"id": 171, "iso3": "PSE", "name": "occupied Palestinian territory", "adminLevel": 0, "pcode": "PS"}], "status": "ok"}
+{"data": [{"id": 1, "iso3": "AFG", "name": "Afghanistan", "adminLevel": 0, "pcode": null}, {"id": 114, "iso3": "JOR", "name": "Jordan", "adminLevel": 0, "pcode": null}, {"id": 171, "iso3": "PSE", "name": "occupied Palestinian territory", "adminLevel": 0, "pcode": "PS"}], "status": "ok"}
