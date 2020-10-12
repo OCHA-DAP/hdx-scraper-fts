@@ -2,26 +2,10 @@ from hdx.data.dataset import Dataset
 from hdx.data.showcase import Showcase
 
 funding_hxl_names = {
-    'amountUSD': '#value+funding+total+usd',
-    'boundary': '#financial+direction',
-    'onBoundary': '#financial+direction+type',
-    'budgetYear': '#date+year+budget',
-    'contributionType': '#financial+contribution+type',
-    'createdAt': '#date+created',
     'date': '#date',
-    'decisionDate': '#date+decision',
+    'budgetYear': '#date+year+budget',
     'description': '#description+notes',
-    'exchangeRate': '#financial+fx',
-    'firstReportedDate': '#date+reported',
-    'flowType': '#financial+contribution+type',
-    'id': '#activity+id+fts_internal',
-    'keywords': '#description+keywords',
-    'method': '#financial+method',
-    'originalAmount': '#value+funding+total',
-    'originalCurrency': '#value+funding+total+currency',
-    'refCode': '#activity+code',
-    'status': '#status+text',
-    'updatedAt': '#date+updated',
+    'amountUSD': '#value+funding+total+usd',
     'srcOrganization': '#org+name+funder',
     'srcOrganizationTypes': '#org+type+funder+list',
     'srcLocations': '#country+iso3+funder+list',
@@ -38,23 +22,42 @@ funding_hxl_names = {
     'destProjectCode': '#activity+project+code',
     'destEmergency': '#crisis+name',
     'destUsageYearStart': '#date+year+start+impl',
-    'destUsageYearEnd': '#date+year+end+impl'
+    'destUsageYearEnd': '#date+year+end+impl',
+    'contributionType': '#financial+contribution+type',
+    'flowType': '#financial+contribution+type',
+    'method': '#financial+method',
+    'boundary': '#financial+direction',
+    'onBoundary': '#financial+direction+type',
+    'status': '#status+text',
+    'firstReportedDate': '#date+reported',
+    'decisionDate': '#date+decision',
+    'keywords': '#description+keywords',
+    'originalAmount': '#value+funding+total',
+    'originalCurrency': '#value+funding+total+currency',
+    'exchangeRate': '#financial+fx',
+    'id': '#activity+id+fts_internal',
+    'refCode': '#activity+code',
+    'createdAt': '#date+created',
+    'updatedAt': '#date+updated',
 }
+
 hxl_names = {
-    'id': '#activity+appeal+id+fts_internal',
-    'emergency_id': '#crisis+code',
     'countryCode': '#country+code',
+    'id': '#activity+appeal+id+fts_internal',
     'name': '#activity+appeal+name',
     'code': '#activity+appeal+id+external',
-    'requirements': '#value+funding+required+usd',
-    'funding': '#value+funding+total+usd',
+    'typeId': '#activity+appeal+type+id+fts_internal',
+    'typeName': '#activity+appeal+type+name',
     'startDate': '#date+start',
     'endDate': '#date+end',
     'year': '#date+year',
-    'percentFunded': '#value+funding+pct',
     'clusterCode': '#sector+cluster+code',
-    'cluster': '#sector+cluster+name'
+    'cluster': '#sector+cluster+name',
+    'requirements': '#value+funding+required+usd',
+    'funding': '#value+funding+total+usd',
+    'percentFunded': '#value+funding+pct'
 }
+
 rename_columns = {
     'totalFunding': 'funding',
     'revisedRequirements': 'requirements',
@@ -72,28 +75,11 @@ country_emergency_columns_to_keep = ['id', 'name', 'code', 'startDate', 'endDate
 plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'totalFunding']
 cluster_columns_to_keep = ['countryCode', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode',
                            'clusterName', 'revisedRequirements', 'totalFunding']
-columnlookup = {'location': 'countryCode', 'emergency': 'emergency_id'}
-urllookup = {'location': 'locationid', 'emergency': 'emergencyid'}
+
+custom_location_codes = ['GLBL', 'COVD']
 
 
-class FTSException(Exception):
-    pass
-
-
-def download(url, downloader):
-    r = downloader.download(url)
-    json = r.json()
-    status = json['status']
-    if status != 'ok':
-        raise FTSException('%s gives status %s' % (url, status))
-    return json
-
-
-def download_data(url, downloader):
-    return download(url, downloader)['data']
-
-
-def get_dataset_and_showcase(slugified_name, title, description, today, country_emergency, showcase_url, additional_tags=list()):
+def get_dataset_and_showcase(slugified_name, title, description, today, country, showcase_url, additional_tags=list()):
     dataset = Dataset({
         'name': slugified_name,
         'title': title,
@@ -109,8 +95,8 @@ def get_dataset_and_showcase(slugified_name, title, description, today, country_
     dataset.add_tags(tags)
     showcase = Showcase({
         'name': '%s-showcase' % slugified_name,
-        'title': 'FTS %s Summary Page' % country_emergency,
-        'notes': 'Click the image on the right to go to the FTS funding summary page for %s' % country_emergency,
+        'title': 'FTS %s Summary Page' % country,
+        'notes': 'Click the image on the right to go to the FTS funding summary page for %s' % country,
         'url': showcase_url,
         'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg'
     })

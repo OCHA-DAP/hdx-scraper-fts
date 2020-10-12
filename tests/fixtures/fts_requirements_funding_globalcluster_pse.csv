@@ -1,0 +1,15 @@
+countryCode,id,name,code,startDate,endDate,year,clusterCode,cluster,requirements,funding,percentFunded
+#country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#sector+cluster+code,#sector+cluster+name,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,26480,Coordination and support services,9767837,1225277,13
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,3,Education,22452394,403248,2
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,4,Emergency Shelter and NFI,14302195,1100009,8
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,6,Food Security,231940445,43939790,19
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,13,Gender Based Violence,,120000,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,7,Health,51606715,15581130,30
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,26479,Multi-sector,,60255154,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,,Not specified,,36957768,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,9,Nutrition,15652497,0,0
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,10,Protection,36039759,6622951,18
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,11,Water Sanitation Hygiene,38619842,4377963,11
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,,Not specified,,36957768,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,,Multiple clusters/sectors (shared),,19026031,

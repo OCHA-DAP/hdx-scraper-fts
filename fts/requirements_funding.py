@@ -1,249 +1,123 @@
-import copy
 import logging
-from os.path import join
 
-from hdx.data.resource import Resource
-from hdx.utilities.downloader import DownloadError
-from pandas import DataFrame, json_normalize, to_numeric, Series
-
-from fts.helpers import download_data, country_emergency_columns_to_keep, rename_columns, FTSException, urllookup, \
-    columnlookup, hxl_names
-from fts.pandas_helpers import drop_columns_except, drop_rows_with_col_word, remove_fractions, remove_nonenan, \
-    lookup_values_by_key, hxlate
+from fts.helpers import hxl_names, custom_location_codes
 
 logger = logging.getLogger(__name__)
 
 
-def generate_requirements_funding(plans, base_funding_url, downloader, name, code, columnname):
-    planidcodemapping = dict()
-    funding_url = '%sgroupby=plan' % base_funding_url
-    fund_data = download_data(funding_url, downloader)
-    data = fund_data['report3']['fundingTotals']['objects']
-    if len(data) == 0:
-        fund_data = None
-    else:
-        fund_data = data[0].get('objectsBreakdown')
-    columns_to_keep = copy.deepcopy(country_emergency_columns_to_keep)
-    columns_to_keep.insert(0, columnname)
-    if len(plans) == 0:
-        incompleteplans = list()
-        if not fund_data:
-            return None, planidcodemapping, incompleteplans
-        logger.warning('No requirements data, only funding data available')
-        dffund = json_normalize(fund_data)
-        dffund = drop_columns_except(dffund, columns_to_keep)
-        dffund['percentFunded'] = ''
-        dffund = dffund.fillna('')
-        dffundreq = dffund
-    else:
-        dfreq = json_normalize(plans)
-        dfreq['year'] = dfreq['years'].apply(lambda x: x[0]['year'])
-        if bool(dfreq['years'].apply(lambda x: len(x) != 1).any()) is True:
-            logger.error('More than one year listed in a plan for %s!' % name)
-        dfreq['id'] = dfreq.id.astype(str).str.replace('\\.0', '')
-        dfreq.rename(columns={'planVersion.id': 'planVersion_id'}, inplace=True)
-        dfreq.rename(columns=lambda x: x.replace('planVersion.', ''), inplace=True)
-        incompleteplans = dfreq.id.loc[~dfreq['revisionState'].isin(['none', None])].values
-        planidcodemapping.update(Series(dfreq.code.values, index=dfreq.id).to_dict())
-        if fund_data:
-            dffund = json_normalize(fund_data)
-            if 'id' in dffund:
-                dffundreq = dfreq.merge(dffund, on='id', how='outer', validate='1:1')
-                dffundreq['name_x'] = dffundreq.name_x.fillna(dffundreq.name_y)
-                dffundreq = dffundreq.fillna('')
-                dffundreq['percentFunded'] = ((to_numeric(dffundreq.totalFunding) / to_numeric(
-                    dffundreq.revisedRequirements) * 100) + 0.5).astype(str)
+class RequirementsFunding:
+    def __init__(self, downloader, locations, today):
+        self.downloader = downloader
+        self.locations = locations
+        self.today = today
+
+    def add_country_requirements_funding(self, planid, plan, countries):
+        if len(countries) == 1:
+            requirements = plan.get('requirements')
+            if requirements is not None:
+                requirements = requirements.get('revisedRequirements')
+            funding = plan.get('funding')
+            if funding is None:
+                progress = None
             else:
-                logger.info('Funding data lacks plan ids')
-                dffundreq = dfreq
-                dffundreq = drop_columns_except(dffundreq, columns_to_keep)
-                dffundreq['totalFunding'] = ''
-                dffundreq['percentFunded'] = ''
-                dffund = drop_columns_except(dffund, columns_to_keep)
-                dffund['percentFunded'] = ''
-                dffund = dffund.fillna('')
-                dffundreq = dffundreq.append(dffund)
+                progress = funding.get('progress')
+                funding = funding.get('totalFunding')
+            countries[0]['requirements'] = requirements
+            countries[0]['funding'] = funding
+            if progress:
+                progress = int(progress + 0.5)
+            countries[0]['percentFunded'] = progress
         else:
-            logger.warning('No funding data, only requirements data available')
-            dffundreq = dfreq
-            dffundreq['totalFunding'] = ''
-            dffundreq['percentFunded'] = ''
-    dffundreq[columnname] = code
-    dffundreq.rename(columns={'name_x': 'name'}, inplace=True)
-    dffundreq = drop_columns_except(dffundreq, columns_to_keep)
-    dffundreq = drop_rows_with_col_word(dffundreq, 'name', 'test')
-    dffundreq = drop_rows_with_col_word(dffundreq, 'name', 'Not specified')
-
-    dffundreq.startDate = dffundreq.startDate.str[:10]
-    dffundreq.endDate = dffundreq.endDate.str[:10]
-    # convert floats to string and trim ( formatters don't work on columns with mixed types)
-    remove_fractions(dffundreq, 'revisedRequirements')
-    remove_nonenan(dffundreq, 'revisedRequirements')
-    remove_fractions(dffundreq, 'totalFunding')
-    remove_nonenan(dffundreq, 'totalFunding')
-    dffundreq['id'] = dffundreq['id'].astype(str)
-    remove_fractions(dffundreq, 'id')
-    remove_nonenan(dffundreq, 'id')
-    remove_fractions(dffundreq, 'percentFunded')
-    remove_nonenan(dffundreq, 'percentFunded')
-    dffundreq.rename(index=str, columns=rename_columns, inplace=True)
-    return dffundreq, planidcodemapping, incompleteplans
-
-
-def row_correction_requirements_funding(objecttype, base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, name, code):
-    planids = list()
-    for i, row in dffundreq.iterrows():
-        planid = row['id']
-        if planid == '' or planid == 'undefined':
-            planname = row['name']
-            if planname == 'Not specified' or planname == '':
-                continue
-            raise FTSException('Plan Name: %s is invalid!' % planname)
-        if planid in incompleteplans:
-            logger.warning('Not reading %s info for plan id %s which is incomplete!' % (objecttype, planid))
-            continue
-
-        plan = all_plans.get(planid)
-        if plan is None:
-            logger.error('Missing plan id %s!' % planid)
-            continue
-        error = plan.get('message')
-        if error:
-            logger.error(error)
-            continue
-        planversioncode = plan['planVersion']['code']
-        planidcodemapping[planid] = planversioncode
-        dffundreq.at[i, 'code'] = planversioncode
-        dffundreq.at[i, 'startDate'] = str(plan['planVersion']['startDate'])[:10]
-        dffundreq.at[i, 'endDate'] = str(plan['planVersion']['endDate'])[:10]
-        years = plan['years']
-        if len(years) > 1:
-            logger.error('More than one year listed in plan %s for %s!' % (planid, name))
-        dffundreq.at[i, 'year'] = years[0]['year']
-
-        funding_url = '%sfts/flow?planid=%s&groupby=%s' % (base_url, planid, objecttype)
-        try:
-            data = download_data(funding_url, downloader)
+            if plan.get('customLocationCode') in custom_location_codes:
+                return
+            funding_url = f'fts/flow?planid={planid}&groupby=location'
+            data = self.downloader.download(funding_url)
+            requirements = data.get('requirements')
+            country_requirements = dict()
+            if requirements is not None:
+                for req_object in requirements.get('objects', list()):
+                    country_id = self.locations.get_countryid_from_object(req_object)
+                    country_req = req_object.get('revisedRequirements')
+                    if country_id is not None and country_req is not None:
+                        country_requirements[country_id] = country_req
             fund_objects = data['report3']['fundingTotals']['objects']
-            totalfunding = row['funding']
-            try:
-                origfunding = int(totalfunding)
-            except ValueError:
-                origfunding = None
-            totalrequirements = row['requirements']
-            try:
-                origrequirements = int(totalrequirements)
-            except ValueError:
-                origrequirements = None
-            name_to_id = dict()
-            if len(fund_objects) != 0:
-                for object in fund_objects[0]['objectsBreakdown']:
-                    if 'id' in object:
-                        if str(object['id']) != code:
-                            continue
-                    else:
-                        continue
-                    name_to_id = {object['name']: str(object['id'])}
-                    totalfunding = object['totalFunding']
-                    if isinstance(totalfunding, int):
-                        if origfunding != totalfunding:
-                            #logger.warning('Overriding funding')
-                            dffundreq.at[i, 'funding'] = totalfunding
-                    break
-            req_objects = data['requirements']['objects']
-            if req_objects:
-                for object in req_objects:
-                    if 'name' not in object:
-                        logger.warning('%s requirements object does not have a %s name!' % (funding_url, objecttype))
-                        continue
-                    if 'id' in object:
-                        if str(object['id']) != code:
-                            continue
-                    else:
-                        object_id = name_to_id.get(object['name'])
-                        if not object_id:
-                            continue
-                        if object_id != code:
-                            continue
-                    totalrequirements = object['revisedRequirements']
-                    if isinstance(totalrequirements, int):
-                        if origrequirements != totalrequirements:
-                            #logger.warning('Overriding requirements for %s' % planid)
-                            dffundreq.at[i, 'requirements'] = totalrequirements
-                    break
-            if totalrequirements:
-                if totalfunding == '':
-                    dffundreq.at[i, 'percentFunded'] = ''
-                else:
-                    totalrequirements_i = int(totalrequirements)
-                    if totalrequirements_i == 0:
-                        dffundreq.at[i, 'percentFunded'] = ''
-                    else:
-                        dffundreq.at[i, 'percentFunded'] = str(int((int(totalfunding) / totalrequirements_i * 100) + 0.5))
-            else:
-                dffundreq.at[i, 'percentFunded'] = ''
-        except DownloadError:
-            logger.error('Problem with downloading %s!' % funding_url)
-        planids.append(planid)
+            country_funding = dict()
+            if len(fund_objects) == 1:
+                for fund_object in fund_objects[0].get('objectsBreakdown', list()):
+                    country_id = self.locations.get_countryid_from_object(fund_object)
+                    country_fund = fund_object.get('totalFunding')
+                    if country_id is not None and country_fund is not None:
+                        country_funding[int(country_id)] = country_fund
+            for country in countries:
+                countryid = country['id']
+                requirements = country_requirements.get(countryid)
+                country['requirements'] = requirements
+                funding = country_funding.get(countryid)
+                country['funding'] = funding
+                if requirements is not None and funding is not None:
+                    country['percentFunded'] = int(funding / requirements * 100 + 0.5)
 
-    return dffundreq, planids
+    def get_country_funding(self, countryid, plans_by_year, start_year=2010):
+        funding_by_year = dict()
+        if plans_by_year is not None:
+            start_year = sorted(plans_by_year.keys())[0]
+        for year in range(self.today.year + 5, start_year - 5, -11):
+            data = self.downloader.download(f'country/{countryid}/summary/trends/{year}', use_v2=True)
+            for object in data:
+                year = object['year']
+                funding = object['totalFunding']
+                if funding:
+                    funding_by_year[year] = funding
+        return funding_by_year
 
+    def generate_resource(self, folder, dataset, plans_by_year, country, call_others=lambda x: None):
+        countryiso = country['iso3']
+        funding_by_year = self.get_country_funding(country['id'], plans_by_year)
+        rows = list()
 
-def add_not_specified(base_funding_url, downloader, code, columnname, dffundreq):
-    years_url = '%sgroupby=year' % base_funding_url
-    ## get totals from year call and subtract all plans in that year
-    # 691121294 - 611797140 (2018 SDN)
-    data = download_data(years_url, downloader)
-    data = data['report3']['fundingTotals']['objects']
-    if len(data) != 0:
-        years_not_specified = list()
-        for year_data in data[0].get('objectsBreakdown'):
-            year = year_data.get('name')
-            if year:
-                year_url = '%syear=%s' % (base_funding_url, year)
-                data = download_data(year_url, downloader)
-                if len(data['flows']) == 0:
+        all_years = sorted(set(plans_by_year.keys()) | set(funding_by_year.keys()), reverse=True)
+        for year in all_years:
+            not_specified_funding = funding_by_year.get(year, '')
+            subrows = list()
+            for plan in plans_by_year.get(year, list()):
+                if plan.get('customLocationCode') in custom_location_codes:
                     continue
-                totalfunding = data['incoming']['fundingTotal']
-                funding_in_year = lookup_values_by_key(dffundreq, 'year', "'%s'" % year, 'funding')
-                if funding_in_year.empty:
-                    not_specified = str(int(totalfunding))
-                else:
-                    not_specified = str(int(totalfunding - to_numeric(funding_in_year, errors='coerce').sum()))
-                if year == 'Not specified':
-                    year = '1000'
-                years_not_specified.append({columnname: code, 'year': year, 'name': 'Not specified',
-                                            'funding': not_specified})
-        df_years_not_specified = DataFrame(data=years_not_specified, columns=list(dffundreq))
-        df_years_not_specified = df_years_not_specified.fillna('')
-        dffundreq = dffundreq.append(df_years_not_specified)
+                planid = plan['id']
+                found_other_countries = False
+                for country in plan['countries']:
+                    adminlevel = country.get('adminlevel', country.get('adminLevel'))
+                    if adminlevel == 0 and country['iso3'] != countryiso:
+                        found_other_countries = True
+                        continue
+                    requirements = country.get('requirements', '')
+                    funding = country.get('funding', '')
+                    percentFunded = country.get('percentFunded', '')
+                    if not_specified_funding and funding:
+                        not_specified_funding -= funding
+                    row = {'countryCode': countryiso, 'id': planid, 'name': plan['name'], 'code': plan['code'],
+                           'typeId': plan['planType']['id'], 'typeName': plan['planType']['id'],
+                           'startDate': plan['startDate'], 'endDate': plan['endDate'], 'year': year,
+                           'requirements': requirements, 'funding': funding, 'percentFunded': percentFunded}
+                    subrows.append(row)
 
-    dffundreq.sort_values(['year', 'endDate', 'name'], ascending=[False, False, True], inplace=True)
-    dffundreq['year'] = dffundreq['year'].replace('1000', 'Not specified')
-    return dffundreq
+                if found_other_countries:
+                    logger.warning('Plan %s spans multiple locations - ignoring in cluster breakdown!' % planid)
+                    continue
+            for row in sorted(subrows, key=lambda k: (k['typeId'], k['id'])):
+                rows.append(row)
+                call_others(row)
 
-
-def generate_requirements_funding_resource(objecttype, base_url, all_plans, plans, downloader, folder, name, code, dataset, outputcode, filecode):
-    base_funding_url = '%sfts/flow?%s=%s&' % (base_url, urllookup[objecttype], code)
-    columnname = columnlookup[objecttype]
-    dffundreq, planidcodemapping, incompleteplans = generate_requirements_funding(plans, base_funding_url, downloader, name, outputcode, columnname)
-    if dffundreq is None:
-        return None, None, planidcodemapping, incompleteplans, None
-    dffundreq, planids = row_correction_requirements_funding(objecttype, base_url, downloader, dffundreq, all_plans, incompleteplans, planidcodemapping, name, code)
-
-    dffundreq = add_not_specified(base_funding_url, downloader, outputcode, columnname, dffundreq)
-
-    hxldffundreq = hxlate(dffundreq, hxl_names)
-    filename = 'fts_requirements_funding_%s.csv' % filecode
-    file_to_upload_hxldffundreq = join(folder, filename)
-    hxldffundreq.to_csv(file_to_upload_hxldffundreq, encoding='utf-8', index=False, date_format='%Y-%m-%d')
-
-    resource_data = {
-        'name': filename.lower(),
-        'description': 'FTS Annual Requirements and Funding Data for %s' % name,
-        'format': 'csv'
-    }
-    resource = Resource(resource_data)
-    resource.set_file_to_upload(file_to_upload_hxldffundreq)
-    dataset.add_update_resource(resource)
-    return dffundreq, planids, planidcodemapping, incompleteplans, resource
+            rows.append({'countryCode': countryiso, 'id': '', 'name': 'Not specified', 'code': '', 'typeId': '',
+                         'typeName': '', 'startDate': '', 'endDate': '', 'year': year, 'requirements': '',
+                         'funding': not_specified_funding, 'percentFunded': ''})
+        if not rows:
+            return None
+        headers = list(rows[0].keys())
+        filename = f'fts_requirements_funding_{countryiso.lower()}.csv'
+        resourcedata = {
+            'name': filename.lower(),
+            'description': f'FTS Annual Requirements and Funding Data for {country["name"]}',
+            'format': 'csv'
+        }
+        success, results = dataset.generate_resource_from_iterator(headers, rows, hxl_names, folder, filename, resourcedata)
+        return results['resource']

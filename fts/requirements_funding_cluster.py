@@ -1,140 +1,125 @@
+import copy
 import logging
-from os.path import join
 
-from hdx.data.resource import Resource
 from hdx.utilities.downloader import DownloadError
-from pandas import DataFrame, json_normalize, to_numeric
 
-from fts.helpers import download_data, plan_columns_to_keep, cluster_columns_to_keep, rename_columns, hxl_names
-from fts.pandas_helpers import drop_columns_except, remove_nonenan, remove_fractions, hxlate
+from fts.helpers import hxl_names
 
 logger = logging.getLogger(__name__)
 
 
-def generate_requirements_funding_cluster(base_url, downloader, countryiso, planids, dffundreq, all_plans):
-    combined = DataFrame()
-    for planid in planids:
-        data = all_plans.get(planid)
-        locations = data['locations']
-        # when the time comes to do cluster breakdowns by emergency, the test here would be for len(emergencies) I think
-        if len(locations) == 0:
-            logger.warning('Plan %s spans multiple locations - ignoring in cluster breakdown!' % planid)
-            continue
-        else:
-            found = False
-            for location in data['locations']:
-                adminlevel = location.get('adminlevel', location.get('adminLevel'))
-                if adminlevel == 0 and location['iso3'] != countryiso:
-                    found = True
-                    break
-            if found:
-                logger.warning('Plan %s spans multiple locations - ignoring in cluster breakdown!' % planid)
-                continue
+class RequirementsFundingCluster:
+    def __init__(self, downloader, locations, planidswithonelocation, clusterlevel=''):
+        self.downloader = downloader
+        self.locations = locations
+        self.planidswithonelocation = planidswithonelocation
+        self.clusterlevel = clusterlevel
+        self.rows = list()
 
-        funding_url = '%sfts/flow?planid=%s&groupby=cluster' % (base_url, planid)
+    def get_requirements_funding_plan(self, inrow):
+        planid = inrow['id']
         try:
-            data = download_data(funding_url, downloader)
-            fund_objects = data['report3']['fundingTotals']['objects']
-            if len(fund_objects) == 0:
-                logger.warning('%s has no funding objects!' % funding_url)
-                fund_data_cluster = None
-            else:
-                fund_data_cluster = fund_objects[0]['objectsBreakdown']
+            data = self.downloader.download(f'fts/flow?planid={planid}&groupby={self.clusterlevel}cluster')
         except DownloadError:
-            logger.error('Problem with downloading %s!' % funding_url)
-            continue
-        req_data_cluster = data['requirements']['objects']
-        if req_data_cluster:
-            dfreq_cluster = json_normalize(req_data_cluster)
-            if 'id' not in dfreq_cluster:
-                dfreq_cluster['id'] = ''
-            else:
-                dfreq_cluster['id'] = dfreq_cluster.id.astype(str).str.replace('\\.0', '')
-            if fund_data_cluster:
-                dffund_cluster = json_normalize(fund_data_cluster)
-                if 'id' not in dffund_cluster:
-                    dffund_cluster['id'] = ''
-                df = dffund_cluster.merge(dfreq_cluster, on='id', how='outer', validate='1:1')
-                df.rename(columns={'name_x': 'clusterName'}, inplace=True)
-                df['clusterName'] = df.clusterName.fillna(df.name_y)
-                del df['name_y']
-            else:
-                df = dfreq_cluster
-                df['totalFunding'] = ''
-                df.rename(columns={'name': 'clusterName'}, inplace=True)
+            logger.error(f'Problem with downloading cluster data for {planid}!')
+            return None, None
+        requirements_clusters = dict()
+        for reqobject in data['requirements']['objects']:
+            clusterid = reqobject.get('id')
+            if clusterid is not None:
+                requirements_clusters[clusterid] = (reqobject['name'], reqobject['revisedRequirements'])
+        funding_clusters = dict()
+        fund_objects = data['report3']['fundingTotals']['objects']
+        notspecified = None
+        if len(fund_objects) == 0:
+            logger.warning(f'{planid} has no funding objects!')
+            shared = None
         else:
-            if fund_data_cluster:
-                df = json_normalize(fund_data_cluster)
-                df['revisedRequirements'] = ''
-                df.rename(columns={'name': 'clusterName'}, inplace=True)
+            for fundobject in fund_objects[0]['objectsBreakdown']:
+                funding = fundobject.get('totalFunding')
+                if funding is not None:
+                    clusterid = fundobject.get('id')
+                    if clusterid is None:
+                        notspecified = funding
+                    else:
+                        clusterid = int(clusterid)
+                    funding_clusters[clusterid] = (fundobject['name'], funding)
+            shared = fund_objects[0]['totalBreakdown']['sharedFunding']
+        return requirements_clusters, funding_clusters, notspecified, shared
+
+    @staticmethod
+    def create_row(base_row, clusterid='', name='', requirements='', funding='', percentFunded=''):
+        row = copy.deepcopy(base_row)
+        row['clusterCode'] = clusterid
+        row['cluster'] = name
+        row['requirements'] = requirements
+        row['funding'] = funding
+        row['percentFunded'] = percentFunded
+        return row
+
+    def generate_rows_requirements_funding(self, inrow, requirements_clusters, funding_clusters, notspecified, shared):
+        if requirements_clusters is None and funding_clusters is None:
+            return
+        planid = inrow['id']
+        if planid not in self.planidswithonelocation:
+            return
+        base_row = copy.deepcopy(inrow)
+        del base_row['typeId']
+        del base_row['typeName']
+        del base_row['requirements']
+        del base_row['funding']
+        del base_row['percentFunded']
+        subrows = list()
+        for clusterid, (fundname, funding) in funding_clusters.items():
+            requirements_cluster = requirements_clusters.get(clusterid)
+            if requirements_cluster is None:
+                requirements = ''
             else:
-                logger.error('No data in %s!' % funding_url)
+                reqname, requirements = requirements_cluster
+                if not fundname:
+                    fundname = reqname
+            row = self.create_row(base_row, clusterid, fundname, requirements, funding)
+            if requirements != '' and funding != '':
+                row['percentFunded'] = int(funding / requirements * 100 + 0.5)
+            else:
+                row['percentFunded'] = ''
+            subrows.append(row)
+
+        fundclusterids = list(funding_clusters.keys())
+        for clusterid, (reqname, requirements) in requirements_clusters.items():
+            if clusterid in fundclusterids:
                 continue
+            row = self.create_row(base_row, clusterid, reqname, requirements)
+            subrows.append(row)
 
-        df.rename(columns={'id': 'clusterCode'}, inplace=True)
-        df = drop_columns_except(df, plan_columns_to_keep)
-        remove_nonenan(df, 'clusterCode')
-        if fund_data_cluster is None:
-            shared_funding = None
+        self.rows.extend(sorted(subrows, key=lambda k: k['cluster']))
+
+        row = self.create_row(base_row, name='Not specified', funding=notspecified)
+        self.rows.append(row)
+        row = self.create_row(base_row, name='Multiple clusters/sectors (shared)', funding=shared)
+        self.rows.append(row)
+
+    def generate_plan_requirements_funding(self, inrow):
+        requirements_clusters, funding_clusters, notspecified, shared = self.get_requirements_funding_plan(inrow)
+        self.generate_rows_requirements_funding(inrow, requirements_clusters, funding_clusters, notspecified, shared)
+
+    def generate_resource(self, folder, dataset, country):
+        if not self.rows:
+            return None
+        headers = list(self.rows[0].keys())
+        filename = f'fts_requirements_funding_{self.clusterlevel}cluster_{country["iso3"].lower()}.csv'
+        description = f'FTS Annual Requirements and Funding Data by Cluster for {country["name"]}'
+        if self.clusterlevel:
+            description = description.replace('Cluster', f'{self.clusterlevel.capitalize()} Cluster')
+        resourcedata = {
+            'name': filename,
+            'description': description,
+            'format': 'csv'
+        }
+        success, results = dataset.generate_resource_from_iterator(headers, self.rows, hxl_names, folder, filename,
+                                                                   resourcedata)
+        self.rows = list()
+        if success:
+            return results['resource']
         else:
-            shared_funding = data['report3']['fundingTotals']['objects'][0]['totalBreakdown']['sharedFunding']
-        if shared_funding:
-            row = {'clusterCode': '', 'clusterName': 'zzz', 'revisedRequirements': '', 'totalFunding': shared_funding}
-            df.loc[len(df)] = row
-        df['id'] = planid
-
-        combined = combined.append(df, ignore_index=True)
-
-    if len(combined) == 0:
-        logger.warning('No cluster data available')
-        return None, False
-
-    df = combined.merge(dffundreq, on='id')
-    df.rename(columns={'name_x': 'name', 'revisedRequirements_x': 'revisedRequirements', 'totalFunding_x': 'totalFunding'}, inplace=True)
-    df = drop_columns_except(df, cluster_columns_to_keep)
-    df['percentFunded'] = ((to_numeric(df.totalFunding) / to_numeric(df.revisedRequirements) * 100) + 0.5).astype(str)
-    remove_fractions(df, 'revisedRequirements')
-    remove_nonenan(df, 'revisedRequirements')
-    remove_fractions(df, 'totalFunding')
-    remove_nonenan(df, 'totalFunding')
-    remove_fractions(df, 'percentFunded')
-    remove_nonenan(df, 'percentFunded')
-    df['id'] = df.id.astype(str)
-    remove_fractions(df, 'id')
-    remove_nonenan(df, 'id')
-    remove_fractions(df, 'clusterCode')
-    remove_nonenan(df, 'clusterCode')
-    df.sort_values(['endDate', 'name', 'clusterName'], ascending=[False, True, True], inplace=True)
-    df['clusterName'].replace('zzz', 'Shared Funding', inplace=True)
-    s = df['clusterName']
-    hxl_resource = False
-    if not s[~s.isin(['Shared Funding', 'Multi-sector', 'Not specified'])].empty:
-        s = df['percentFunded'] == ''
-        if not s[~s.isin([True])].empty:
-            hxl_resource = True
-    df.rename(index=str, columns=rename_columns, inplace=True)
-    return df, hxl_resource
-
-
-def generate_requirements_funding_cluster_resource(base_url, downloader, folder, countryname, countryiso, planids,
-                                                   dffundreq, all_plans, dataset):
-    filename = 'fts_requirements_funding_cluster_%s.csv' % countryiso.lower()
-    df, hxl_resource = generate_requirements_funding_cluster(base_url, downloader, countryiso, planids, dffundreq, all_plans)
-    if df is None:
-        return None
-
-    df = hxlate(df, hxl_names)
-    file_to_upload = join(folder, filename)
-    df.to_csv(file_to_upload, encoding='utf-8', index=False, date_format='%Y-%m-%d')
-
-    resource_data = {
-        'name': filename,
-        'description': 'FTS Annual Requirements and Funding Data by Cluster for %s' % countryname,
-        'format': 'csv'
-    }
-    resource = Resource(resource_data)
-    resource.set_file_to_upload(file_to_upload)
-    dataset.add_update_resource(resource)
-    if hxl_resource:
-        return resource
-    return None
+            return None
