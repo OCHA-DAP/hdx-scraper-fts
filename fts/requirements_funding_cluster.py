@@ -25,9 +25,11 @@ class RequirementsFundingCluster:
             return None, None
         requirements_clusters = dict()
         for reqobject in data['requirements']['objects']:
-            clusterid = reqobject.get('id')
-            if clusterid is not None:
-                requirements_clusters[clusterid] = (reqobject['name'], reqobject['revisedRequirements'])
+            requirements = reqobject.get('revisedRequirements')
+            if requirements is not None:
+                clusterid = reqobject.get('id')
+                if clusterid is not None:
+                    requirements_clusters[clusterid] = (reqobject['name'], reqobject['revisedRequirements'])
         funding_clusters = dict()
         fund_objects = data['report3']['fundingTotals']['objects']
         notspecified = None
