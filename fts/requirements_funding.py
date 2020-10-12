@@ -1,9 +1,6 @@
 import logging
 
-from hdx.utilities.downloader import DownloadError
-
 from fts.helpers import hxl_names, custom_location_codes
-from fts.requirements_funding_cluster import RequirementsFundingCluster
 
 logger = logging.getLogger(__name__)
 
@@ -13,8 +10,6 @@ class RequirementsFunding:
         self.downloader = downloader
         self.locations = locations
         self.today = today
-        self.cluster = RequirementsFundingCluster(downloader, locations)
-        self.globalcluster = RequirementsFundingCluster(downloader, locations, clusterlevel='global')
 
     def add_country_requirements_funding(self, planid, plan, countries):
         if len(countries) == 1:
@@ -75,7 +70,7 @@ class RequirementsFunding:
                     funding_by_year[year] = funding
         return funding_by_year
 
-    def generate_resource(self, folder, dataset, plans_by_year, country, covid=None):
+    def generate_resource(self, folder, dataset, plans_by_year, country, call_others=lambda x: None):
         countryiso = country['iso3']
         funding_by_year = self.get_country_funding(country['id'], plans_by_year)
         rows = list()
@@ -110,18 +105,13 @@ class RequirementsFunding:
                     continue
             for row in sorted(subrows, key=lambda k: (k['typeId'], k['id'])):
                 rows.append(row)
-                requirements_clusters = self.cluster.generate_plan_requirements_funding(row)
-                if covid:
-                    covid.generate_plan_requirements_funding(row, requirements_clusters)
-                self.globalcluster.generate_plan_requirements_funding(row)
+                call_others(row)
 
             rows.append({'countryCode': countryiso, 'id': '', 'name': 'Not specified', 'code': '', 'typeId': '',
                          'typeName': '', 'startDate': '', 'endDate': '', 'year': year, 'requirements': '',
                          'funding': not_specified_funding, 'percentFunded': ''})
         if not rows:
             return None
-        if covid:
-            covid.generate_resource(folder, dataset, country)
         headers = list(rows[0].keys())
         filename = f'fts_requirements_funding_{countryiso.lower()}.csv'
         resourcedata = {
@@ -130,8 +120,4 @@ class RequirementsFunding:
             'format': 'csv'
         }
         success, results = dataset.generate_resource_from_iterator(headers, rows, hxl_names, folder, filename, resourcedata)
-        self.globalcluster.generate_resource(folder, dataset, country)
-        cluster_resource = self.cluster.generate_resource(folder, dataset, country)
-        if cluster_resource:
-            return cluster_resource
         return results['resource']

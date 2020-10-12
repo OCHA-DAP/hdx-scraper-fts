@@ -124,7 +124,8 @@ class Flows:
             rows.append(newrow)
             fund_boundaries_info[boundary] = rows
 
-        for boundary in sorted(fund_boundaries_info.keys(), reverse=True):
+        resources = list()
+        for boundary in sorted(fund_boundaries_info.keys()):
             rows = sorted(fund_boundaries_info[boundary], key=lambda k: k['date'], reverse=True)
             headers = list(funding_hxl_names.keys())
             filename = f'fts_{boundary}_funding_{country["iso3"].lower()}.csv'
@@ -133,5 +134,7 @@ class Flows:
                 'description': f'FTS {boundary.capitalize()} Funding Data for {country["name"]} for {latestyear}',
                 'format': 'csv'
             }
-            dataset.generate_resource_from_iterator(headers, rows, funding_hxl_names, folder, filename, resourcedata)
-        return len(fund_boundaries_info)
+            success, results = dataset.generate_resource_from_iterator(headers, rows, funding_hxl_names, folder, filename, resourcedata)
+            if success:
+                resources.append(results['resource'])
+        return resources

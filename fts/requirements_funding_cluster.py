@@ -9,9 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class RequirementsFundingCluster:
-    def __init__(self, downloader, locations, clusterlevel=''):
+    def __init__(self, downloader, locations, planidswithonelocation, clusterlevel=''):
         self.downloader = downloader
         self.locations = locations
+        self.planidswithonelocation = planidswithonelocation
         self.clusterlevel = clusterlevel
         self.rows = list()
 
@@ -56,9 +57,11 @@ class RequirementsFundingCluster:
         row['percentFunded'] = percentFunded
         return row
 
-    def generate_plan_requirements_funding(self, inrow):
-        requirements_clusters, funding_clusters, notspecified, shared = self.get_requirements_funding_plan(inrow)
+    def generate_rows_requirements_funding(self, inrow, requirements_clusters, funding_clusters, notspecified, shared):
         if requirements_clusters is None and funding_clusters is None:
+            return
+        planid = inrow['id']
+        if planid not in self.planidswithonelocation:
             return
         base_row = copy.deepcopy(inrow)
         del base_row['typeId']
@@ -95,7 +98,10 @@ class RequirementsFundingCluster:
         self.rows.append(row)
         row = self.create_row(base_row, name='Multiple clusters/sectors (shared)', funding=shared)
         self.rows.append(row)
-        return requirements_clusters
+
+    def generate_plan_requirements_funding(self, inrow):
+        requirements_clusters, funding_clusters, notspecified, shared = self.get_requirements_funding_plan(inrow)
+        self.generate_rows_requirements_funding(inrow, requirements_clusters, funding_clusters, notspecified, shared)
 
     def generate_resource(self, folder, dataset, country):
         if not self.rows:
@@ -113,4 +119,7 @@ class RequirementsFundingCluster:
         success, results = dataset.generate_resource_from_iterator(headers, self.rows, hxl_names, folder, filename,
                                                                    resourcedata)
         self.rows = list()
-        return results['resource']
+        if success:
+            return results['resource']
+        else:
+            return None

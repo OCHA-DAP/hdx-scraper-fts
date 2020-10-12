@@ -1,3 +1,4 @@
+import copy
 from os.path import join, basename
 from urllib.parse import urlsplit
 
@@ -13,6 +14,7 @@ class FTSDownload:
     def __init__(self, configuration, downloader, countryisos=None, years=None, testfolder=None, testpath=False):
         self.v1_url = configuration['v1_url']
         self.v2_url = configuration['v2_url']
+        self.test_url = configuration['test_url']
         self.downloader = downloader
         if countryisos:
             self.countryisos = countryisos.split(',')
@@ -40,7 +42,9 @@ class FTSDownload:
             filename = f'{basename(split.path)}'
             if split.query:
                 filename = f'{filename}_{split.query}'
-        return f'{filename}.json'
+        if filename[-5:] != '.json':
+            filename = f'{filename}.json'
+        return filename
 
     def download(self, partial_url=None, data=True, use_v2=False, url=None):
         if self.testpath:
@@ -100,7 +104,19 @@ class FTSDownload:
             json = origjson
         if save and self.testfolder and json:
             filename = self.get_testfile_path(partial_url, url)
-            save_json(origjson, join(self.testfolder, filename))
+            filepath = join(self.testfolder, filename)
+            meta = origjson.get('meta')
+            if meta:
+                nextlink = meta.get('nextLink')
+            else:
+                nextlink = None
+            if nextlink:
+                nextname = self.get_testfile_path(None, nextlink)
+                meta['nextLink'] = f'{self.test_url}{nextname}'
+                save_json(origjson, filepath)
+                meta['nextLink'] = nextlink
+            else:
+                save_json(origjson, filepath)
         return json
 
 
