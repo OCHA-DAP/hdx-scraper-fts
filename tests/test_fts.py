@@ -14,6 +14,7 @@ from hdx.data.vocabulary import Vocabulary
 from hdx.hdx_configuration import Configuration
 from hdx.location.country import Country
 from hdx.utilities.compare import assert_files_same
+from hdx.utilities.dateparse import parse_date
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
 
@@ -47,7 +48,7 @@ class TestFTS:
             with Download(user_agent='test') as downloader:
                 ftsdownloader = FTSDownload(configuration, downloader, testpath=True)
                 notes = configuration['notes']
-                today = datetime.now()
+                today = parse_date('2020-10-12')
 
                 locations = Locations(ftsdownloader)
                 logger.info('Number of country datasets to upload: %d' % len(locations.countries))

@@ -81,7 +81,7 @@ class RequirementsFundingCluster:
                 if not fundname:
                     fundname = reqname
             row = self.create_row(base_row, clusterid, fundname, requirements, funding)
-            if requirements != '' and funding != '':
+            if requirements and funding != '':
                 row['percentFunded'] = int(funding / requirements * 100 + 0.5)
             else:
                 row['percentFunded'] = ''
