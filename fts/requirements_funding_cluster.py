@@ -41,11 +41,11 @@ class RequirementsFundingCluster:
                 funding = fundobject.get('totalFunding')
                 if funding is not None:
                     clusterid = fundobject.get('id')
-                    if clusterid is None:
+                    if clusterid is None or clusterid == 'undefined':
                         notspecified = funding
                     else:
                         clusterid = int(clusterid)
-                    funding_clusters[clusterid] = (fundobject['name'], funding)
+                        funding_clusters[clusterid] = (fundobject['name'], funding)
             shared = fund_objects[0]['totalBreakdown']['sharedFunding']
         return requirements_clusters, funding_clusters, notspecified, shared
 
