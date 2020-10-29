@@ -76,8 +76,6 @@ plan_columns_to_keep = ['clusterCode', 'clusterName', 'revisedRequirements', 'to
 cluster_columns_to_keep = ['countryCode', 'id', 'name', 'code', 'startDate', 'endDate', 'year', 'clusterCode',
                            'clusterName', 'revisedRequirements', 'totalFunding']
 
-custom_location_codes = ['GLBL', 'COVD']
-
 
 def get_dataset_and_showcase(slugified_name, title, description, today, country, showcase_url, additional_tags=list()):
     dataset = Dataset({

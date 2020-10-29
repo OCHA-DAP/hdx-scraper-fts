@@ -1,14 +1,15 @@
 import logging
 
-from fts.helpers import hxl_names, custom_location_codes
+from fts.helpers import hxl_names
 
 logger = logging.getLogger(__name__)
 
 
 class RequirementsFunding:
-    def __init__(self, downloader, locations, today):
+    def __init__(self, downloader, locations, globalplanids, today):
         self.downloader = downloader
         self.locations = locations
+        self.globalplanids = globalplanids
         self.today = today
 
     def add_country_requirements_funding(self, planid, plan, countries):
@@ -28,18 +29,25 @@ class RequirementsFunding:
                 progress = int(progress + 0.5)
             countries[0]['percentFunded'] = progress
         else:
-            if plan.get('customLocationCode') in custom_location_codes:
-                return
+            if plan.get('customLocationCode') == 'COVD':
+                return True
             funding_url = f'fts/flow?planid={planid}&groupby=location'
             data = self.downloader.download(funding_url)
             requirements = data.get('requirements')
             country_requirements = dict()
             if requirements is not None:
+                totalreq = requirements['totalRevisedReqs']
+                countryreq_is_totalreq = True
                 for req_object in requirements.get('objects', list()):
                     country_id = self.locations.get_countryid_from_object(req_object)
                     country_req = req_object.get('revisedRequirements')
                     if country_id is not None and country_req is not None:
                         country_requirements[country_id] = country_req
+                        if country_req != totalreq:
+                            countryreq_is_totalreq = False
+                if countryreq_is_totalreq:
+                    logger.info('%s has same country requirements as total requirements!' % planid)
+                    return True
             fund_objects = data['report3']['fundingTotals']['objects']
             country_funding = dict()
             if len(fund_objects) == 1:
@@ -56,6 +64,7 @@ class RequirementsFunding:
                 country['funding'] = funding
                 if requirements is not None and funding is not None:
                     country['percentFunded'] = int(funding / requirements * 100 + 0.5)
+        return False
 
     def get_country_funding(self, countryid, plans_by_year, start_year=2010):
         funding_by_year = dict()
@@ -80,9 +89,9 @@ class RequirementsFunding:
             not_specified_funding = funding_by_year.get(year, '')
             subrows = list()
             for plan in plans_by_year.get(year, list()):
-                if plan.get('customLocationCode') in custom_location_codes:
-                    continue
                 planid = plan['id']
+                if planid in self.globalplanids:
+                    continue
                 found_other_countries = False
                 for country in plan['countries']:
                     adminlevel = country.get('adminlevel', country.get('adminLevel'))

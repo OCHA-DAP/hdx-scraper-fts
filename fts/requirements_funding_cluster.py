@@ -22,7 +22,7 @@ class RequirementsFundingCluster:
             data = self.downloader.download(f'fts/flow?planid={planid}&groupby={self.clusterlevel}cluster')
         except DownloadError:
             logger.error(f'Problem with downloading cluster data for {planid}!')
-            return None, None
+            return None, None, None, None
         requirements_clusters = dict()
         for reqobject in data['requirements']['objects']:
             requirements = reqobject.get('revisedRequirements')

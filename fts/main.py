@@ -31,7 +31,8 @@ class FTS:
         self.plans_by_year_by_country = dict()
         self.planidcodemapping = dict()
         self.planidswithonelocation = set()
-        self.reqfund = RequirementsFunding(downloader, locations, today)
+        self.globalplanids = set()
+        self.reqfund = RequirementsFunding(downloader, locations, self.globalplanids, today)
         self.get_plans(start_year=start_year)
         self.flows = Flows(downloader, locations, self.planidcodemapping)
         self.others = self.setup_others(downloader, locations)
@@ -51,7 +52,9 @@ class FTS:
                 self.planidcodemapping[planid] = plan['code']
                 countries = plan['countries']
                 if countries:
-                    self.reqfund.add_country_requirements_funding(planid, plan, countries)
+                    is_global = self.reqfund.add_country_requirements_funding(planid, plan, countries)
+                    if is_global:
+                        self.globalplanids.add(planid)
                     if len(countries) == 1:
                         self.planidswithonelocation.add(planid)
                     for country in countries:
