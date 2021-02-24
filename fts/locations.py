@@ -7,7 +7,7 @@ class Locations:
         self.name_to_id = dict()
         self.id_to_iso3 = dict()
         countries = set()
-        for country in downloader.download('location'):
+        for country in downloader.download('1/public/location'):
             countryiso = country['iso3']
             if countryiso is None:
                 continue

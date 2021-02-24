@@ -12,8 +12,7 @@ class FTSException(Exception):
 
 class FTSDownload:
     def __init__(self, configuration, downloader, countryisos=None, years=None, testfolder=None, testpath=False):
-        self.v1_url = configuration['v1_url']
-        self.v2_url = configuration['v2_url']
+        self.url = configuration['base_url']
         self.test_url = configuration['test_url']
         self.downloader = downloader
         if countryisos:
@@ -27,11 +26,8 @@ class FTSDownload:
         self.testfolder = testfolder
         self.testpath = testpath
 
-    def get_url(self, partial_url, use_v2=False):
-        if use_v2:
-            return f'{self.v2_url}{partial_url}'
-        else:
-            return f'{self.v1_url}{partial_url}'
+    def get_url(self, partial_url):
+        return f'{self.url}{partial_url}'
 
     @staticmethod
     def get_testfile_path(partial_url=None, url=None):
@@ -46,11 +42,11 @@ class FTSDownload:
             filename = f'{filename}.json'
         return filename
 
-    def download(self, partial_url=None, data=True, use_v2=False, url=None):
+    def download(self, partial_url=None, data=True, url=None):
         if self.testpath:
             partial_url = self.get_testfile_path(partial_url, url)
         if partial_url is not None:
-            url = self.get_url(partial_url, use_v2=use_v2)
+            url = self.get_url(partial_url)
         r = self.downloader.download(url)
         origjson = r.json()
         status = origjson['status']

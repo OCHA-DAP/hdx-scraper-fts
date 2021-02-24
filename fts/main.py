@@ -45,7 +45,7 @@ class FTS:
 
     def get_plans(self, start_year=1998):
         for year in range(self.today.year, start_year, -1):
-            data = self.downloader.download(f'fts/flow/plan/overview/progress/{year}', use_v2=True)
+            data = self.downloader.download(f'2/fts/flow/plan/overview/progress/{year}')
             plans = data['plans']
             for plan in plans:
                 planid = plan['id']

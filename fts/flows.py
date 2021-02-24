@@ -74,7 +74,7 @@ class Flows:
     def generate_resources(self, folder, dataset, latestyear, country):
         fund_boundaries_info = dict()
         fund_data = list()
-        base_funding_url = f'fts/flow?locationid={country["id"]}&'
+        base_funding_url = f'1/fts/flow/custom-search?locationid={country["id"]}&'
         funding_url = self.downloader.get_url(f'{base_funding_url}year={latestyear}')
         while funding_url:
             json = self.downloader.download(url=funding_url, data=False)

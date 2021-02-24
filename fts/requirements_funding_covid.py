@@ -24,13 +24,13 @@ class RequirementsFundingCovid:
                     continue
                 planids.update(str(plan['id']) for plan in plans_by_year[year])
         planids = ','.join(sorted(planids))
-        data = self.downloader.download(f'fts/flow?emergencyid=911&planid={planids}&groupby=plan')
+        data = self.downloader.download(f'1/fts/flow/custom-search?emergencyid=911&planid={planids}&groupby=plan')
         for fundingobject in data['report3']['fundingTotals']['objects'][0]['singleFundingObjects']:
             self.covidfundingbyplan[fundingobject['id']] = fundingobject['totalFunding']
 
     def generate_plan_requirements_funding(self, inrow, requirements_clusters):
         planid = inrow['id']
-        data = self.downloader.download(f'public/governingEntity?planId={planid}&scopes=governingEntityVersion', use_v2=True)
+        data = self.downloader.download(f'2/public/governingEntity?planId={planid}&scopes=governingEntityVersion')
         covid_ids = set()
         for clusterobj in data:
             tags = clusterobj['governingEntityVersion'].get('tags')
