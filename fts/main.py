@@ -68,7 +68,7 @@ class FTS:
     def call_others(self, row):
         requirements_clusters, funding_clusters, notspecified, shared = self.others['cluster'].get_requirements_funding_plan(row)
         self.others['cluster'].generate_rows_requirements_funding(row, requirements_clusters, funding_clusters, notspecified, shared)
-        self.others['covid'].generate_plan_requirements_funding(row, requirements_clusters)
+        self.others['covid'].generate_plan_funding(row)
         self.others['globalcluster'].generate_plan_requirements_funding(row)
 
     def generate_other_resources(self, resources, folder, dataset, country):

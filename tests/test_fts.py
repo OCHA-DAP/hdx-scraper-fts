@@ -75,7 +75,7 @@ class TestFTS:
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
                                      {'name': 'fts_requirements_funding_cluster_afg.csv', 'description': 'FTS Annual Requirements and Funding Data by Cluster for Afghanistan',
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
-                                     {'name': 'fts_requirements_funding_covid_afg.csv', 'description': 'FTS Annual Covid Requirements and Funding Data for Afghanistan',
+                                     {'name': 'fts_requirements_funding_covid_afg.csv', 'description': 'FTS Annual Requirements, Funding and Covid Funding Data for Afghanistan',
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
                 check_resources(resources)
                 assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
@@ -112,7 +112,7 @@ class TestFTS:
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
                                      {'name': 'fts_requirements_funding_cluster_jor.csv', 'description': 'FTS Annual Requirements and Funding Data by Cluster for Jordan',
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
-                                     {'name': 'fts_requirements_funding_covid_jor.csv', 'description': 'FTS Annual Covid Requirements and Funding Data for Jordan',
+                                     {'name': 'fts_requirements_funding_covid_jor.csv', 'description': 'FTS Annual Requirements, Funding and Covid Funding Data for Jordan',
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
                 check_resources(resources)
                 assert showcase == {
@@ -152,7 +152,7 @@ class TestFTS:
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
                                      {'name': 'fts_requirements_funding_cluster_pse.csv', 'description': 'FTS Annual Requirements and Funding Data by Cluster for occupied Palestinian territory',
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
-                                     {'name': 'fts_requirements_funding_covid_pse.csv', 'description': 'FTS Annual Covid Requirements and Funding Data for occupied Palestinian territory',
+                                     {'name': 'fts_requirements_funding_covid_pse.csv', 'description': 'FTS Annual Requirements, Funding and Covid Funding Data for occupied Palestinian territory',
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
                 check_resources(resources)
                 assert showcase == {

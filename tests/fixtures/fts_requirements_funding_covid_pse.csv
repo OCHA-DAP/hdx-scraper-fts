@@ -1,3 +1,3 @@
-countryCode,id,name,code,typeId,typeName,startDate,endDate,year,requirements,funding,percentFunded
-#country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#activity+appeal+type+id+fts_internal,#activity+appeal+type+name,#date+start,#date+end,#date+year,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
-PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,4,4,2020-01-01,2020-12-31,2020,72405610,37636435,52
+countryCode,id,name,code,typeId,typeName,startDate,endDate,year,requirements,funding,covidFunding,covidPercentageOfFunding
+#country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#activity+appeal+type+id+fts_internal,#activity+appeal+type+name,#date+start,#date+end,#date+year,#value+funding+required+usd,#value+funding+total+usd,#value+funding+covid+usd,#value+funding+covid+pct
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,4,4,2020-01-01,2020-12-31,2020,420381684,189609321,37636435,20

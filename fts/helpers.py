@@ -55,7 +55,9 @@ hxl_names = {
     'cluster': '#sector+cluster+name',
     'requirements': '#value+funding+required+usd',
     'funding': '#value+funding+total+usd',
-    'percentFunded': '#value+funding+pct'
+    'percentFunded': '#value+funding+pct',
+    'covidFunding': '#value+funding+covid+usd',
+    'covidPercentageOfFunding': '#value+funding+covid+pct'
 }
 
 rename_columns = {
