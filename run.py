@@ -40,7 +40,7 @@ def parse_args():
 def main():
     '''Generate dataset and create it in HDX'''
 
-    with Download(extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup, rate_limit={'calls': 1, 'period': 1}) as downloader:
+    with Download(fail_on_missing_file=False, extra_params_yaml=join(expanduser('~'), '.extraparams.yml'), extra_params_lookup=lookup, rate_limit={'calls': 1, 'period': 1}) as downloader:
         args = parse_args()
         configuration = Configuration.read()
         ftsdownloader = FTSDownload(configuration, downloader, countryisos=args.countries, years=args.years, testfolder=args.testfolder)
