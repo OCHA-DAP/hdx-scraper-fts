@@ -38,9 +38,9 @@ class FTS:
         self.others = self.setup_others(downloader, locations)
 
     def setup_others(self, downloader, locations):
-        covid = RequirementsFundingCovid(downloader, self.plans_by_year_by_country)
-        cluster = RequirementsFundingCluster(downloader, locations, self.planidswithonelocation)
-        globalcluster = RequirementsFundingCluster(downloader, locations, self.planidswithonelocation, clusterlevel='global')
+        covid = RequirementsFundingCovid(downloader, locations, self.plans_by_year_by_country)
+        cluster = RequirementsFundingCluster(downloader, self.planidswithonelocation)
+        globalcluster = RequirementsFundingCluster(downloader, self.planidswithonelocation, clusterlevel='global')
         return {'covid': covid, 'cluster': cluster, 'globalcluster': globalcluster}
 
     def get_plans(self, start_year=1998):
@@ -100,8 +100,8 @@ class FTS:
         latestyear = str(self.today.year)
         slugified_name = slugify(f'FTS Requirements and Funding Data for {countryname}').lower()
         showcase_url = f'https://fts.unocha.org/countries/{country["id"]}/flows/{latestyear}'
-        dataset, showcase = get_dataset_and_showcase(slugified_name, title, self.notes, self.today, countryname,
-                                                     showcase_url, additional_tags=['covid-19'])
+        dataset, showcase = get_dataset_and_showcase(slugified_name, title, self.notes, self.today, countryiso,
+                                                     countryname, showcase_url, additional_tags=['covid-19'])
         try:
             dataset.add_country_location(countryiso)
         except HDXError as e:

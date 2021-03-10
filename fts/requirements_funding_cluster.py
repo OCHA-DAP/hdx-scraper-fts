@@ -9,9 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class RequirementsFundingCluster:
-    def __init__(self, downloader, locations, planidswithonelocation, clusterlevel=''):
+    def __init__(self, downloader, planidswithonelocation, clusterlevel=''):
         self.downloader = downloader
-        self.locations = locations
         self.planidswithonelocation = planidswithonelocation
         self.clusterlevel = clusterlevel
         self.rows = list()

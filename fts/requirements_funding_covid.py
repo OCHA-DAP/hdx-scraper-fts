@@ -7,32 +7,58 @@ logger = logging.getLogger(__name__)
 
 
 class RequirementsFundingCovid:
-    def __init__(self, downloader, plans_by_year_by_country):
+    def __init__(self, downloader, locations, plans_by_year_by_country):
         self.downloader = downloader
-        self.covidfundingbyplan = dict()
+        self.covidfundingbyplanandlocation = dict()
         self.rows = list()
-        self.get_covid_funding(plans_by_year_by_country)
+        self.get_covid_funding(locations.id_to_iso3, plans_by_year_by_country)
 
     def clear_rows(self):
         self.rows = list()
 
-    def get_covid_funding(self, plans_by_year_by_country, covidstartyear=2020):
-        planids = set()
+    def get_covid_funding(self, locationid_to_iso3, plans_by_year_by_country, covidstartyear=2020):
+        multiplecountry_planids = dict()
+        planid_to_country = dict()
         for plans_by_year in plans_by_year_by_country.values():
             for year in plans_by_year:
                 if year < covidstartyear:
                     continue
-                planids.update(str(plan['id']) for plan in plans_by_year[year])
-        planids = ','.join(sorted(planids))
-        data = self.downloader.download(f'1/fts/flow/custom-search?emergencyid=911&planid={planids}&groupby=plan')
+                for plan in plans_by_year[year]:
+                    planid = str(plan['id'])
+                    countryisos = set()
+                    for country in plan['countries']:
+                        adminlevel = country.get('adminlevel', country.get('adminLevel'))
+                        if adminlevel == 0:
+                            countryisos.add(country['iso3'])
+                    if len(countryisos) == 1:
+                        planid_to_country[planid] = countryisos.pop()
+                    else:
+                        multiplecountry_planids[planid] = countryisos
+
+        onecountry_planids = ','.join(sorted(planid_to_country.keys()))
+        data = self.downloader.download(f'1/fts/flow/custom-search?emergencyid=911&planid={onecountry_planids}&groupby=plan')
         for fundingobject in data['report3']['fundingTotals']['objects'][0]['objectsBreakdown']:
-            self.covidfundingbyplan[int(fundingobject['id'])] = fundingobject['totalFunding']
+            planid = fundingobject.get('id')
+            countryiso = planid_to_country[planid]
+            self.covidfundingbyplanandlocation[f'{planid}-{countryiso}'] = fundingobject['totalFunding']
+
+        for planid in multiplecountry_planids:
+            data = self.downloader.download(f'1/fts/flow/custom-search?emergencyid=911&planid={planid}&groupby=location')
+            fundingobjects = data['report3']['fundingTotals']['objects']
+            if len(fundingobjects) == 0:
+                continue
+            for fundingobject in fundingobjects[0]['objectsBreakdown']:
+                locationid = int(fundingobject['id'])
+                countryiso = locationid_to_iso3.get(locationid)
+                if countryiso:
+                    self.covidfundingbyplanandlocation[f'{planid}-{countryiso}'] = fundingobject['totalFunding']
 
     def generate_plan_funding(self, inrow):
         planid = inrow['id']
-        covidfunding = self.covidfundingbyplan.get(planid)
+        countryiso = inrow['countryCode']
+        covidfunding = self.covidfundingbyplanandlocation.get(f'{planid}-{countryiso}')
         if covidfunding is None:
-            logger.info(f'{planid} has no COVID component!')
+            logger.info(f'Location {countryiso} of plan {planid} has no COVID component!')
             return
         row = copy.deepcopy(inrow)
         del row['percentFunded']

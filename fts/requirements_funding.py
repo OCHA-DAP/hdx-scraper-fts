@@ -98,8 +98,12 @@ class RequirementsFunding:
                     if adminlevel == 0 and country['iso3'] != countryiso:
                         found_other_countries = True
                         continue
-                    requirements = country.get('requirements', '')
-                    funding = country.get('funding', '')
+                    requirements = country.get('requirements')
+                    if requirements is None:
+                        requirements = ''
+                    funding = country.get('funding')
+                    if funding is None:
+                        funding = ''
                     percentFunded = country.get('percentFunded', '')
                     if not_specified_funding and funding:
                         not_specified_funding -= funding

@@ -78,7 +78,7 @@ class TestFTS:
                                      {'name': 'fts_requirements_funding_covid_afg.csv', 'description': 'FTS Annual Requirements, Funding and Covid Funding Data for Afghanistan',
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
                 check_resources(resources)
-                assert showcase == {'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
+                assert showcase == {'image_url': 'https://reliefweb.int/sites/reliefweb.int/files/styles/location-image/public/country-location-images/afg.png',
                                     'name': 'fts-requirements-and-funding-data-for-afghanistan-showcase',
                                     'notes': 'Click the image on the right to go to the FTS funding summary page for Afghanistan',
                                     'url': 'https://fts.unocha.org/countries/1/flows/2020', 'title': 'FTS Afghanistan Summary Page',
@@ -116,7 +116,7 @@ class TestFTS:
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
                 check_resources(resources)
                 assert showcase == {
-                    'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
+                    'image_url': 'https://reliefweb.int/sites/reliefweb.int/files/styles/location-image/public/country-location-images/jor.png',
                     'name': 'fts-requirements-and-funding-data-for-jordan-showcase',
                     'notes': 'Click the image on the right to go to the FTS funding summary page for Jordan',
                     'url': 'https://fts.unocha.org/countries/114/flows/2020', 'title': 'FTS Jordan Summary Page',
@@ -156,7 +156,7 @@ class TestFTS:
                                       'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
                 check_resources(resources)
                 assert showcase == {
-                    'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg',
+                    'image_url': 'https://reliefweb.int/sites/reliefweb.int/files/styles/location-image/public/country-location-images/pse.png',
                     'name': 'fts-requirements-and-funding-data-for-occupied-palestinian-territory-showcase',
                     'notes': 'Click the image on the right to go to the FTS funding summary page for occupied Palestinian territory',
                     'url': 'https://fts.unocha.org/countries/171/flows/2020', 'title': 'FTS occupied Palestinian territory Summary Page',

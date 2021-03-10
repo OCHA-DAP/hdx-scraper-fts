@@ -1,5 +1,5 @@
 countryCode,id,name,code,typeId,typeName,startDate,endDate,year,requirements,funding,percentFunded
 #country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#activity+appeal+type+id+fts_internal,#activity+appeal+type+name,#date+start,#date+end,#date+year,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
 AFG,,Not specified,,,,,,2022,,25620568,
-AFG,929,Afghanistan 2020,HAFG20,4,4,2020-01-01,2020-12-31,2020,1131050820,372094167,33
-AFG,,Not specified,,,,,,2020,,80913522,
+AFG,929,Afghanistan 2020,HAFG20,4,4,2020-01-01,2020-12-31,2020,1131050820,564467765,50
+AFG,,Not specified,,,,,,2020,,-111460076,

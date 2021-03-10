@@ -79,7 +79,7 @@ cluster_columns_to_keep = ['countryCode', 'id', 'name', 'code', 'startDate', 'en
                            'clusterName', 'revisedRequirements', 'totalFunding']
 
 
-def get_dataset_and_showcase(slugified_name, title, description, today, country, showcase_url, additional_tags=list()):
+def get_dataset_and_showcase(slugified_name, title, description, today, countryiso, country, showcase_url, additional_tags=list()):
     dataset = Dataset({
         'name': slugified_name,
         'title': title,
@@ -98,7 +98,7 @@ def get_dataset_and_showcase(slugified_name, title, description, today, country,
         'title': 'FTS %s Summary Page' % country,
         'notes': 'Click the image on the right to go to the FTS funding summary page for %s' % country,
         'url': showcase_url,
-        'image_url': 'https://fts.unocha.org/sites/default/files/styles/fts_feature_image/public/navigation_101.jpg'
+        'image_url': f'https://reliefweb.int/sites/reliefweb.int/files/styles/location-image/public/country-location-images/{countryiso.lower()}.png'
     })
     showcase.add_tags(tags)
     return dataset, showcase

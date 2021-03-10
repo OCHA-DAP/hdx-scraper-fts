@@ -1,7 +1,7 @@
 countryCode,id,name,code,startDate,endDate,year,clusterCode,cluster,requirements,funding,percentFunded
 #country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#sector+cluster+code,#sector+cluster+name,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
 JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,5832,Education COVID-19,600000,,
-JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,5833,Health COVID-19,52045731,200000,0
-JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,5831,Multi-sector COVID-19,200000,938190,469
-JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,,Not specified,,400003,
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,5833,Health COVID-19,52045731,320251,1
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,5831,Multi-sector COVID-19,200000,2148882,1074
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,,Not specified,,16135147,
 JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,,Multiple clusters/sectors (shared),,0,

@@ -54,7 +54,7 @@ def main():
         for info, country in progress_storing_tempdir('FTS', locations.countries, 'iso3'):
             folder = info['folder']
 # for testing specific countries only
-#             if nextdict['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
+#             if country['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
 #                 continue
             dataset, showcase, hxl_resource, ordered_resource_names = fts.generate_dataset_and_showcase(folder, country)
             if dataset is not None:
@@ -78,5 +78,5 @@ def main():
 
 
 if __name__ == '__main__':
-    facade(main, user_agent_config_yaml=join(expanduser('~'), '.useragents.yml'), user_agent_lookup=lookup, project_config_yaml=join('config', 'project_configuration.yml'))
+    facade(main, hdx_site='feature', user_agent_config_yaml=join(expanduser('~'), '.useragents.yml'), user_agent_lookup=lookup, project_config_yaml=join('config', 'project_configuration.yml'))
 
