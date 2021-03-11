@@ -1,6 +1,5 @@
 countryCode,id,name,code,typeId,typeName,startDate,endDate,year,requirements,funding,percentFunded
 #country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#activity+appeal+type+id+fts_internal,#activity+appeal+type+name,#date+start,#date+end,#date+year,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
-JOR,,Not specified,,,,,,2022,,560105,
 JOR,943,Syria Refugee Response and Resilience Plan (3RP) 2020,RSYR20,111,111,2020-01-01,2020-12-31,2020,1475421996,597249843,40
 JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,1614,1614,2020-05-01,2020-12-31,2020,52845731,18604280,35
-JOR,,Not specified,,,,,,2020,,-7319120,
+JOR,,Not specified,,,,,,2020,,98392138,

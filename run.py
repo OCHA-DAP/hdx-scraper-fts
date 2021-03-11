@@ -14,6 +14,7 @@ from datetime import datetime
 from os.path import join, expanduser
 
 from hdx.hdx_configuration import Configuration
+from hdx.utilities.dateparse import parse_date
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import progress_storing_tempdir
 
@@ -30,6 +31,7 @@ lookup = 'hdx-scraper-fts'
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--today', default=None, help='Date to use for today')
     parser.add_argument('-c', '--countries', default=None, help='Countries to run')
     parser.add_argument('-y', '--years', default=None, help='Years to run')
     parser.add_argument('-t', '--testfolder', default=None, help='Output test data to folder')
@@ -45,7 +47,10 @@ def main():
         configuration = Configuration.read()
         ftsdownloader = FTSDownload(configuration, downloader, countryisos=args.countries, years=args.years, testfolder=args.testfolder)
         notes = configuration['notes']
-        today = datetime.now()
+        if args.today:
+            today = parse_date(args.today)
+        else:
+            today = datetime.now()
 
         locations = Locations(ftsdownloader)
         logger.info('Number of country datasets to upload: %d' % len(locations.countries))

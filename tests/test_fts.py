@@ -48,7 +48,7 @@ class TestFTS:
             with Download(user_agent='test') as downloader:
                 ftsdownloader = FTSDownload(configuration, downloader, testpath=True)
                 notes = configuration['notes']
-                today = parse_date('2020-10-12')
+                today = parse_date('2020-12-31')
 
                 locations = Locations(ftsdownloader)
                 logger.info('Number of country datasets to upload: %d' % len(locations.countries))
@@ -61,7 +61,7 @@ class TestFTS:
                                             {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                             {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                             {'name': 'covid-19', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
-                                   'dataset_date': '[2020-10-12T00:00:00 TO 2020-10-12T00:00:00]',
+                                   'dataset_date': '[2020-12-31T00:00:00 TO 2020-12-31T00:00:00]',
                                    'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
                                    'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0', 'notes': notes}
                 resources = dataset.get_resources()
@@ -96,7 +96,7 @@ class TestFTS:
                                             {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                             {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                             {'name': 'covid-19', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
-                                   'dataset_date': '[2020-10-12T00:00:00 TO 2020-10-12T00:00:00]',
+                                   'dataset_date': '[2020-12-31T00:00:00 TO 2020-12-31T00:00:00]',
                                    'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
                                    'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0',
                                    'notes': notes}
@@ -134,7 +134,7 @@ class TestFTS:
                                             {'name': 'financial tracking service - fts', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                             {'name': 'aid funding', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'},
                                             {'name': 'covid-19', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}],
-                                   'dataset_date': '[2020-10-12T00:00:00 TO 2020-10-12T00:00:00]',
+                                   'dataset_date': '[2020-12-31T00:00:00 TO 2020-12-31T00:00:00]',
                                    'data_update_frequency': '1', 'maintainer': '196196be-6037-4488-8b71-d786adf4c081',
                                    'owner_org': 'fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e', 'subnational': '0',
                                    'notes': notes}

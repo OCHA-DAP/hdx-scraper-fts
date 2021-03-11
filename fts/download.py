@@ -32,13 +32,19 @@ class FTSDownload:
     @staticmethod
     def get_testfile_path(partial_url=None, url=None):
         if partial_url:
-            filename = slugify(partial_url)
+            filename = partial_url
         else:
             split = urlsplit(url)
             filename = f'{basename(split.path)}'
             if split.query:
                 filename = f'{filename}_{split.query}'
-        if filename[-5:] != '.json':
+        filename = slugify(filename)
+        extension = filename[-4:]
+        if extension == 'json':
+            dot = filename[-5]
+            if dot != '.':
+                filename = filename.replace(f'{dot}json', '.json')
+        else:
             filename = f'{filename}.json'
         return filename
 
