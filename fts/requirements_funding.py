@@ -46,8 +46,8 @@ class RequirementsFunding:
                         if country_req != totalreq:
                             countryreq_is_totalreq = False
                 if countryreq_is_totalreq:
-                    logger.info('%s has same country requirements as total requirements!' % planid)
-                    return True
+                    logger.info('Ignoring %s country requirements as same as total requirements!' % planid)
+                    country_requirements = dict()
             fund_objects = data['report3']['fundingTotals']['objects']
             country_funding = dict()
             if len(fund_objects) == 1:
@@ -81,6 +81,7 @@ class RequirementsFunding:
 
     def generate_resource(self, folder, dataset, plans_by_year, country, call_others=lambda x: None):
         countryiso = country['iso3']
+        countryname = country['name']
         funding_by_year = self.get_country_funding(country['id'], plans_by_year)
         rows = list()
 
@@ -99,9 +100,11 @@ class RequirementsFunding:
                         found_other_countries = True
                         continue
                     requirements = country.get('requirements')
-                    if requirements is None:
-                        requirements = ''
                     funding = country.get('funding')
+                    if requirements is None:
+                        if funding is None:
+                            continue
+                        requirements = ''
                     if funding is None:
                         funding = ''
                     percentFunded = country.get('percentFunded', '')
@@ -129,7 +132,7 @@ class RequirementsFunding:
         filename = f'fts_requirements_funding_{countryiso.lower()}.csv'
         resourcedata = {
             'name': filename.lower(),
-            'description': f'FTS Annual Requirements and Funding Data for {country["name"]}',
+            'description': f'FTS Annual Requirements and Funding Data for {countryname}',
             'format': 'csv'
         }
         success, results = dataset.generate_resource_from_iterator(headers, rows, hxl_names, folder, filename, resourcedata)
