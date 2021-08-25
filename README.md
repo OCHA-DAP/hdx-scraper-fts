@@ -1,5 +1,5 @@
 ### Collector for FTS's Datasets
-[![Build Status](https://github.com/OCHA-DAP/hdx-scraper-fts/workflows/build/badge.svg)](https://github.com/OCHA-DAP/hdx-scraper-fts/actions?query=workflow%3Abuild) [![Coverage Status](https://coveralls.io/repos/github/OCHA-DAP/hdx-scraper-fts/badge.svg?branch=master&ts=1)](https://coveralls.io/github/OCHA-DAP/hdx-scraper-fts?branch=master)
+[![Build Status](https://github.com/OCHA-DAP/hdx-scraper-fts/workflows/build/badge.svg)](https://github.com/OCHA-DAP/hdx-scraper-fts/actions?query=workflow%3Abuild) [![Coverage Status](https://coveralls.io/repos/github/OCHA-DAP/hdx-scraper-fts/badge.svg?branch=main&ts=1)](https://coveralls.io/github/OCHA-DAP/hdx-scraper-fts?branch=main)
 
 This script connects to the [FTS API](https://api.hpc.tools/docs/v1/) and extracts requirements and funding data country by country creating a dataset per country in HDX. It makes in the order of 5000 reads from FTS and 1000 read/writes (API calls) to HDX in a one hour period. It saves 3 temporary files per country each less than 5Kb and these are what are uploaded to HDX. These files are then deleted. It runs every day. 
 
