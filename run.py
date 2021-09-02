@@ -61,7 +61,7 @@ def main():
 # for testing specific countries only
 #             if country['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
 #                 continue
-            dataset, showcase, hxl_resource, ordered_resource_names = fts.generate_dataset_and_showcase(folder, country)
+            dataset, showcase, hxl_resource, resource_names = fts.generate_dataset_and_showcase(folder, country)
             if dataset is not None:
                 dataset.update_from_yaml()
                 if hxl_resource is None:
@@ -74,9 +74,13 @@ def main():
                     hxl_update = True
                 else:
                     hxl_update = False
-                sorted_resources = sorted(dataset.get_resources(), key=lambda x: ordered_resource_names.index(x['name']))
-                dataset.reorder_resources([x['id'] for x in sorted_resources], hxl_update=hxl_update)
-                if hxl_resource and not hxl_update:
+                existing_order = [x['name'] for x in dataset.get_resources()]
+                if existing_order != resource_names:
+                    sorted_resources = sorted(dataset.get_resources(), key=lambda x: resource_names.index(x['name']))
+                    dataset.reorder_resources([x['id'] for x in sorted_resources], hxl_update=False)
+                if hxl_update:
+                    dataset.hxl_update()
+                elif hxl_resource:
                     dataset.generate_resource_view()
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)

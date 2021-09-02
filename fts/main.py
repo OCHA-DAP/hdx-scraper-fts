@@ -122,5 +122,4 @@ class FTS:
             other_hxl_resource = self.generate_other_resources(resources, folder, dataset, country)
             if other_hxl_resource:
                 hxl_resource = other_hxl_resource
-        ordered_resource_names = [x['name'] for x in resources]
-        return dataset, showcase, hxl_resource, ordered_resource_names
+        return dataset, showcase, hxl_resource, [x['name'] for x in resources]
