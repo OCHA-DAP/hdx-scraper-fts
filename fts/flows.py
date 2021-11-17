@@ -3,7 +3,7 @@ import logging
 from hdx.utilities.dictandlist import dict_of_lists_add
 from hdx.utilities.text import multiple_replace
 
-from fts.helpers import country_all_columns_to_keep, funding_hxl_names, rename_columns
+from .helpers import country_all_columns_to_keep, funding_hxl_names, rename_columns
 
 logger = logging.getLogger(__name__)
 

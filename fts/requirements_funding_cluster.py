@@ -3,7 +3,7 @@ import logging
 
 from hdx.utilities.downloader import DownloadError
 
-from fts.helpers import hxl_names
+from .helpers import hxl_names
 
 logger = logging.getLogger(__name__)
 

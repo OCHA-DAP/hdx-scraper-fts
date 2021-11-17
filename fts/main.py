@@ -12,11 +12,11 @@ from hdx.data.hdxobject import HDXError
 from hdx.utilities.dictandlist import dict_of_lists_add
 from slugify import slugify
 
-from fts.flows import Flows
-from fts.helpers import get_dataset_and_showcase
-from fts.requirements_funding import RequirementsFunding
-from fts.requirements_funding_cluster import RequirementsFundingCluster
-from fts.requirements_funding_covid import RequirementsFundingCovid
+from .flows import Flows
+from .helpers import get_dataset_and_showcase
+from .requirements_funding import RequirementsFunding
+from .requirements_funding_cluster import RequirementsFundingCluster
+from .requirements_funding_covid import RequirementsFundingCovid
 
 logger = logging.getLogger(__name__)
 

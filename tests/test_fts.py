@@ -7,18 +7,17 @@ import logging
 from os.path import join
 
 import pytest
-from hdx import hdx_locations
+from fts.download import FTSDownload
+from fts.locations import Locations
+from fts.main import FTS
+from hdx.api.configuration import Configuration
+from hdx.api.locations import Locations as HDXLocations
 from hdx.data.vocabulary import Vocabulary
-from hdx.hdx_configuration import Configuration
 from hdx.location.country import Country
 from hdx.utilities.compare import assert_files_same
 from hdx.utilities.dateparse import parse_date
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
-
-from fts.download import FTSDownload
-from fts.locations import Locations
-from fts.main import FTS
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ class TestFTS:
             user_agent="test",
             project_config_yaml=join("tests", "config", "project_configuration.yml"),
         )
-        hdx_locations.Locations.set_validlocations(
+        HDXLocations.set_validlocations(
             [
                 {"name": "afg", "title": "Afghanistan"},
                 {"name": "jor", "title": "Jordan"},
