@@ -124,7 +124,7 @@ class RequirementsFunding:
                         "name": plan["name"],
                         "code": plan["code"],
                         "typeId": plan["planType"]["id"],
-                        "typeName": plan["planType"]["id"],
+                        "typeName": plan["planType"]["name"],
                         "startDate": plan["startDate"],
                         "endDate": plan["endDate"],
                         "year": year,

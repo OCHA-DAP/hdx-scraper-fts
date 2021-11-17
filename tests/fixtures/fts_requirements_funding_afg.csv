@@ -1,5 +1,5 @@
 countryCode,id,name,code,typeId,typeName,startDate,endDate,year,requirements,funding,percentFunded
 #country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#activity+appeal+type+id+fts_internal,#activity+appeal+type+name,#date+start,#date+end,#date+year,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
-AFG,929,Afghanistan 2020,HAFG20,4,4,2020-01-01,2020-12-31,2020,1131050820,564467765,50
-AFG,1006,Famine Prevention COVID-19 2020,OGLBL20,1614,1614,2020-05-01,2020-12-31,2020,,15000000,
+AFG,929,Afghanistan 2020,HAFG20,4,Humanitarian response plan,2020-01-01,2020-12-31,2020,1131050820,564467765,50
+AFG,1006,Famine Prevention COVID-19 2020,OGLBL20,1614,Other,2020-05-01,2020-12-31,2020,,15000000,
 AFG,,Not specified,,,,,,2020,,146123534,
