@@ -75,7 +75,6 @@ class TestFTS:
                     dataset,
                     showcase,
                     hxl_resource,
-                    ordered_resource_names,
                 ) = fts.generate_dataset_and_showcase(folder, locations.countries[0])
                 assert dataset == {
                     "groups": [{"name": "afg"}],
@@ -178,20 +177,11 @@ class TestFTS:
                     ],
                 }
                 assert hxl_resource == resources[4]
-                assert ordered_resource_names == [
-                    "fts_requirements_funding_afg.csv",
-                    "fts_requirements_funding_covid_afg.csv",
-                    "fts_requirements_funding_cluster_afg.csv",
-                    "fts_requirements_funding_globalcluster_afg.csv",
-                    "fts_incoming_funding_afg.csv",
-                    "fts_internal_funding_afg.csv",
-                ]
 
                 (
                     dataset,
                     showcase,
                     hxl_resource,
-                    ordered_resource_names,
                 ) = fts.generate_dataset_and_showcase(folder, locations.countries[1])
                 assert dataset == {
                     "groups": [{"name": "jor"}],
@@ -295,20 +285,11 @@ class TestFTS:
                     ],
                 }
                 assert hxl_resource == resources[4]
-                assert ordered_resource_names == [
-                    "fts_requirements_funding_jor.csv",
-                    "fts_requirements_funding_covid_jor.csv",
-                    "fts_requirements_funding_cluster_jor.csv",
-                    "fts_requirements_funding_globalcluster_jor.csv",
-                    "fts_incoming_funding_jor.csv",
-                    "fts_internal_funding_jor.csv",
-                ]
 
                 (
                     dataset,
                     showcase,
                     hxl_resource,
-                    ordered_resource_names,
                 ) = fts.generate_dataset_and_showcase(folder, locations.countries[2])
                 assert dataset == {
                     "groups": [{"name": "pse"}],
@@ -419,12 +400,3 @@ class TestFTS:
                     ],
                 }
                 assert hxl_resource == resources[5]
-                assert ordered_resource_names == [
-                    "fts_requirements_funding_pse.csv",
-                    "fts_requirements_funding_covid_pse.csv",
-                    "fts_requirements_funding_cluster_pse.csv",
-                    "fts_requirements_funding_globalcluster_pse.csv",
-                    "fts_incoming_funding_pse.csv",
-                    "fts_internal_funding_pse.csv",
-                    "fts_outgoing_funding_pse.csv",
-                ]

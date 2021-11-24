@@ -78,7 +78,6 @@ def main():
                 dataset,
                 showcase,
                 hxl_resource,
-                resource_names,
             ) = fts.generate_dataset_and_showcase(folder, country)
             if dataset is not None:
                 dataset.update_from_yaml()
@@ -88,6 +87,7 @@ def main():
                     dataset.set_quickchart_resource(hxl_resource)
                 dataset.create_in_hdx(
                     remove_additional_resources=True,
+                    match_resource_order=True,
                     hxl_update=False,
                     updated_by_script="HDX Scraper: FTS",
                     batch=info["batch"],
@@ -96,15 +96,6 @@ def main():
                     hxl_update = True
                 else:
                     hxl_update = False
-                existing_order = [x["name"] for x in dataset.get_resources()]
-                if existing_order != resource_names:
-                    sorted_resources = sorted(
-                        dataset.get_resources(),
-                        key=lambda x: resource_names.index(x["name"]),
-                    )
-                    dataset.reorder_resources(
-                        [x["id"] for x in sorted_resources], hxl_update=False
-                    )
                 if hxl_update:
                     dataset.hxl_update()
                 elif hxl_resource:

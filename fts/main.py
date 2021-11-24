@@ -155,4 +155,5 @@ class FTS:
             )
             if other_hxl_resource:
                 hxl_resource = other_hxl_resource
-        return dataset, showcase, hxl_resource, [x["name"] for x in resources]
+        dataset.resources = resources
+        return dataset, showcase, hxl_resource
