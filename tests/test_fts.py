@@ -108,20 +108,6 @@ class TestFTS:
                 resources = dataset.get_resources()
                 assert resources == [
                     {
-                        "name": "fts_incoming_funding_afg.csv",
-                        "description": "FTS Incoming Funding Data for Afghanistan for 2020",
-                        "format": "csv",
-                        "resource_type": "file.upload",
-                        "url_type": "upload",
-                    },
-                    {
-                        "name": "fts_internal_funding_afg.csv",
-                        "description": "FTS Internal Funding Data for Afghanistan for 2020",
-                        "format": "csv",
-                        "resource_type": "file.upload",
-                        "url_type": "upload",
-                    },
-                    {
                         "name": "fts_requirements_funding_afg.csv",
                         "description": "FTS Annual Requirements and Funding Data for Afghanistan",
                         "format": "csv",
@@ -129,8 +115,8 @@ class TestFTS:
                         "url_type": "upload",
                     },
                     {
-                        "name": "fts_requirements_funding_globalcluster_afg.csv",
-                        "description": "FTS Annual Requirements and Funding Data by Global Cluster for Afghanistan",
+                        "name": "fts_requirements_funding_covid_afg.csv",
+                        "description": "FTS Annual Requirements, Funding and Covid Funding Data for Afghanistan",
                         "format": "csv",
                         "resource_type": "file.upload",
                         "url_type": "upload",
@@ -143,8 +129,22 @@ class TestFTS:
                         "url_type": "upload",
                     },
                     {
-                        "name": "fts_requirements_funding_covid_afg.csv",
-                        "description": "FTS Annual Requirements, Funding and Covid Funding Data for Afghanistan",
+                        "name": "fts_requirements_funding_globalcluster_afg.csv",
+                        "description": "FTS Annual Requirements and Funding Data by Global Cluster for Afghanistan",
+                        "format": "csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "name": "fts_incoming_funding_afg.csv",
+                        "description": "FTS Incoming Funding Data for Afghanistan for 2020",
+                        "format": "csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "name": "fts_internal_funding_afg.csv",
+                        "description": "FTS Internal Funding Data for Afghanistan for 2020",
                         "format": "csv",
                         "resource_type": "file.upload",
                         "url_type": "upload",
@@ -176,7 +176,7 @@ class TestFTS:
                         },
                     ],
                 }
-                assert hxl_resource == resources[4]
+                assert hxl_resource == resources[2]
 
                 (
                     dataset,
@@ -216,20 +216,6 @@ class TestFTS:
                 resources = dataset.get_resources()
                 assert resources == [
                     {
-                        "name": "fts_incoming_funding_jor.csv",
-                        "description": "FTS Incoming Funding Data for Jordan for 2020",
-                        "format": "csv",
-                        "resource_type": "file.upload",
-                        "url_type": "upload",
-                    },
-                    {
-                        "name": "fts_internal_funding_jor.csv",
-                        "description": "FTS Internal Funding Data for Jordan for 2020",
-                        "format": "csv",
-                        "resource_type": "file.upload",
-                        "url_type": "upload",
-                    },
-                    {
                         "name": "fts_requirements_funding_jor.csv",
                         "description": "FTS Annual Requirements and Funding Data for Jordan",
                         "format": "csv",
@@ -237,8 +223,8 @@ class TestFTS:
                         "url_type": "upload",
                     },
                     {
-                        "name": "fts_requirements_funding_globalcluster_jor.csv",
-                        "description": "FTS Annual Requirements and Funding Data by Global Cluster for Jordan",
+                        "name": "fts_requirements_funding_covid_jor.csv",
+                        "description": "FTS Annual Requirements, Funding and Covid Funding Data for Jordan",
                         "format": "csv",
                         "resource_type": "file.upload",
                         "url_type": "upload",
@@ -251,8 +237,22 @@ class TestFTS:
                         "url_type": "upload",
                     },
                     {
-                        "name": "fts_requirements_funding_covid_jor.csv",
-                        "description": "FTS Annual Requirements, Funding and Covid Funding Data for Jordan",
+                        "name": "fts_requirements_funding_globalcluster_jor.csv",
+                        "description": "FTS Annual Requirements and Funding Data by Global Cluster for Jordan",
+                        "format": "csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "name": "fts_incoming_funding_jor.csv",
+                        "description": "FTS Incoming Funding Data for Jordan for 2020",
+                        "format": "csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "name": "fts_internal_funding_jor.csv",
+                        "description": "FTS Internal Funding Data for Jordan for 2020",
                         "format": "csv",
                         "resource_type": "file.upload",
                         "url_type": "upload",
@@ -284,7 +284,7 @@ class TestFTS:
                         },
                     ],
                 }
-                assert hxl_resource == resources[4]
+                assert hxl_resource == resources[2]
 
                 (
                     dataset,
@@ -324,6 +324,34 @@ class TestFTS:
                 resources = dataset.get_resources()
                 assert resources == [
                     {
+                        "name": "fts_requirements_funding_pse.csv",
+                        "description": "FTS Annual Requirements and Funding Data for occupied Palestinian territory",
+                        "format": "csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "name": "fts_requirements_funding_covid_pse.csv",
+                        "description": "FTS Annual Requirements, Funding and Covid Funding Data for occupied Palestinian territory",
+                        "format": "csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "name": "fts_requirements_funding_cluster_pse.csv",
+                        "description": "FTS Annual Requirements and Funding Data by Cluster for occupied Palestinian territory",
+                        "format": "csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "name": "fts_requirements_funding_globalcluster_pse.csv",
+                        "description": "FTS Annual Requirements and Funding Data by Global Cluster for occupied Palestinian territory",
+                        "format": "csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
                         "name": "fts_incoming_funding_pse.csv",
                         "description": "FTS Incoming Funding Data for occupied Palestinian territory for 2020",
                         "format": "csv",
@@ -340,34 +368,6 @@ class TestFTS:
                     {
                         "name": "fts_outgoing_funding_pse.csv",
                         "description": "FTS Outgoing Funding Data for occupied Palestinian territory for 2020",
-                        "format": "csv",
-                        "resource_type": "file.upload",
-                        "url_type": "upload",
-                    },
-                    {
-                        "name": "fts_requirements_funding_pse.csv",
-                        "description": "FTS Annual Requirements and Funding Data for occupied Palestinian territory",
-                        "format": "csv",
-                        "resource_type": "file.upload",
-                        "url_type": "upload",
-                    },
-                    {
-                        "name": "fts_requirements_funding_globalcluster_pse.csv",
-                        "description": "FTS Annual Requirements and Funding Data by Global Cluster for occupied Palestinian territory",
-                        "format": "csv",
-                        "resource_type": "file.upload",
-                        "url_type": "upload",
-                    },
-                    {
-                        "name": "fts_requirements_funding_cluster_pse.csv",
-                        "description": "FTS Annual Requirements and Funding Data by Cluster for occupied Palestinian territory",
-                        "format": "csv",
-                        "resource_type": "file.upload",
-                        "url_type": "upload",
-                    },
-                    {
-                        "name": "fts_requirements_funding_covid_pse.csv",
-                        "description": "FTS Annual Requirements, Funding and Covid Funding Data for occupied Palestinian territory",
                         "format": "csv",
                         "resource_type": "file.upload",
                         "url_type": "upload",
@@ -399,4 +399,4 @@ class TestFTS:
                         },
                     ],
                 }
-                assert hxl_resource == resources[5]
+                assert hxl_resource == resources[2]
