@@ -12,15 +12,14 @@ import logging
 from datetime import datetime
 from os.path import expanduser, join
 
-from hdx.facades.simple import facade
-from hdx.api.configuration import Configuration
-from hdx.utilities.dateparse import parse_date
-from hdx.utilities.downloader import Download
-from hdx.utilities.path import progress_storing_tempdir
-
 from fts.download import FTSDownload
 from fts.locations import Locations
 from fts.main import FTS
+from hdx.api.configuration import Configuration
+from hdx.facades.simple import facade
+from hdx.utilities.dateparse import parse_date
+from hdx.utilities.downloader import Download
+from hdx.utilities.path import progress_storing_tempdir
 
 logger = logging.getLogger(__name__)
 
