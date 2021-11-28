@@ -105,12 +105,12 @@ class FTS:
         countryname = country["name"]
         if countryname == "World":
             logger.info(f"Ignoring {countryname}")
-            return None, None, None, None
+            return None, None, None
         title = f"{countryname} - Requirements and Funding Data"
         countryiso = country["iso3"]
         if countryiso is None:
             logger.error(f"{title} has a problem! Iso3 is None!")
-            return None, None, None, None
+            return None, None, None
         logger.info(f"Adding FTS data for {countryname}")
         latestyear = str(self.today.year)
         slugified_name = slugify(
@@ -133,11 +133,11 @@ class FTS:
             dataset.add_country_location(countryiso)
         except HDXError as e:
             logger.error(f"{title} has a problem! {e}")
-            return None, None, None, None
+            return None, None, None
         resources = self.flows.generate_resources(folder, dataset, latestyear, country)
         if len(resources) == 0:
             logger.warning("No requirements or funding data available")
-            return None, None, None, None
+            return None, None, None
 
         hxl_resource = None
         plans_by_year = self.plans_by_year_by_country.get(countryiso)
