@@ -161,7 +161,7 @@ def get_dataset_and_showcase(
             "title": f"FTS {country} Summary Page",
             "notes": f"Click the image on the right to go to the FTS funding summary page for {country}",
             "url": showcase_url,
-            "image_url": f"https://reliefweb.int/sites/reliefweb.int/files/styles/location-image/public/country-location-images/{countryiso.lower()}.png",
+            "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
         }
     )
     showcase.add_tags(tags)

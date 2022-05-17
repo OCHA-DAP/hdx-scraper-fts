@@ -152,7 +152,7 @@ class TestFTS:
                 ]
                 check_resources(resources)
                 assert showcase == {
-                    "image_url": "https://reliefweb.int/sites/reliefweb.int/files/styles/location-image/public/country-location-images/afg.png",
+                    "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
                     "name": "fts-requirements-and-funding-data-for-afghanistan-showcase",
                     "notes": "Click the image on the right to go to the FTS funding summary page for Afghanistan",
                     "url": "https://fts.unocha.org/countries/1/flows/2020",
@@ -260,7 +260,7 @@ class TestFTS:
                 ]
                 check_resources(resources)
                 assert showcase == {
-                    "image_url": "https://reliefweb.int/sites/reliefweb.int/files/styles/location-image/public/country-location-images/jor.png",
+                    "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
                     "name": "fts-requirements-and-funding-data-for-jordan-showcase",
                     "notes": "Click the image on the right to go to the FTS funding summary page for Jordan",
                     "url": "https://fts.unocha.org/countries/114/flows/2020",
@@ -375,7 +375,7 @@ class TestFTS:
                 ]
                 check_resources(resources)
                 assert showcase == {
-                    "image_url": "https://reliefweb.int/sites/reliefweb.int/files/styles/location-image/public/country-location-images/pse.png",
+                    "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
                     "name": "fts-requirements-and-funding-data-for-occupied-palestinian-territory-showcase",
                     "notes": "Click the image on the right to go to the FTS funding summary page for occupied Palestinian territory",
                     "url": "https://fts.unocha.org/countries/171/flows/2020",
