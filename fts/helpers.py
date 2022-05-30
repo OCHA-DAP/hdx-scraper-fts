@@ -159,7 +159,7 @@ def get_dataset_and_showcase(
         {
             "name": f"{slugified_name}-showcase",
             "title": f"FTS {country} Summary Page",
-            "notes": f"Click the image on the right to go to the FTS funding summary page for {country}",
+            "notes": f"Click the image to go to the FTS funding summary page for {country}",
             "url": showcase_url,
             "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
         }

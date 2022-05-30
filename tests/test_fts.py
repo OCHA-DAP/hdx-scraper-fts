@@ -154,7 +154,7 @@ class TestFTS:
                 assert showcase == {
                     "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
                     "name": "fts-requirements-and-funding-data-for-afghanistan-showcase",
-                    "notes": "Click the image on the right to go to the FTS funding summary page for Afghanistan",
+                    "notes": "Click the image to go to the FTS funding summary page for Afghanistan",
                     "url": "https://fts.unocha.org/countries/1/flows/2020",
                     "title": "FTS Afghanistan Summary Page",
                     "tags": [
@@ -262,7 +262,7 @@ class TestFTS:
                 assert showcase == {
                     "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
                     "name": "fts-requirements-and-funding-data-for-jordan-showcase",
-                    "notes": "Click the image on the right to go to the FTS funding summary page for Jordan",
+                    "notes": "Click the image to go to the FTS funding summary page for Jordan",
                     "url": "https://fts.unocha.org/countries/114/flows/2020",
                     "title": "FTS Jordan Summary Page",
                     "tags": [
@@ -377,7 +377,7 @@ class TestFTS:
                 assert showcase == {
                     "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
                     "name": "fts-requirements-and-funding-data-for-occupied-palestinian-territory-showcase",
-                    "notes": "Click the image on the right to go to the FTS funding summary page for occupied Palestinian territory",
+                    "notes": "Click the image to go to the FTS funding summary page for occupied Palestinian territory",
                     "url": "https://fts.unocha.org/countries/171/flows/2020",
                     "title": "FTS occupied Palestinian territory Summary Page",
                     "tags": [
