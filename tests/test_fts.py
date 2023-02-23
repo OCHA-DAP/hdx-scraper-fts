@@ -41,9 +41,7 @@ class TestFTS:
         Vocabulary._approved_vocabulary = {
             "tags": [
                 {"name": "hxl"},
-                {"name": "financial tracking service - fts"},
-                {"name": "aid funding"},
-                {"name": "epidemics and outbreaks"},
+                {"name": "funding"},
                 {"name": "covid-19"},
             ],
             "id": "4e61d464-4943-4e97-973a-84673c1aaa87",
@@ -86,11 +84,7 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
-                            "name": "financial tracking service - fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "aid funding",
+                            "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
@@ -163,11 +157,7 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
-                            "name": "financial tracking service - fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "aid funding",
+                            "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
@@ -193,11 +183,7 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
-                            "name": "financial tracking service - fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "aid funding",
+                            "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
@@ -271,11 +257,7 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
-                            "name": "financial tracking service - fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "aid funding",
+                            "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
@@ -301,11 +283,7 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
-                            "name": "financial tracking service - fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "aid funding",
+                            "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
@@ -386,11 +364,7 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
-                            "name": "financial tracking service - fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "aid funding",
+                            "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {

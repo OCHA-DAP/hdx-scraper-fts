@@ -149,10 +149,10 @@ def get_dataset_and_showcase(
     dataset = Dataset({"name": slugified_name, "title": title, "notes": description})
     dataset.set_maintainer("196196be-6037-4488-8b71-d786adf4c081")
     dataset.set_organization("fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e")
-    dataset.set_date_of_dataset(today)
+    dataset.set_reference_period(today)
     dataset.set_expected_update_frequency("Every day")
     dataset.set_subnational(False)
-    tags = ["hxl", "financial tracking service - fts", "aid funding"]
+    tags = ["hxl", "funding"]
     tags.extend(additional_tags)
     dataset.add_tags(tags)
     showcase = Showcase(
