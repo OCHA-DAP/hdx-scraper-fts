@@ -95,10 +95,10 @@ def main():
                     hxl_update = True
                 else:
                     hxl_update = False
-                if hxl_resource:
-                    dataset.generate_resource_view()
                 if hxl_update:
                     dataset.hxl_update()
+                elif hxl_resource:
+                    dataset.generate_resource_view(hxl_resource)
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
