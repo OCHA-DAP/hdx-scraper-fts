@@ -3,7 +3,15 @@
 
 name: Run tests
 
-on: [push, pull_request]
+on:
+  workflow_dispatch: # add run button in github
+  push:
+    branches-ignore:
+      - gh-pages
+  pull_request:
+    branches-ignore:
+      - gh-pages
+
 
 jobs:
   build:
@@ -11,7 +19,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python 3.x
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
@@ -28,16 +36,15 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov-config .coveragerc --cov-report= --cov=.
+        pytest --junitxml=junit/test-results.xml --cov-config .coveragerc --cov-report= --cov=.
     - name: Publish in Coveralls
       uses: AndreMiras/coveralls-python-action@develop
-      if: success()
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: tests
     - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v1
+      uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        files: junit/*.xml
+        junit_files: junit/*.xml
