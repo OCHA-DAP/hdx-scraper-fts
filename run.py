@@ -43,7 +43,7 @@ def main():
 
     with Download(
         fail_on_missing_file=False,
-        extra_params_yaml=join(expanduser("~"), ".extraparams.yml"),
+        extra_params_yaml=join(expanduser("~"), ".extraparams.yaml"),
         extra_params_lookup=lookup,
         rate_limit={"calls": 1, "period": 1},
     ) as downloader:
@@ -98,7 +98,7 @@ def main():
                 if hxl_update:
                     dataset.hxl_update()
                 elif hxl_resource:
-                    dataset.generate_resource_view(hxl_resource)
+                    dataset.generate_quickcharts(hxl_resource)
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
@@ -106,7 +106,7 @@ def main():
 if __name__ == "__main__":
     facade(
         main,
-        user_agent_config_yaml=join(expanduser("~"), ".useragents.yml"),
+        user_agent_config_yaml=join(expanduser("~"), ".useragents.yaml"),
         user_agent_lookup=lookup,
-        project_config_yaml=join("config", "project_configuration.yml"),
+        project_config_yaml=join("config", "project_configuration.yaml"),
     )
