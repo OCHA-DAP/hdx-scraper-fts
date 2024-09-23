@@ -17,7 +17,8 @@ class RequirementsFundingCovid:
         self.rows = list()
 
     def get_covid_funding(
-        self, locationid_to_iso3, plans_by_year_by_country, covidstartyear=2020
+            self, locationid_to_iso3, plans_by_year_by_country,
+            covidstartyear=2020
     ):
         multiplecountry_planids = dict()
         planid_to_country = dict()
@@ -70,7 +71,8 @@ class RequirementsFundingCovid:
     def generate_plan_funding(self, inrow):
         planid = inrow["id"]
         countryiso = inrow["countryCode"]
-        covidfunding = self.covidfundingbyplanandlocation.get(f"{planid}-{countryiso}")
+        covidfunding = self.covidfundingbyplanandlocation.get(
+            f"{planid}-{countryiso}")
         if covidfunding is None:
             logger.info(
                 f"Location {countryiso} of plan {planid} has no COVID component!"

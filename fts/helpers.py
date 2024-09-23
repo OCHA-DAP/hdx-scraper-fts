@@ -137,19 +137,17 @@ cluster_columns_to_keep = [
 
 
 def get_dataset_and_showcase(
-    slugified_name,
-    title,
-    description,
-    today,
-    countryiso,
-    country,
-    showcase_url,
-    additional_tags=list(),
+        slugified_name,
+        title,
+        description,
+        country,
+        showcase_url,
+        additional_tags=list(),
 ):
-    dataset = Dataset({"name": slugified_name, "title": title, "notes": description})
+    dataset = Dataset(
+        {"name": slugified_name, "title": title, "notes": description})
     dataset.set_maintainer("196196be-6037-4488-8b71-d786adf4c081")
     dataset.set_organization("fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e")
-    dataset.set_time_period(today)
     dataset.set_expected_update_frequency("Every day")
     dataset.set_subnational(False)
     tags = ["hxl", "funding"]

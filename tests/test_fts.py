@@ -28,7 +28,8 @@ class TestFTS:
         Configuration._create(
             hdx_read_only=True,
             user_agent="test",
-            project_config_yaml=join("tests", "config", "project_configuration.yml"),
+            project_config_yaml=join("tests", "config",
+                                     "project_configuration.yml"),
         )
         HDXLocations.set_validlocations(
             [
@@ -59,7 +60,8 @@ class TestFTS:
 
         with temp_dir("FTS-TEST", delete_on_failure=False) as folder:
             with Download(user_agent="test") as downloader:
-                ftsdownloader = FTSDownload(configuration, downloader, testpath=True)
+                ftsdownloader = FTSDownload(configuration, downloader,
+                                            testpath=True)
                 notes = configuration["notes"]
                 today = parse_date("2020-12-31")
 
@@ -68,12 +70,14 @@ class TestFTS:
                     f"Number of country datasets to upload: {len(locations.countries)}"
                 )
 
-                fts = FTS(ftsdownloader, locations, today, notes, start_year=2019)
+                fts = FTS(ftsdownloader, locations, today, notes,
+                          start_year=2019)
                 (
                     dataset,
                     showcase,
                     hxl_resource,
-                ) = fts.generate_dataset_and_showcase(folder, locations.countries[0])
+                ) = fts.generate_dataset_and_showcase(folder,
+                                                      locations.countries[0])
                 assert dataset == {
                     "groups": [{"name": "afg"}],
                     "name": "fts-requirements-and-funding-data-for-afghanistan",
@@ -92,7 +96,7 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                     ],
-                    "dataset_date": "[2020-12-31T00:00:00 TO 2020-12-31T00:00:00]",
+                    "dataset_date": "[2016-03-31T00:00:00 TO 2020-12-31T23:59:59]",
                     "data_update_frequency": "1",
                     "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                     "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
@@ -172,7 +176,8 @@ class TestFTS:
                     dataset,
                     showcase,
                     hxl_resource,
-                ) = fts.generate_dataset_and_showcase(folder, locations.countries[1])
+                ) = fts.generate_dataset_and_showcase(folder,
+                                                      locations.countries[1])
                 assert dataset == {
                     "groups": [{"name": "jor"}],
                     "name": "fts-requirements-and-funding-data-for-jordan",
@@ -191,7 +196,7 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                     ],
-                    "dataset_date": "[2020-12-31T00:00:00 TO 2020-12-31T00:00:00]",
+                    "dataset_date": "[2017-04-05T00:00:00 TO 2020-12-31T23:59:59]",
                     "data_update_frequency": "1",
                     "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                     "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
@@ -272,7 +277,8 @@ class TestFTS:
                     dataset,
                     showcase,
                     hxl_resource,
-                ) = fts.generate_dataset_and_showcase(folder, locations.countries[2])
+                ) = fts.generate_dataset_and_showcase(folder,
+                                                      locations.countries[2])
                 assert dataset == {
                     "groups": [{"name": "pse"}],
                     "name": "fts-requirements-and-funding-data-for-occupied-palestinian-territory",
@@ -291,7 +297,7 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                     ],
-                    "dataset_date": "[2020-12-31T00:00:00 TO 2020-12-31T00:00:00]",
+                    "dataset_date": "[2016-02-26T00:00:00 TO 2020-12-31T23:59:59]",
                     "data_update_frequency": "1",
                     "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                     "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
