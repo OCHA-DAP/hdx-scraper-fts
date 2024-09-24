@@ -9,6 +9,7 @@ Generates FTS datasets.
 import logging
 
 from hdx.data.hdxobject import HDXError
+from hdx.utilities.dateparse import parse_date
 from hdx.utilities.dictandlist import dict_of_lists_add
 from slugify import slugify
 
@@ -42,15 +43,18 @@ class FTS:
         covid = RequirementsFundingCovid(
             downloader, locations, self.plans_by_year_by_country
         )
-        cluster = RequirementsFundingCluster(downloader, self.planidswithonelocation)
+        cluster = RequirementsFundingCluster(downloader,
+                                             self.planidswithonelocation)
         globalcluster = RequirementsFundingCluster(
             downloader, self.planidswithonelocation, clusterlevel="global"
         )
-        return {"covid": covid, "cluster": cluster, "globalcluster": globalcluster}
+        return {"covid": covid, "cluster": cluster,
+                "globalcluster": globalcluster}
 
     def get_plans(self, start_year=1998):
         for year in range(self.today.year, start_year, -1):
-            data = self.downloader.download(f"2/fts/flow/plan/overview/progress/{year}")
+            data = self.downloader.download(
+                f"2/fts/flow/plan/overview/progress/{year}")
             plans = data["plans"]
             for plan in plans:
                 planid = plan["id"]
@@ -72,10 +76,12 @@ class FTS:
                             countryiso, {}
                         )
                         dict_of_lists_add(plans_by_year, year, plan)
-                        self.plans_by_year_by_country[countryiso] = plans_by_year
+                        self.plans_by_year_by_country[
+                            countryiso] = plans_by_year
 
     def call_others(self, row):
-        requirements_clusters, funding_clusters, notspecified, shared = self.others[
+        requirements_clusters, funding_clusters, notspecified, shared = \
+        self.others[
             "cluster"
         ].get_requirements_funding_plan(row)
         self.others["cluster"].generate_rows_requirements_funding(
@@ -90,10 +96,12 @@ class FTS:
         )
         if resource:
             resources.insert(1, resource)
-        hxlresource = self.others["cluster"].generate_resource(folder, dataset, country)
+        hxlresource = self.others["cluster"].generate_resource(folder, dataset,
+                                                               country)
         if hxlresource:
             resources.insert(1, hxlresource)
-        resource = self.others["covid"].generate_resource(folder, dataset, country)
+        resource = self.others["covid"].generate_resource(folder, dataset,
+                                                          country)
         if resource:
             resources.insert(1, resource)
         return hxlresource
@@ -123,8 +131,6 @@ class FTS:
             slugified_name,
             title,
             self.notes,
-            self.today,
-            countryiso,
             countryname,
             showcase_url,
             additional_tags=["covid-19"],
@@ -134,7 +140,9 @@ class FTS:
         except HDXError as e:
             logger.error(f"{title} has a problem! {e}")
             return None, None, None
-        resources = self.flows.generate_resources(folder, dataset, latestyear, country)
+        resources, start_date = self.flows.generate_resources(folder, dataset,
+                                                              latestyear,
+                                                              country)
         if len(resources) == 0:
             logger.warning("No requirements or funding data available")
             return None, None, None
@@ -146,6 +154,10 @@ class FTS:
                 f"We have latest year funding data but no overall funding data for {title}"
             )
         else:
+            earliest_year = sorted(plans_by_year)[0]
+            earliest_date = parse_date(f"{earliest_year}-01-01")
+            if earliest_date < start_date:
+                start_date = earliest_date
             hxl_resource = self.reqfund.generate_resource(
                 folder, dataset, plans_by_year, country, self.call_others
             )
@@ -156,4 +168,5 @@ class FTS:
             if other_hxl_resource:
                 hxl_resource = other_hxl_resource
         dataset.resources = resources
+        dataset.set_time_period(start_date, self.today)
         return dataset, showcase, hxl_resource

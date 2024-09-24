@@ -28,8 +28,10 @@ lookup = "hdx-scraper-fts"
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--today", default=None, help="Date to use for today")
-    parser.add_argument("-c", "--countries", default=None, help="Countries to run")
+    parser.add_argument("-d", "--today", default=None,
+                        help="Date to use for today")
+    parser.add_argument("-c", "--countries", default=None,
+                        help="Countries to run")
     parser.add_argument("-y", "--years", default=None, help="Years to run")
     parser.add_argument(
         "-t", "--testfolder", default=None, help="Output test data to folder"
@@ -42,10 +44,10 @@ def main():
     """Generate dataset and create it in HDX"""
 
     with Download(
-        fail_on_missing_file=False,
-        extra_params_yaml=join(expanduser("~"), ".extraparams.yaml"),
-        extra_params_lookup=lookup,
-        rate_limit={"calls": 1, "period": 1},
+            fail_on_missing_file=False,
+            extra_params_yaml=join(expanduser("~"), ".extraparams.yaml"),
+            extra_params_lookup=lookup,
+            rate_limit={"calls": 1, "period": 1},
     ) as downloader:
         args = parse_args()
         configuration = Configuration.read()
@@ -63,11 +65,12 @@ def main():
             today = datetime.now()
 
         locations = Locations(ftsdownloader)
-        logger.info(f"Number of country datasets to upload: {len(locations.countries)}")
+        logger.info(
+            f"Number of country datasets to upload: {len(locations.countries)}")
 
         fts = FTS(ftsdownloader, locations, today, notes)
         for info, country in progress_storing_tempdir(
-            "FTS", locations.countries, "iso3"
+                "FTS", locations.countries, "iso3"
         ):
             folder = info["folder"]
             # for testing specific countries only

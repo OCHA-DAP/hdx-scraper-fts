@@ -11,13 +11,13 @@ class FTSException(Exception):
 
 class FTSDownload:
     def __init__(
-        self,
-        configuration,
-        downloader,
-        countryisos=None,
-        years=None,
-        testfolder=None,
-        testpath=False,
+            self,
+            configuration,
+            downloader,
+            countryisos=None,
+            years=None,
+            testfolder=None,
+            testpath=False,
     ):
         self.url = configuration["base_url"]
         self.test_url = configuration["test_url"]
