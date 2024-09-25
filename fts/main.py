@@ -81,9 +81,9 @@ class FTS:
 
     def call_others(self, row):
         requirements_clusters, funding_clusters, notspecified, shared = \
-        self.others[
-            "cluster"
-        ].get_requirements_funding_plan(row)
+            self.others[
+                "cluster"
+            ].get_requirements_funding_plan(row)
         self.others["cluster"].generate_rows_requirements_funding(
             row, requirements_clusters, funding_clusters, notspecified, shared
         )
@@ -154,13 +154,12 @@ class FTS:
                 f"We have latest year funding data but no overall funding data for {title}"
             )
         else:
-            earliest_year = sorted(plans_by_year)[0]
-            earliest_date = parse_date(f"{earliest_year}-01-01")
-            if earliest_date < start_date:
-                start_date = earliest_date
-            hxl_resource = self.reqfund.generate_resource(
+            hxl_resource, reqfund_start_year = self.reqfund.generate_resource(
                 folder, dataset, plans_by_year, country, self.call_others
             )
+            reqfund_start_date = parse_date(f"{reqfund_start_year}-01-01")
+            if reqfund_start_date < start_date:
+                start_date = reqfund_start_date
             resources.insert(0, hxl_resource)
             other_hxl_resource = self.generate_other_resources(
                 resources, folder, dataset, country
