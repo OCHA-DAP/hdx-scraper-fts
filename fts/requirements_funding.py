@@ -167,8 +167,6 @@ class RequirementsFunding:
                     "percentFunded": "",
                 }
             )
-        if not rows:
-            return None
         headers = list(rows[0].keys())
         filename = f"fts_requirements_funding_{countryiso.lower()}.csv"
         resourcedata = {
@@ -179,4 +177,4 @@ class RequirementsFunding:
         success, results = dataset.generate_resource_from_iterator(
             headers, rows, hxl_names, folder, filename, resourcedata
         )
-        return results["resource"]
+        return results["resource"], all_years[-1]
