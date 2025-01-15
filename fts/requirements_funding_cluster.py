@@ -14,6 +14,8 @@ class RequirementsFundingCluster:
         self.planidswithonelocation = planidswithonelocation
         self.clusterlevel = clusterlevel
         self.rows = list()
+        self.iso3_latestdata = {}
+        self.iso3_latestpopulated = {}
 
     def get_requirements_funding_plan(self, inrow):
         planid = inrow["id"]
@@ -81,6 +83,11 @@ class RequirementsFundingCluster:
         del base_row["requirements"]
         del base_row["funding"]
         del base_row["percentFunded"]
+        countryiso3 = base_row["countryCode"]
+        year = base_row["year"]
+        if year >= self.iso3_latestdata.get(countryiso3, year):
+            self.iso3_latestdata[countryiso3] = year
+        year = max(year, self.iso3_latestpopulated.get(countryiso3, year))
         subrows = list()
         for clusterid, (fundname, funding) in funding_clusters.items():
             requirements_cluster = requirements_clusters.get(clusterid)
@@ -94,6 +101,7 @@ class RequirementsFundingCluster:
                                   funding)
             if requirements and funding != "":
                 row["percentFunded"] = int(funding / requirements * 100 + 0.5)
+                self.iso3_latestpopulated[countryiso3] = year
             else:
                 row["percentFunded"] = ""
             subrows.append(row)
@@ -150,3 +158,15 @@ class RequirementsFundingCluster:
             return results["resource"]
         else:
             return None
+
+    def can_make_quickchart(self, countryiso3):
+        latest_year = self.iso3_latestdata.get(countryiso3)
+        if not latest_year:
+            return False
+        populated_year = self.iso3_latestpopulated.get(countryiso3)
+        if not populated_year:
+            return False
+        if populated_year == latest_year:
+            return True
+        return False
+

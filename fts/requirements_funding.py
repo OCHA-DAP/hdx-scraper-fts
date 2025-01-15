@@ -91,7 +91,7 @@ class RequirementsFunding:
             self, folder, dataset, plans_by_year, country,
             call_others=lambda x: None
     ):
-        countryiso = country["iso3"]
+        countryiso3 = country["iso3"]
         countryname = country["name"]
         funding_by_year = self.get_country_funding(country["id"],
                                                    plans_by_year)
@@ -112,7 +112,7 @@ class RequirementsFunding:
                 for country in plan["countries"]:
                     adminlevel = country.get("adminlevel",
                                              country.get("adminLevel"))
-                    if adminlevel == 0 and country["iso3"] != countryiso:
+                    if adminlevel == 0 and country["iso3"] != countryiso3:
                         found_other_countries = True
                         continue
                     requirements = country.get("requirements")
@@ -127,7 +127,7 @@ class RequirementsFunding:
                     if not_specified_funding and funding:
                         not_specified_funding -= funding
                     row = {
-                        "countryCode": countryiso,
+                        "countryCode": countryiso3,
                         "id": planid,
                         "name": plan["name"],
                         "code": plan["code"],
@@ -153,7 +153,7 @@ class RequirementsFunding:
 
             rows.append(
                 {
-                    "countryCode": countryiso,
+                    "countryCode": countryiso3,
                     "id": "",
                     "name": "Not specified",
                     "code": "",
@@ -168,7 +168,7 @@ class RequirementsFunding:
                 }
             )
         headers = list(rows[0].keys())
-        filename = f"fts_requirements_funding_{countryiso.lower()}.csv"
+        filename = f"fts_requirements_funding_{countryiso3.lower()}.csv"
         resourcedata = {
             "name": filename.lower(),
             "description": f"FTS Annual Requirements and Funding Data for {countryname}",

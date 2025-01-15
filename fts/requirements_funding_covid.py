@@ -28,17 +28,17 @@ class RequirementsFundingCovid:
                     continue
                 for plan in plans_by_year[year]:
                     planid = str(plan["id"])
-                    countryisos = set()
+                    countryiso3s = set()
                     for country in plan["countries"]:
                         adminlevel = country.get(
                             "adminlevel", country.get("adminLevel")
                         )
                         if adminlevel == 0:
-                            countryisos.add(country["iso3"])
-                    if len(countryisos) == 1:
-                        planid_to_country[planid] = countryisos.pop()
+                            countryiso3s.add(country["iso3"])
+                    if len(countryiso3s) == 1:
+                        planid_to_country[planid] = countryiso3s.pop()
                     else:
-                        multiplecountry_planids[planid] = countryisos
+                        multiplecountry_planids[planid] = countryiso3s
 
         onecountry_planids = ",".join(sorted(planid_to_country.keys()))
         data = self.downloader.download(
@@ -48,9 +48,9 @@ class RequirementsFundingCovid:
             "objectsBreakdown"
         ]:
             planid = fundingobject.get("id")
-            countryiso = planid_to_country[planid]
+            countryiso3 = planid_to_country[planid]
             self.covidfundingbyplanandlocation[
-                f"{planid}-{countryiso}"
+                f"{planid}-{countryiso3}"
             ] = fundingobject["totalFunding"]
 
         for planid in multiplecountry_planids:
@@ -62,20 +62,20 @@ class RequirementsFundingCovid:
                 continue
             for fundingobject in fundingobjects[0]["objectsBreakdown"]:
                 locationid = int(fundingobject["id"])
-                countryiso = locationid_to_iso3.get(locationid)
-                if countryiso:
+                countryiso3 = locationid_to_iso3.get(locationid)
+                if countryiso3:
                     self.covidfundingbyplanandlocation[
-                        f"{planid}-{countryiso}"
+                        f"{planid}-{countryiso3}"
                     ] = fundingobject["totalFunding"]
 
     def generate_plan_funding(self, inrow):
         planid = inrow["id"]
-        countryiso = inrow["countryCode"]
+        countryiso3 = inrow["countryCode"]
         covidfunding = self.covidfundingbyplanandlocation.get(
-            f"{planid}-{countryiso}")
+            f"{planid}-{countryiso3}")
         if covidfunding is None:
             logger.info(
-                f"Location {countryiso} of plan {planid} has no COVID component!"
+                f"Location {countryiso3} of plan {planid} has no COVID component!"
             )
             return
         row = copy.deepcopy(inrow)
