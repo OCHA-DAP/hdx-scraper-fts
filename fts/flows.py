@@ -2,7 +2,7 @@ import logging
 
 from hdx.utilities.dateparse import default_enddate, parse_date
 from hdx.utilities.dictandlist import dict_of_lists_add
-from hdx.utilities.text import multiple_replace
+from hdx.utilities.matching import multiple_replace
 
 from .helpers import country_all_columns_to_keep, funding_hxl_names, \
     rename_columns

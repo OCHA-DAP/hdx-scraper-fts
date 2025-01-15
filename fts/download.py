@@ -14,7 +14,7 @@ class FTSDownload:
             self,
             configuration,
             downloader,
-            countryisos=None,
+            countryiso3s=None,
             years=None,
             testfolder=None,
             testpath=False,
@@ -22,10 +22,10 @@ class FTSDownload:
         self.url = configuration["base_url"]
         self.test_url = configuration["test_url"]
         self.downloader = downloader
-        if countryisos:
-            self.countryisos = countryisos.split(",")
+        if countryiso3s:
+            self.countryiso3s = countryiso3s.split(",")
         else:
-            self.countryisos = None
+            self.countryiso3s = None
         if years:
             self.years = years.split(",")
         else:
@@ -80,12 +80,12 @@ class FTSDownload:
                 if plans is not None:
                     for i, plan in reversed(list(enumerate(plans))):
                         delete = False
-                        if self.countryisos:
+                        if self.countryiso3s:
                             countries = plan["countries"]
                             if countries:
                                 delete = True
                                 for country in countries:
-                                    if country["iso3"] in self.countryisos:
+                                    if country["iso3"] in self.countryiso3s:
                                         delete = False
                                         break
                         if not delete and self.years:
@@ -98,11 +98,11 @@ class FTSDownload:
                             del plans[i]
                     if len(plans) == 0:
                         save = False
-            elif self.countryisos or self.years:
+            elif self.countryiso3s or self.years:
                 for i, object in reversed(list(enumerate(json))):
                     if "iso3" in object:
-                        countryiso = object["iso3"]
-                        if countryiso is None or countryiso not in self.countryisos:
+                        countryiso3 = object["iso3"]
+                        if countryiso3 is None or countryiso3 not in self.countryiso3s:
                             del json[i]
                             continue
                     if "year" in object:

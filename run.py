@@ -54,7 +54,7 @@ def main():
         ftsdownloader = FTSDownload(
             configuration,
             downloader,
-            countryisos=args.countries,
+            countryiso3s=args.countries,
             years=args.years,
             testfolder=args.testfolder,
         )
@@ -94,14 +94,12 @@ def main():
                     updated_by_script="HDX Scraper: FTS",
                     batch=info["batch"],
                 )
-                if hxl_resource and "cluster" not in hxl_resource["name"]:
-                    hxl_update = True
-                else:
-                    hxl_update = False
-                if hxl_update:
-                    dataset.hxl_update()
-                elif hxl_resource:
-                    dataset.generate_quickcharts(hxl_resource)
+                if hxl_resource:
+                    if "cluster" in hxl_resource["name"]:
+                        dataset.generate_quickcharts(hxl_resource)
+                    else:
+                        dataset.generate_quickcharts(hxl_resource, bites_disabled=[False, True, True])
+
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
@@ -109,6 +107,7 @@ def main():
 if __name__ == "__main__":
     facade(
         main,
+        hdx_site="feature",
         user_agent_config_yaml=join(expanduser("~"), ".useragents.yaml"),
         user_agent_lookup=lookup,
         project_config_yaml=join("config", "project_configuration.yaml"),

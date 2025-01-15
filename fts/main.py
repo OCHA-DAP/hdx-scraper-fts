@@ -69,15 +69,15 @@ class FTS:
                     if len(countries) == 1:
                         self.planidswithonelocation.add(planid)
                     for country in countries:
-                        countryiso = country["iso3"]
-                        if not countryiso:
+                        countryiso3 = country["iso3"]
+                        if not countryiso3:
                             continue
                         plans_by_year = self.plans_by_year_by_country.get(
-                            countryiso, {}
+                            countryiso3, {}
                         )
                         dict_of_lists_add(plans_by_year, year, plan)
                         self.plans_by_year_by_country[
-                            countryiso] = plans_by_year
+                            countryiso3] = plans_by_year
 
     def call_others(self, row):
         requirements_clusters, funding_clusters, notspecified, shared = \
@@ -91,15 +91,18 @@ class FTS:
         self.others["globalcluster"].generate_plan_requirements_funding(row)
 
     def generate_other_resources(self, resources, folder, dataset, country):
+        hxlresource = None
         resource = self.others["globalcluster"].generate_resource(
             folder, dataset, country
         )
         if resource:
             resources.insert(1, resource)
-        hxlresource = self.others["cluster"].generate_resource(folder, dataset,
-                                                               country)
-        if hxlresource:
-            resources.insert(1, hxlresource)
+        resource = self.others["cluster"].generate_resource(folder, dataset,
+                                                                       country)
+        if resource:
+            resources.insert(1, resource)
+            if self.others["cluster"].can_make_quickchart(country["iso3"]):
+                hxlresource = resource
         resource = self.others["covid"].generate_resource(folder, dataset,
                                                           country)
         if resource:
@@ -115,8 +118,8 @@ class FTS:
             logger.info(f"Ignoring {countryname}")
             return None, None, None
         title = f"{countryname} - Requirements and Funding Data"
-        countryiso = country["iso3"]
-        if countryiso is None:
+        countryiso3 = country["iso3"]
+        if countryiso3 is None:
             logger.error(f"{title} has a problem! Iso3 is None!")
             return None, None, None
         logger.info(f"Adding FTS data for {countryname}")
@@ -136,7 +139,7 @@ class FTS:
             additional_tags=["covid-19"],
         )
         try:
-            dataset.add_country_location(countryiso)
+            dataset.add_country_location(countryiso3)
         except HDXError as e:
             logger.error(f"{title} has a problem! {e}")
             return None, None, None
@@ -148,7 +151,7 @@ class FTS:
             return None, None, None
 
         hxl_resource = None
-        plans_by_year = self.plans_by_year_by_country.get(countryiso)
+        plans_by_year = self.plans_by_year_by_country.get(countryiso3)
         if plans_by_year is None:
             logger.error(
                 f"We have latest year funding data but no overall funding data for {title}"

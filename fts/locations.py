@@ -8,18 +8,18 @@ class Locations:
         self.id_to_iso3 = dict()
         countries = set()
         for country in downloader.download("1/public/location"):
-            countryiso = country["iso3"]
-            if countryiso is None:
+            countryiso3 = country["iso3"]
+            if countryiso3 is None:
                 continue
             countryid = country["id"]
             countryname = country["name"]
-            self.name_to_iso3[countryname] = countryiso
+            self.name_to_iso3[countryname] = countryiso3
             self.name_to_id[countryname] = countryid
-            self.id_to_iso3[countryid] = countryiso
-            hdxcountryname = Country.get_country_name_from_iso3(countryiso)
+            self.id_to_iso3[countryid] = countryiso3
+            hdxcountryname = Country.get_country_name_from_iso3(countryiso3)
             if hdxcountryname is None:
                 continue
-            countries.add((countryname, countryiso, countryid))
+            countries.add((countryname, countryiso3, countryid))
         self.countries = [
             {"id": country[2], "iso3": country[1], "name": country[0]}
             for country in sorted(countries)
