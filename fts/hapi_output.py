@@ -61,7 +61,7 @@ class HAPIOutput:
                 row["funding_usd"] = funding
 
                 funding_pct = row.get("percentFunded")
-                if funding_pct and row.get("requirements"):
+                if not funding_pct and row.get("requirements"):
                     funding_pct = 0
                 row["funding_pct"] = funding_pct
 
