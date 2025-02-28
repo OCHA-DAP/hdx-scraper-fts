@@ -9,7 +9,7 @@ hapi_dataset:
 
 hapi_resource:
   name: "Global Coordination & Context: Funding"
-  description: "Funding data from HDX HAPI, please see [the documentation](https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/affected_people/#refugees-persons-of-concern) for more information"
+  description: "Funding data from HDX HAPI, please see [the documentation](https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/coordination_and_context/#funding) for more information"
 
 hapi_hxl_tags:
   location_code: "#country+code"

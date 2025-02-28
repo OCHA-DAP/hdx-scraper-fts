@@ -95,3 +95,6 @@ ENV/
 
 # other
 *.bak
+
+# Mac files
+.DS_Store
