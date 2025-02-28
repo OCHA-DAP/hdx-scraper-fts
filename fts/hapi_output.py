@@ -46,8 +46,19 @@ class HAPIOutput:
                 row["appeal_name"] = row.get("name")
                 row["appeal_type"] = row.get("typeName")
                 row["requirements_usd"] = row.get("requirements")
-                row["funding_usd"] = row.get("funding")
-                row["funding_pct"] = row.get("percentFunded")
+
+                funding = row.get("funding")
+                if funding is None:
+                    funding = 0
+                if funding < 0:
+                    logger.error(f"Negative funding value found for {countryiso3}")
+                    error = "Negative funding value"
+                row["funding_usd"] = funding
+
+                funding_pct = row.get("percentFunded")
+                if funding_pct is None and row.get("requirements") is not None:
+                    funding_pct = 0
+                row["funding_pct"] = funding_pct
 
                 if row.get("startDate"):
                     start_date = parse_date(row["startDate"])
