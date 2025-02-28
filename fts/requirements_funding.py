@@ -11,6 +11,7 @@ class RequirementsFunding:
         self.locations = locations
         self.globalplanids = globalplanids
         self.today = today
+        self.global_rows = {}
 
     def add_country_requirements_funding(self, planid, plan, countries):
         if len(countries) == 1:
@@ -167,6 +168,7 @@ class RequirementsFunding:
                     "percentFunded": "",
                 }
             )
+        self.global_rows[countryname] = rows
         headers = list(rows[0].keys())
         filename = f"fts_requirements_funding_{countryiso3.lower()}.csv"
         resourcedata = {

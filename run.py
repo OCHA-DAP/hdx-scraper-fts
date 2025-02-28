@@ -13,6 +13,7 @@ from datetime import datetime
 from os.path import expanduser, join
 
 from fts.download import FTSDownload
+from fts.hapi_output import HAPIOutput
 from fts.locations import Locations
 from fts.main import FTS
 from hdx.api.configuration import Configuration
@@ -102,6 +103,16 @@ def main():
 
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
+
+        hapi_output = HAPIOutput(configuration, fts.reqfund.global_rows, today, folder)
+        dataset = hapi_output.generate_dataset()
+        dataset.update_from_yaml(path=join("config", "hdx_hapi_dataset_static.yaml"))
+        dataset.create_in_hdx(
+            remove_additional_resources=True,
+            match_resource_order=False,
+            hxl_update=False,
+            updated_by_script="HDX Scraper: FTS",
+        )
 
 
 if __name__ == "__main__":
