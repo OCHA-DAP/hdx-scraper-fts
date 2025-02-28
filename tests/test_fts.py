@@ -13,6 +13,7 @@ from fts.locations import Locations
 from fts.main import FTS
 from hdx.api.configuration import Configuration
 from hdx.api.locations import Locations as HDXLocations
+from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.data.dataset import Dataset
 from hdx.data.vocabulary import Vocabulary
 from hdx.location.country import Country
@@ -398,36 +399,37 @@ class TestFTS:
                 }
                 assert hxl_resource == resources[2]
 
-                hapi_output = HAPIOutput(configuration, fts.reqfund.global_rows, today, folder)
-                dataset = hapi_output.generate_dataset()
-                assert dataset == {
-                    "name": "hdx-hapi-funding",
-                    "title": "HDX HAPI - Coordination & Context: Funding",
-                    "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
-                    "tags": [
-                        {
-                            "name": "funding",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "hxl",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        }],
-                    "groups": [{"name": "world"}],
-                }
+                with HDXErrorHandler() as error_handler:
+                    hapi_output = HAPIOutput(configuration, error_handler, fts.reqfund.global_rows, today, folder)
+                    dataset = hapi_output.generate_dataset()
+                    assert dataset == {
+                        "name": "hdx-hapi-funding",
+                        "title": "HDX HAPI - Coordination & Context: Funding",
+                        "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
+                        "tags": [
+                            {
+                                "name": "funding",
+                                "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                            },
+                            {
+                                "name": "hxl",
+                                "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                            }],
+                        "groups": [{"name": "world"}],
+                    }
 
-                resources = dataset.get_resources()
-                assert resources[0] == {
-                    "name": "Global Coordination & Context: Funding",
-                    "description": "Funding data from HDX HAPI, please see [the documentation]"
-                    "(https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/coordination_and_context/#funding) "
-                    "for more information",
-                    "format": "csv",
-                    "resource_type": "file.upload",
-                    "url_type": "upload",
-                }
+                    resources = dataset.get_resources()
+                    assert resources[0] == {
+                        "name": "Global Coordination & Context: Funding",
+                        "description": "Funding data from HDX HAPI, please see [the documentation]"
+                        "(https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/coordination_and_context/#funding) "
+                        "for more information",
+                        "format": "csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    }
 
-                assert_files_same(
-                    join("tests", "fixtures", "hdx_hapi_funding_global.csv"),
-                    join(folder, "hdx_hapi_funding_global.csv"),
-                )
+                    assert_files_same(
+                        join("tests", "fixtures", "hdx_hapi_funding_global.csv"),
+                        join(folder, "hdx_hapi_funding_global.csv"),
+                    )

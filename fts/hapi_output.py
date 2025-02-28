@@ -9,8 +9,9 @@ logger = getLogger(__name__)
 
 
 class HAPIOutput:
-    def __init__(self, configuration, global_rows, today, folder):
+    def __init__(self, configuration, error_handler, global_rows, today, folder):
         self._configuration = configuration
+        self._error_handler = error_handler
         self._temp_dir = folder
         self._today = today
         self.global_rows = global_rows
@@ -31,7 +32,7 @@ class HAPIOutput:
             resources = country_dataset.get_resources()
 
             for row in rows:
-                error = []
+                errors = []
                 countryiso3 = row["countryCode"]
                 row["location_code"] = countryiso3
 
@@ -51,12 +52,16 @@ class HAPIOutput:
                 if funding is None:
                     funding = 0
                 if funding < 0:
-                    logger.error(f"Negative funding value found for {countryiso3}")
-                    error = "Negative funding value"
+                    self._error_handler.add_message(
+                        "Funding",
+                        country_dataset,
+                        f"Negative funding value found for {countryiso3}",
+                    )
+                    errors.append("Negative funding value")
                 row["funding_usd"] = funding
 
                 funding_pct = row.get("percentFunded")
-                if funding_pct is None and row.get("requirements") is not None:
+                if funding_pct and row.get("requirements"):
                     funding_pct = 0
                 row["funding_pct"] = funding_pct
 
@@ -64,8 +69,12 @@ class HAPIOutput:
                     start_date = parse_date(row["startDate"])
                     end_date = parse_date(row["endDate"])
                     if start_date > end_date:
-                        error.append("Start date occurs after end date")
-                        logger.error(f"Start date occurs after end date for {countryiso3}")
+                        self._error_handler.add_message(
+                            "Funding",
+                            country_dataset,
+                            f"Start date occurs after end date for {countryiso3}",
+                        )
+                        errors.append("Start date occurs after end date")
                 else:
                     start_date, end_date = parse_date_range(str(row["year"]))
                 start_dates.append(start_date)
@@ -79,12 +88,16 @@ class HAPIOutput:
 
                 duplicate_check = (countryiso3, row["appeal_code"], start_date)
                 if duplicate_check in duplicate_checks:
-                    error.append("Duplicate row")
-                    logger.error(f"Duplicate row found for {countryiso3}")
+                    self._error_handler.add_message(
+                        "Funding",
+                        country_dataset,
+                        f"Duplicate row found for {countryiso3}",
+                    )
+                    errors.append("Duplicate row")
                 else:
                     duplicate_checks.append(duplicate_check)
 
-                row["error"] = "|".join(error)
+                row["error"] = "|".join(errors)
                 global_data.append(row)
 
         start_date = min(start_dates)

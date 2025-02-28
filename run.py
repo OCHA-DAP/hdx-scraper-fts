@@ -17,6 +17,7 @@ from fts.hapi_output import HAPIOutput
 from fts.locations import Locations
 from fts.main import FTS
 from hdx.api.configuration import Configuration
+from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.facades.simple import facade
 from hdx.utilities.dateparse import parse_date
 from hdx.utilities.downloader import Download
@@ -104,15 +105,16 @@ def main():
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
-        hapi_output = HAPIOutput(configuration, fts.reqfund.global_rows, today, folder)
-        dataset = hapi_output.generate_dataset()
-        dataset.update_from_yaml(path=join("config", "hdx_hapi_dataset_static.yaml"))
-        dataset.create_in_hdx(
-            remove_additional_resources=True,
-            match_resource_order=False,
-            hxl_update=False,
-            updated_by_script="HDX Scraper: FTS",
-        )
+        with HDXErrorHandler(write_to_hdx=False) as error_handler:
+            hapi_output = HAPIOutput(configuration, error_handler, fts.reqfund.global_rows, today, folder)
+            dataset = hapi_output.generate_dataset()
+            dataset.update_from_yaml(path=join("config", "hdx_hapi_dataset_static.yaml"))
+            dataset.create_in_hdx(
+                remove_additional_resources=True,
+                match_resource_order=False,
+                hxl_update=False,
+                updated_by_script="HDX Scraper: FTS",
+            )
 
 
 if __name__ == "__main__":
