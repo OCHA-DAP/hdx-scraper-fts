@@ -43,13 +43,17 @@ class HAPIOutput:
                     "Y" if Country.get_gho_status_from_iso3(countryiso3) else "N"
                 )
 
-                row["appeal_code"] = row.get("code")
+                appeal_code = row.get("code")
+                if not appeal_code:
+                    appeal_code = "Not specified"
+                row["appeal_code"] = appeal_code
+
                 row["appeal_name"] = row.get("name")
                 row["appeal_type"] = row.get("typeName")
                 row["requirements_usd"] = row.get("requirements")
 
                 funding = row.get("funding")
-                if funding is None:
+                if not funding:
                     funding = 0
                 if funding < 0:
                     self._error_handler.add_message(
