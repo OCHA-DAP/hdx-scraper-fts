@@ -8,10 +8,13 @@ from os.path import join
 
 import pytest
 from fts.download import FTSDownload
+from fts.hapi_output import HAPIOutput
 from fts.locations import Locations
 from fts.main import FTS
 from hdx.api.configuration import Configuration
 from hdx.api.locations import Locations as HDXLocations
+from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
+from hdx.data.dataset import Dataset
 from hdx.data.vocabulary import Vocabulary
 from hdx.location.country import Country
 from hdx.utilities.compare import assert_files_same
@@ -36,6 +39,7 @@ class TestFTS:
                 {"name": "afg", "title": "Afghanistan"},
                 {"name": "jor", "title": "Jordan"},
                 {"name": "pse", "title": "occupied Palestinian territory"},
+                {"name": "world", "title": "World"},
             ]
         )
         Country.countriesdata(False)
@@ -50,7 +54,21 @@ class TestFTS:
         }
         return Configuration.read()
 
-    def test_generate_dataset_and_showcase(self, configuration):
+    @pytest.fixture(scope="function")
+    def read_dataset(self, monkeypatch):
+        def read_from_hdx(dataset_name):
+            return Dataset.load_from_json(
+                join(
+                    "tests",
+                    "fixtures",
+                    "input",
+                    f"dataset-{dataset_name}.json",
+                )
+            )
+
+        monkeypatch.setattr(Dataset, "read_from_hdx", staticmethod(read_from_hdx))
+
+    def test_generate_dataset_and_showcase(self, configuration, read_dataset):
         def check_resources(dsresources):
             for resource in dsresources:
                 resource_name = resource["name"]
@@ -380,3 +398,38 @@ class TestFTS:
                     ],
                 }
                 assert hxl_resource == resources[2]
+
+                with HDXErrorHandler() as error_handler:
+                    hapi_output = HAPIOutput(configuration, error_handler, fts.reqfund.global_rows, today, folder)
+                    dataset = hapi_output.generate_dataset()
+                    assert dataset == {
+                        "name": "hdx-hapi-funding",
+                        "title": "HDX HAPI - Coordination & Context: Funding",
+                        "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
+                        "tags": [
+                            {
+                                "name": "funding",
+                                "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                            },
+                            {
+                                "name": "hxl",
+                                "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                            }],
+                        "groups": [{"name": "world"}],
+                    }
+
+                    resources = dataset.get_resources()
+                    assert resources[0] == {
+                        "name": "Global Coordination & Context: Funding",
+                        "description": "Funding data from HDX HAPI, please see [the documentation]"
+                        "(https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/coordination_and_context/#funding) "
+                        "for more information",
+                        "format": "csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    }
+
+                    assert_files_same(
+                        join("tests", "fixtures", "hdx_hapi_funding_global.csv"),
+                        join(folder, "hdx_hapi_funding_global.csv"),
+                    )

@@ -2,3 +2,28 @@
 base_url: "https://api.hpc.tools/v"
 test_url: "https://github.com/OCHA-DAP/hdx-scraper-fts/raw/main/tests/fixtures/input/"
 notes: "FTS publishes data on humanitarian funding flows as reported by donors and recipient organizations. It presents all humanitarian funding to a country and funding that is specifically reported or that can be specifically mapped against funding requirements stated in humanitarian response plans. The data comes from OCHA's [Financial Tracking Service](https://fts.unocha.org/), is encoded as utf-8 and the second row of the CSV contains [HXL](http://hxlstandard.org) tags."
+
+hapi_dataset:
+  name: "hdx-hapi-funding"
+  title: "HDX HAPI - Coordination & Context: Funding"
+
+hapi_resource:
+  name: "Global Coordination & Context: Funding"
+  description: "Funding data from HDX HAPI, please see [the documentation](https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/coordination_and_context/#funding) for more information"
+
+hapi_hxl_tags:
+  location_code: "#country+code"
+  has_hrp: "#meta+has_hrp"
+  in_gho: "#meta+in_gho"
+  appeal_code: "#activity+appeal+id+external"
+  appeal_name: "#activity+appeal+name"
+  appeal_type: "#activity+appeal+type+name"
+  requirements_usd: "#value+funding+required+usd"
+  funding_usd: "#value+funding+total+usd"
+  funding_pct: "#value+funding+pct"
+  reference_period_start: "#date+start"
+  reference_period_end: "#date+end"
+  dataset_hdx_id: "#meta+dataset_id"
+  resource_hdx_id: "#meta+resource_id"
+  warning: "#meta+warning"
+  error: "#meta+error"
