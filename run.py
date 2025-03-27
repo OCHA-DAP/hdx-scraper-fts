@@ -105,7 +105,7 @@ def main():
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
-        with HDXErrorHandler(write_to_hdx=False) as error_handler:
+        with HDXErrorHandler(write_to_hdx=True) as error_handler:
             hapi_output = HAPIOutput(configuration, error_handler, fts.reqfund.global_rows, today, folder)
             dataset = hapi_output.generate_dataset()
             dataset.update_from_yaml(path=join("config", "hdx_hapi_dataset_static.yaml"))

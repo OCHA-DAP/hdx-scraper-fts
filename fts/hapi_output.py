@@ -34,8 +34,10 @@ class HAPIOutput:
             for row in rows:
                 errors = []
                 countryiso3 = row["countryCode"]
-                row["location_code"] = countryiso3
+                resource_name = f"fts_requirements_funding_{countryiso3.lower()}.csv"
+                resource = [r for r in resources if r["name"] == resource_name][0]
 
+                row["location_code"] = countryiso3
                 row["has_hrp"] = (
                     "Y" if Country.get_hrp_status_from_iso3(countryiso3) else "N"
                 )
@@ -60,6 +62,8 @@ class HAPIOutput:
                         "Funding",
                         country_dataset,
                         f"Negative funding value found for {countryiso3}",
+                        resource_name=resource_name,
+                        err_to_hdx=True,
                     )
                     errors.append("Negative funding value")
                 row["funding_usd"] = funding
@@ -77,6 +81,8 @@ class HAPIOutput:
                             "Funding",
                             country_dataset,
                             f"Start date occurs after end date for {countryiso3}",
+                            resource_name=resource_name,
+                            err_to_hdx=True,
                         )
                         errors.append("Start date occurs after end date")
                 else:
@@ -86,9 +92,7 @@ class HAPIOutput:
                 row["reference_period_end"] = iso_string_from_datetime(end_date)
 
                 row["dataset_hdx_id"] = country_dataset["id"]
-                resource_name = f"fts_requirements_funding_{countryiso3.lower()}.csv"
-                resource = [r for r in resources if r["name"] == resource_name]
-                row["resource_hdx_id"] = resource[0]["id"]
+                row["resource_hdx_id"] = resource["id"]
 
                 duplicate_check = (countryiso3, row["appeal_code"], start_date)
                 if duplicate_check in duplicate_checks:
@@ -96,6 +100,8 @@ class HAPIOutput:
                         "Funding",
                         country_dataset,
                         f"Duplicate row found for {countryiso3}",
+                        resource_name=resource_name,
+                        err_to_hdx=True,
                     )
                     errors.append("Duplicate row")
                 else:
