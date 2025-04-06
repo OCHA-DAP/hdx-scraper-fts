@@ -6,18 +6,18 @@ FTS:
 Generates FTS datasets.
 
 """
+
 import logging
 
 from hdx.data.hdxobject import HDXError
+from hdx.scraper.fts.flows import Flows
+from hdx.scraper.fts.helpers import get_dataset_and_showcase
+from hdx.scraper.fts.requirements_funding import RequirementsFunding
+from hdx.scraper.fts.requirements_funding_cluster import RequirementsFundingCluster
+from hdx.scraper.fts.requirements_funding_covid import RequirementsFundingCovid
 from hdx.utilities.dateparse import parse_date
 from hdx.utilities.dictandlist import dict_of_lists_add
 from slugify import slugify
-
-from .flows import Flows
-from .helpers import get_dataset_and_showcase
-from .requirements_funding import RequirementsFunding
-from .requirements_funding_cluster import RequirementsFundingCluster
-from .requirements_funding_covid import RequirementsFundingCovid
 
 logger = logging.getLogger(__name__)
 
@@ -43,18 +43,15 @@ class FTS:
         covid = RequirementsFundingCovid(
             downloader, locations, self.plans_by_year_by_country
         )
-        cluster = RequirementsFundingCluster(downloader,
-                                             self.planidswithonelocation)
+        cluster = RequirementsFundingCluster(downloader, self.planidswithonelocation)
         globalcluster = RequirementsFundingCluster(
             downloader, self.planidswithonelocation, clusterlevel="global"
         )
-        return {"covid": covid, "cluster": cluster,
-                "globalcluster": globalcluster}
+        return {"covid": covid, "cluster": cluster, "globalcluster": globalcluster}
 
     def get_plans(self, start_year=1998):
         for year in range(self.today.year, start_year, -1):
-            data = self.downloader.download(
-                f"2/fts/flow/plan/overview/progress/{year}")
+            data = self.downloader.download(f"2/fts/flow/plan/overview/progress/{year}")
             plans = data["plans"]
             for plan in plans:
                 planid = plan["id"]
@@ -76,14 +73,12 @@ class FTS:
                             countryiso3, {}
                         )
                         dict_of_lists_add(plans_by_year, year, plan)
-                        self.plans_by_year_by_country[
-                            countryiso3] = plans_by_year
+                        self.plans_by_year_by_country[countryiso3] = plans_by_year
 
     def call_others(self, row):
-        requirements_clusters, funding_clusters, notspecified, shared = \
-            self.others[
-                "cluster"
-            ].get_requirements_funding_plan(row)
+        requirements_clusters, funding_clusters, notspecified, shared = self.others[
+            "cluster"
+        ].get_requirements_funding_plan(row)
         self.others["cluster"].generate_rows_requirements_funding(
             row, requirements_clusters, funding_clusters, notspecified, shared
         )
@@ -97,14 +92,12 @@ class FTS:
         )
         if resource:
             resources.insert(1, resource)
-        resource = self.others["cluster"].generate_resource(folder, dataset,
-                                                                       country)
+        resource = self.others["cluster"].generate_resource(folder, dataset, country)
         if resource:
             resources.insert(1, resource)
             if self.others["cluster"].can_make_quickchart(country["iso3"]):
                 hxlresource = resource
-        resource = self.others["covid"].generate_resource(folder, dataset,
-                                                          country)
+        resource = self.others["covid"].generate_resource(folder, dataset, country)
         if resource:
             resources.insert(1, resource)
         return hxlresource
@@ -128,7 +121,7 @@ class FTS:
             f"FTS Requirements and Funding Data for {countryname}"
         ).lower()
         showcase_url = (
-            f'https://fts.unocha.org/countries/{country["id"]}/flows/{latestyear}'
+            f"https://fts.unocha.org/countries/{country['id']}/flows/{latestyear}"
         )
         dataset, showcase = get_dataset_and_showcase(
             slugified_name,
@@ -143,9 +136,9 @@ class FTS:
         except HDXError as e:
             logger.error(f"{title} has a problem! {e}")
             return None, None, None
-        resources, start_date = self.flows.generate_resources(folder, dataset,
-                                                              latestyear,
-                                                              country)
+        resources, start_date = self.flows.generate_resources(
+            folder, dataset, latestyear, country
+        )
         if len(resources) == 0:
             logger.warning("No requirements or funding data available")
             return None, None, None

@@ -3,20 +3,17 @@
 Unit tests for fts.
 
 """
+
 import logging
 from os.path import join
 
 import pytest
-from fts.download import FTSDownload
-from fts.hapi_output import HAPIOutput
-from fts.locations import Locations
-from fts.main import FTS
-from hdx.api.configuration import Configuration
-from hdx.api.locations import Locations as HDXLocations
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.data.dataset import Dataset
-from hdx.data.vocabulary import Vocabulary
-from hdx.location.country import Country
+from hdx.scraper.fts.download import FTSDownload
+from hdx.scraper.fts.hapi_output import HAPIOutput
+from hdx.scraper.fts.locations import Locations
+from hdx.scraper.fts.main import FTS
 from hdx.utilities.compare import assert_files_same
 from hdx.utilities.dateparse import parse_date
 from hdx.utilities.downloader import Download
@@ -26,34 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 class TestFTS:
-    @pytest.fixture(scope="function")
-    def configuration(self):
-        Configuration._create(
-            hdx_read_only=True,
-            user_agent="test",
-            project_config_yaml=join("tests", "config",
-                                     "project_configuration.yml"),
-        )
-        HDXLocations.set_validlocations(
-            [
-                {"name": "afg", "title": "Afghanistan"},
-                {"name": "jor", "title": "Jordan"},
-                {"name": "pse", "title": "occupied Palestinian territory"},
-                {"name": "world", "title": "World"},
-            ]
-        )
-        Country.countriesdata(False)
-        Vocabulary._approved_vocabulary = {
-            "tags": [
-                {"name": "hxl"},
-                {"name": "funding"},
-                {"name": "covid-19"},
-            ],
-            "id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-            "name": "approved",
-        }
-        return Configuration.read()
-
     @pytest.fixture(scope="function")
     def read_dataset(self, monkeypatch):
         def read_from_hdx(dataset_name):
@@ -78,8 +47,7 @@ class TestFTS:
 
         with temp_dir("FTS-TEST", delete_on_failure=False) as folder:
             with Download(user_agent="test") as downloader:
-                ftsdownloader = FTSDownload(configuration, downloader,
-                                            testpath=True)
+                ftsdownloader = FTSDownload(configuration, downloader, testpath=True)
                 notes = configuration["notes"]
                 today = parse_date("2020-12-31")
 
@@ -88,14 +56,12 @@ class TestFTS:
                     f"Number of country datasets to upload: {len(locations.countries)}"
                 )
 
-                fts = FTS(ftsdownloader, locations, today, notes,
-                          start_year=2019)
+                fts = FTS(ftsdownloader, locations, today, notes, start_year=2019)
                 (
                     dataset,
                     showcase,
                     hxl_resource,
-                ) = fts.generate_dataset_and_showcase(folder,
-                                                      locations.countries[0])
+                ) = fts.generate_dataset_and_showcase(folder, locations.countries[0])
                 assert dataset == {
                     "groups": [{"name": "afg"}],
                     "name": "fts-requirements-and-funding-data-for-afghanistan",
@@ -194,8 +160,7 @@ class TestFTS:
                     dataset,
                     showcase,
                     hxl_resource,
-                ) = fts.generate_dataset_and_showcase(folder,
-                                                      locations.countries[1])
+                ) = fts.generate_dataset_and_showcase(folder, locations.countries[1])
                 assert dataset == {
                     "groups": [{"name": "jor"}],
                     "name": "fts-requirements-and-funding-data-for-jordan",
@@ -295,8 +260,7 @@ class TestFTS:
                     dataset,
                     showcase,
                     hxl_resource,
-                ) = fts.generate_dataset_and_showcase(folder,
-                                                      locations.countries[2])
+                ) = fts.generate_dataset_and_showcase(folder, locations.countries[2])
                 assert dataset == {
                     "groups": [{"name": "pse"}],
                     "name": "fts-requirements-and-funding-data-for-occupied-palestinian-territory",
@@ -400,7 +364,13 @@ class TestFTS:
                 assert hxl_resource == resources[2]
 
                 with HDXErrorHandler() as error_handler:
-                    hapi_output = HAPIOutput(configuration, error_handler, fts.reqfund.global_rows, today, folder)
+                    hapi_output = HAPIOutput(
+                        configuration,
+                        error_handler,
+                        fts.reqfund.global_rows,
+                        today,
+                        folder,
+                    )
                     dataset = hapi_output.generate_dataset()
                     assert dataset == {
                         "name": "hdx-hapi-funding",
@@ -414,7 +384,8 @@ class TestFTS:
                             {
                                 "name": "hxl",
                                 "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                            }],
+                            },
+                        ],
                         "groups": [{"name": "world"}],
                     }
 

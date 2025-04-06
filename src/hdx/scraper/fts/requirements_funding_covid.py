@@ -1,7 +1,7 @@
 import copy
 import logging
 
-from fts.helpers import hxl_names
+from hdx.scraper.fts.helpers import hxl_names
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +17,7 @@ class RequirementsFundingCovid:
         self.rows = list()
 
     def get_covid_funding(
-            self, locationid_to_iso3, plans_by_year_by_country,
-            covidstartyear=2020
+        self, locationid_to_iso3, plans_by_year_by_country, covidstartyear=2020
     ):
         multiplecountry_planids = dict()
         planid_to_country = dict()
@@ -49,9 +48,9 @@ class RequirementsFundingCovid:
         ]:
             planid = fundingobject.get("id")
             countryiso3 = planid_to_country[planid]
-            self.covidfundingbyplanandlocation[
-                f"{planid}-{countryiso3}"
-            ] = fundingobject["totalFunding"]
+            self.covidfundingbyplanandlocation[f"{planid}-{countryiso3}"] = (
+                fundingobject["totalFunding"]
+            )
 
         for planid in multiplecountry_planids:
             data = self.downloader.download(
@@ -64,15 +63,14 @@ class RequirementsFundingCovid:
                 locationid = int(fundingobject["id"])
                 countryiso3 = locationid_to_iso3.get(locationid)
                 if countryiso3:
-                    self.covidfundingbyplanandlocation[
-                        f"{planid}-{countryiso3}"
-                    ] = fundingobject["totalFunding"]
+                    self.covidfundingbyplanandlocation[f"{planid}-{countryiso3}"] = (
+                        fundingobject["totalFunding"]
+                    )
 
     def generate_plan_funding(self, inrow):
         planid = inrow["id"]
         countryiso3 = inrow["countryCode"]
-        covidfunding = self.covidfundingbyplanandlocation.get(
-            f"{planid}-{countryiso3}")
+        covidfunding = self.covidfundingbyplanandlocation.get(f"{planid}-{countryiso3}")
         if covidfunding is None:
             logger.info(
                 f"Location {countryiso3} of plan {planid} has no COVID component!"
@@ -90,10 +88,10 @@ class RequirementsFundingCovid:
         if not self.rows:
             return None
         headers = list(self.rows[0].keys())
-        filename = f'fts_requirements_funding_covid_{country["iso3"].lower()}.csv'
+        filename = f"fts_requirements_funding_covid_{country['iso3'].lower()}.csv"
         resourcedata = {
             "name": filename,
-            "description": f'FTS Annual Requirements, Funding and Covid Funding Data for {country["name"]}',
+            "description": f"FTS Annual Requirements, Funding and Covid Funding Data for {country['name']}",
             "format": "csv",
         }
         success, results = dataset.generate_resource_from_iterator(

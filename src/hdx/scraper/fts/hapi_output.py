@@ -2,7 +2,11 @@ from logging import getLogger
 
 from hdx.data.dataset import Dataset
 from hdx.location.country import Country
-from hdx.utilities.dateparse import iso_string_from_datetime, parse_date, parse_date_range
+from hdx.utilities.dateparse import (
+    iso_string_from_datetime,
+    parse_date,
+    parse_date_range,
+)
 from slugify import slugify
 
 logger = getLogger(__name__)
@@ -17,9 +21,7 @@ class HAPIOutput:
         self.global_rows = global_rows
 
     def generate_dataset(self) -> Dataset:
-        dataset = Dataset(
-            self._configuration["hapi_dataset"]
-        )
+        dataset = Dataset(self._configuration["hapi_dataset"])
 
         global_data = []
         duplicate_checks = []
@@ -119,7 +121,7 @@ class HAPIOutput:
             global_data,
             hxl_tags,
             self._temp_dir,
-            f"hdx_hapi_funding_global.csv",
+            "hdx_hapi_funding_global.csv",
             self._configuration["hapi_resource"],
             encoding="utf-8-sig",
         )

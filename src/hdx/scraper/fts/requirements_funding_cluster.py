@@ -1,9 +1,8 @@
 import copy
 import logging
 
+from hdx.scraper.fts.helpers import hxl_names
 from hdx.utilities.downloader import DownloadError
-
-from .helpers import hxl_names
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +23,7 @@ class RequirementsFundingCluster:
                 f"1/fts/flow/custom-search?planid={planid}&groupby={self.clusterlevel}cluster"
             )
         except DownloadError:
-            logger.error(
-                f"Problem with downloading cluster data for {planid}!")
+            logger.error(f"Problem with downloading cluster data for {planid}!")
             return None, None, None, None
         requirements_clusters = dict()
         for reqobject in data["requirements"]["objects"]:
@@ -33,8 +31,7 @@ class RequirementsFundingCluster:
             if requirements is not None:
                 clusterid = reqobject.get("id")
                 if clusterid is not None:
-                    requirements_clusters[clusterid] = (
-                    reqobject["name"], requirements)
+                    requirements_clusters[clusterid] = (reqobject["name"], requirements)
         funding_clusters = dict()
         fund_objects = data["report3"]["fundingTotals"]["objects"]
         notspecified = None
@@ -50,15 +47,13 @@ class RequirementsFundingCluster:
                         notspecified = funding
                     else:
                         clusterid = int(clusterid)
-                        funding_clusters[clusterid] = (
-                        fundobject["name"], funding)
+                        funding_clusters[clusterid] = (fundobject["name"], funding)
             shared = fund_objects[0]["totalBreakdown"]["sharedFunding"]
         return requirements_clusters, funding_clusters, notspecified, shared
 
     @staticmethod
     def create_row(
-            base_row, clusterid="", name="", requirements="", funding="",
-            percentFunded=""
+        base_row, clusterid="", name="", requirements="", funding="", percentFunded=""
     ):
         row = copy.deepcopy(base_row)
         row["clusterCode"] = clusterid
@@ -69,8 +64,7 @@ class RequirementsFundingCluster:
         return row
 
     def generate_rows_requirements_funding(
-            self, inrow, requirements_clusters, funding_clusters, notspecified,
-            shared
+        self, inrow, requirements_clusters, funding_clusters, notspecified, shared
     ):
         if requirements_clusters is None and funding_clusters is None:
             return
@@ -97,8 +91,7 @@ class RequirementsFundingCluster:
                 reqname, requirements = requirements_cluster
                 if not fundname:
                     fundname = reqname
-            row = self.create_row(base_row, clusterid, fundname, requirements,
-                                  funding)
+            row = self.create_row(base_row, clusterid, fundname, requirements, funding)
             if requirements and funding != "":
                 row["percentFunded"] = int(funding / requirements * 100 + 0.5)
                 self.iso3_latestpopulated[countryiso3] = year
@@ -107,8 +100,7 @@ class RequirementsFundingCluster:
             subrows.append(row)
 
         fundclusterids = list(funding_clusters.keys())
-        for clusterid, (
-        reqname, requirements) in requirements_clusters.items():
+        for clusterid, (reqname, requirements) in requirements_clusters.items():
             if clusterid in fundclusterids:
                 continue
             row = self.create_row(base_row, clusterid, reqname, requirements)
@@ -116,8 +108,7 @@ class RequirementsFundingCluster:
 
         self.rows.extend(sorted(subrows, key=lambda k: k["cluster"]))
 
-        row = self.create_row(base_row, name="Not specified",
-                              funding=notspecified)
+        row = self.create_row(base_row, name="Not specified", funding=notspecified)
         self.rows.append(row)
         row = self.create_row(
             base_row, name="Multiple clusters/sectors (shared)", funding=shared
@@ -132,24 +123,22 @@ class RequirementsFundingCluster:
             shared,
         ) = self.get_requirements_funding_plan(inrow)
         self.generate_rows_requirements_funding(
-            inrow, requirements_clusters, funding_clusters, notspecified,
-            shared
+            inrow, requirements_clusters, funding_clusters, notspecified, shared
         )
 
     def generate_resource(self, folder, dataset, country):
         if not self.rows:
             return None
         headers = list(self.rows[0].keys())
-        filename = f'fts_requirements_funding_{self.clusterlevel}cluster_{country["iso3"].lower()}.csv'
+        filename = f"fts_requirements_funding_{self.clusterlevel}cluster_{country['iso3'].lower()}.csv"
         description = (
-            f'FTS Annual Requirements and Funding Data by Cluster for {country["name"]}'
+            f"FTS Annual Requirements and Funding Data by Cluster for {country['name']}"
         )
         if self.clusterlevel:
             description = description.replace(
                 "Cluster", f"{self.clusterlevel.capitalize()} Cluster"
             )
-        resourcedata = {"name": filename, "description": description,
-                        "format": "csv"}
+        resourcedata = {"name": filename, "description": description, "format": "csv"}
         success, results = dataset.generate_resource_from_iterator(
             headers, self.rows, hxl_names, folder, filename, resourcedata
         )
@@ -169,4 +158,3 @@ class RequirementsFundingCluster:
         if populated_year == latest_year:
             return True
         return False
-

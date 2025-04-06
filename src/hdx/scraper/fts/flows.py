@@ -1,11 +1,13 @@
 import logging
 
+from hdx.scraper.fts.helpers import (
+    country_all_columns_to_keep,
+    funding_hxl_names,
+    rename_columns,
+)
 from hdx.utilities.dateparse import default_enddate, parse_date
 from hdx.utilities.dictandlist import dict_of_lists_add
 from hdx.utilities.matching import multiple_replace
-
-from .helpers import country_all_columns_to_keep, funding_hxl_names, \
-    rename_columns
 
 logger = logging.getLogger(__name__)
 
@@ -57,16 +59,14 @@ class Flows:
                     outputstr = values[-1]
                     keyname = f"{keyname}End"
                 elif any(
-                        x in keyname for x in
-                        ["Cluster", "Location", "OrganizationTypes"]
+                    x in keyname for x in ["Cluster", "Location", "OrganizationTypes"]
                 ):
                     if keyname[-1] != "s":
                         keyname = f"{keyname}s"
                     if "Location" in keyname:
                         iso3s = list()
                         for country in values:
-                            iso3 = self.locations.get_countryiso_from_name(
-                                country)
+                            iso3 = self.locations.get_countryiso_from_name(country)
                             if iso3:
                                 iso3s.append(iso3)
                         values = iso3s
@@ -86,9 +86,8 @@ class Flows:
     def generate_resources(self, folder, dataset, latestyear, country):
         fund_boundaries_info = dict()
         fund_data = list()
-        base_funding_url = f'1/fts/flow/custom-search?locationid={country["id"]}&'
-        funding_url = self.downloader.get_url(
-            f"{base_funding_url}year={latestyear}")
+        base_funding_url = f"1/fts/flow/custom-search?locationid={country['id']}&"
+        funding_url = self.downloader.get_url(f"{base_funding_url}year={latestyear}")
         while funding_url:
             json = self.downloader.download(url=funding_url, data=False)
             fund_data.extend(json["data"]["flows"])
@@ -104,8 +103,7 @@ class Flows:
                 value = row[key]
                 shortened = srcdestmap.get(key)
                 if shortened:
-                    newdestPlanId = self.flatten_objects(value, shortened,
-                                                         newrow)
+                    newdestPlanId = self.flatten_objects(value, shortened, newrow)
                     if newdestPlanId:
                         destPlanId = int(newdestPlanId)
                     continue
@@ -152,19 +150,17 @@ class Flows:
         resources = list()
         for boundary in sorted(fund_boundaries_info.keys()):
             rows = sorted(
-                fund_boundaries_info[boundary], key=lambda k: k["date"],
-                reverse=True
+                fund_boundaries_info[boundary], key=lambda k: k["date"], reverse=True
             )
             headers = list(funding_hxl_names.keys())
-            filename = f'fts_{boundary}_funding_{country["iso3"].lower()}.csv'
+            filename = f"fts_{boundary}_funding_{country['iso3'].lower()}.csv"
             resourcedata = {
                 "name": filename,
-                "description": f'FTS {boundary.capitalize()} Funding Data for {country["name"]} for {latestyear}',
+                "description": f"FTS {boundary.capitalize()} Funding Data for {country['name']} for {latestyear}",
                 "format": "csv",
             }
             success, results = dataset.generate_resource_from_iterator(
-                headers, rows, funding_hxl_names, folder, filename,
-                resourcedata
+                headers, rows, funding_hxl_names, folder, filename, resourcedata
             )
             if success:
                 resources.append(results["resource"])

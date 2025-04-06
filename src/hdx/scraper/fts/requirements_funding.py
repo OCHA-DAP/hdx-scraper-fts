@@ -1,6 +1,6 @@
 import logging
 
-from .helpers import hxl_names
+from hdx.scraper.fts.helpers import hxl_names
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +40,7 @@ class RequirementsFunding:
                 totalreq = requirements["totalRevisedReqs"]
                 countryreq_is_totalreq = True
                 for req_object in requirements.get("objects", list()):
-                    country_id = self.locations.get_countryid_from_object(
-                        req_object)
+                    country_id = self.locations.get_countryid_from_object(req_object)
                     country_req = req_object.get("revisedRequirements")
                     if country_id is not None and country_req is not None:
                         country_requirements[country_id] = country_req
@@ -55,10 +54,8 @@ class RequirementsFunding:
             fund_objects = data["report3"]["fundingTotals"]["objects"]
             country_funding = dict()
             if len(fund_objects) == 1:
-                for fund_object in fund_objects[0].get("objectsBreakdown",
-                                                       list()):
-                    country_id = self.locations.get_countryid_from_object(
-                        fund_object)
+                for fund_object in fund_objects[0].get("objectsBreakdown", list()):
+                    country_id = self.locations.get_countryid_from_object(fund_object)
                     country_fund = fund_object.get("totalFunding")
                     if country_id is not None and country_fund is not None:
                         country_funding[int(country_id)] = country_fund
@@ -69,8 +66,7 @@ class RequirementsFunding:
                 funding = country_funding.get(countryid)
                 country["funding"] = funding
                 if requirements is not None and funding is not None:
-                    country["percentFunded"] = int(
-                        funding / requirements * 100 + 0.5)
+                    country["percentFunded"] = int(funding / requirements * 100 + 0.5)
         return False
 
     def get_country_funding(self, countryid, plans_by_year, start_year=2010):
@@ -89,18 +85,15 @@ class RequirementsFunding:
         return funding_by_year
 
     def generate_resource(
-            self, folder, dataset, plans_by_year, country,
-            call_others=lambda x: None
+        self, folder, dataset, plans_by_year, country, call_others=lambda x: None
     ):
         countryiso3 = country["iso3"]
         countryname = country["name"]
-        funding_by_year = self.get_country_funding(country["id"],
-                                                   plans_by_year)
+        funding_by_year = self.get_country_funding(country["id"], plans_by_year)
         rows = list()
 
         all_years = sorted(
-            set(plans_by_year.keys()) | set(funding_by_year.keys()),
-            reverse=True
+            set(plans_by_year.keys()) | set(funding_by_year.keys()), reverse=True
         )
         for year in all_years:
             not_specified_funding = funding_by_year.get(year, "")
@@ -111,8 +104,7 @@ class RequirementsFunding:
                     continue
                 found_other_countries = False
                 for country in plan["countries"]:
-                    adminlevel = country.get("adminlevel",
-                                             country.get("adminLevel"))
+                    adminlevel = country.get("adminlevel", country.get("adminLevel"))
                     if adminlevel == 0 and country["iso3"] != countryiso3:
                         found_other_countries = True
                         continue
