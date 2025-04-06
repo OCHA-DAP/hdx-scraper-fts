@@ -22,7 +22,7 @@ from slugify import slugify
 logger = logging.getLogger(__name__)
 
 
-class FTS:
+class Pipeline:
     def __init__(self, downloader, locations, today, notes, start_year=1998):
         self.downloader = downloader
         self.locations = locations

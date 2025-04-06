@@ -13,7 +13,7 @@ from hdx.data.dataset import Dataset
 from hdx.scraper.fts.download import FTSDownload
 from hdx.scraper.fts.hapi_output import HAPIOutput
 from hdx.scraper.fts.locations import Locations
-from hdx.scraper.fts.main import FTS
+from hdx.scraper.fts.pipeline import Pipeline
 from hdx.utilities.compare import assert_files_same
 from hdx.utilities.dateparse import parse_date
 from hdx.utilities.downloader import Download
@@ -56,12 +56,16 @@ class TestFTS:
                     f"Number of country datasets to upload: {len(locations.countries)}"
                 )
 
-                fts = FTS(ftsdownloader, locations, today, notes, start_year=2019)
+                pipeline = Pipeline(
+                    ftsdownloader, locations, today, notes, start_year=2019
+                )
                 (
                     dataset,
                     showcase,
                     hxl_resource,
-                ) = fts.generate_dataset_and_showcase(folder, locations.countries[0])
+                ) = pipeline.generate_dataset_and_showcase(
+                    folder, locations.countries[0]
+                )
                 assert dataset == {
                     "groups": [{"name": "afg"}],
                     "name": "fts-requirements-and-funding-data-for-afghanistan",
@@ -160,7 +164,9 @@ class TestFTS:
                     dataset,
                     showcase,
                     hxl_resource,
-                ) = fts.generate_dataset_and_showcase(folder, locations.countries[1])
+                ) = pipeline.generate_dataset_and_showcase(
+                    folder, locations.countries[1]
+                )
                 assert dataset == {
                     "groups": [{"name": "jor"}],
                     "name": "fts-requirements-and-funding-data-for-jordan",
@@ -260,7 +266,9 @@ class TestFTS:
                     dataset,
                     showcase,
                     hxl_resource,
-                ) = fts.generate_dataset_and_showcase(folder, locations.countries[2])
+                ) = pipeline.generate_dataset_and_showcase(
+                    folder, locations.countries[2]
+                )
                 assert dataset == {
                     "groups": [{"name": "pse"}],
                     "name": "fts-requirements-and-funding-data-for-occupied-palestinian-territory",
@@ -367,7 +375,7 @@ class TestFTS:
                     hapi_output = HAPIOutput(
                         configuration,
                         error_handler,
-                        fts.reqfund.global_rows,
+                        pipeline.reqfund.global_rows,
                         today,
                         folder,
                     )
