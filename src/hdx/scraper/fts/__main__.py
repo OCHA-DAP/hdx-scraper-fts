@@ -49,6 +49,9 @@ def main(
         years (str): Years to run. Defaults to "".
         testfolder (str): Output test data to folder. Defaults to "".
         err_to_hdx (Optional[bool]): Whether to write any errors to HDX metadata. Defaults to None.
+
+    Returns:
+        None
     """
 
     logger.info(f"##### {lookup} version {__version__} ####")
