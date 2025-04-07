@@ -10,6 +10,7 @@ that register datasets in HDX.
 import argparse
 import logging
 from datetime import datetime
+from os import getenv
 from os.path import expanduser, join
 
 from fts.download import FTSDownload
@@ -52,6 +53,7 @@ def main():
             rate_limit={"calls": 1, "period": 1},
     ) as downloader:
         args = parse_args()
+        err_to_hdx = getenv("ERR_TO_HDX")
         configuration = Configuration.read()
         ftsdownloader = FTSDownload(
             configuration,
@@ -105,7 +107,7 @@ def main():
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 
-        with HDXErrorHandler(write_to_hdx=True) as error_handler:
+        with HDXErrorHandler(write_to_hdx=err_to_hdx) as error_handler:
             hapi_output = HAPIOutput(configuration, error_handler, fts.reqfund.global_rows, today, folder)
             dataset = hapi_output.generate_dataset()
             dataset.update_from_yaml(path=join("config", "hdx_hapi_dataset_static.yaml"))
