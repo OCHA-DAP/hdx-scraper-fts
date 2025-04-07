@@ -19,6 +19,7 @@ from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.data.user import User
 from hdx.facades.infer_arguments import facade
 from hdx.scraper.fts._version import __version__
+from hdx.scraper.fts.dataset_generator import DatasetGenerator
 from hdx.scraper.fts.download import FTSDownload
 from hdx.scraper.fts.hapi_output import HAPIOutput
 from hdx.scraper.fts.locations import Locations
@@ -89,7 +90,8 @@ def main(
                 f"Number of country datasets to upload: {len(locations.countries)}"
             )
 
-            pipeline = Pipeline(ftsdownloader, locations, today, notes)
+            pipeline = Pipeline(ftsdownloader, locations, today)
+            dataset_generator = DatasetGenerator(today, notes)
             for info, country in progress_storing_tempdir(
                 "FTS", locations.countries, "iso3"
             ):
@@ -97,34 +99,37 @@ def main(
                 # for testing specific countries only
                 #             if country['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
                 #                 continue
-                (
-                    dataset,
-                    showcase,
-                    hxl_resource,
-                ) = pipeline.generate_dataset_and_showcase(folder, country)
-                if dataset is not None:
-                    dataset.update_from_yaml()
-                    if hxl_resource is None:
-                        dataset.preview_off()
+                dataset, showcase = dataset_generator.get_dataset_and_showcase(
+                    country,
+                    additional_tags=["covid-19"],
+                )
+                if not dataset:
+                    continue
+                hxl_resource = pipeline.generate_dataset_and_showcase(
+                    folder, country, dataset
+                )
+                dataset.update_from_yaml()
+                if hxl_resource is None:
+                    dataset.preview_off()
+                else:
+                    dataset.set_quickchart_resource(hxl_resource)
+                dataset.create_in_hdx(
+                    remove_additional_resources=True,
+                    match_resource_order=True,
+                    hxl_update=False,
+                    updated_by_script="HDX Scraper: FTS",
+                    batch=info["batch"],
+                )
+                if hxl_resource:
+                    if "cluster" in hxl_resource["name"]:
+                        dataset.generate_quickcharts(hxl_resource)
                     else:
-                        dataset.set_quickchart_resource(hxl_resource)
-                    dataset.create_in_hdx(
-                        remove_additional_resources=True,
-                        match_resource_order=True,
-                        hxl_update=False,
-                        updated_by_script="HDX Scraper: FTS",
-                        batch=info["batch"],
-                    )
-                    if hxl_resource:
-                        if "cluster" in hxl_resource["name"]:
-                            dataset.generate_quickcharts(hxl_resource)
-                        else:
-                            dataset.generate_quickcharts(
-                                hxl_resource, bites_disabled=[False, True, True]
-                            )
+                        dataset.generate_quickcharts(
+                            hxl_resource, bites_disabled=[False, True, True]
+                        )
 
-                    showcase.create_in_hdx()
-                    showcase.add_dataset(dataset)
+                showcase.create_in_hdx()
+                showcase.add_dataset(dataset)
 
             hapi_output = HAPIOutput(
                 configuration,

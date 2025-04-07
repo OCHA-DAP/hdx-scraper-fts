@@ -10,6 +10,7 @@ from os.path import join
 import pytest
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.data.dataset import Dataset
+from hdx.scraper.fts.dataset_generator import DatasetGenerator
 from hdx.scraper.fts.download import FTSDownload
 from hdx.scraper.fts.hapi_output import HAPIOutput
 from hdx.scraper.fts.locations import Locations
@@ -56,15 +57,16 @@ class TestFTS:
                     f"Number of country datasets to upload: {len(locations.countries)}"
                 )
 
-                pipeline = Pipeline(
-                    ftsdownloader, locations, today, notes, start_year=2019
+                pipeline = Pipeline(ftsdownloader, locations, today, start_year=2019)
+                dataset_generator = DatasetGenerator(today, notes)
+
+                country = locations.countries[0]
+                dataset, showcase = dataset_generator.get_dataset_and_showcase(
+                    country,
+                    additional_tags=["covid-19"],
                 )
-                (
-                    dataset,
-                    showcase,
-                    hxl_resource,
-                ) = pipeline.generate_dataset_and_showcase(
-                    folder, locations.countries[0]
+                hxl_resource = pipeline.generate_dataset_and_showcase(
+                    folder, country, dataset
                 )
                 assert dataset == {
                     "groups": [{"name": "afg"}],
@@ -160,12 +162,13 @@ class TestFTS:
                 }
                 assert hxl_resource == resources[2]
 
-                (
-                    dataset,
-                    showcase,
-                    hxl_resource,
-                ) = pipeline.generate_dataset_and_showcase(
-                    folder, locations.countries[1]
+                country = locations.countries[1]
+                dataset, showcase = dataset_generator.get_dataset_and_showcase(
+                    country,
+                    additional_tags=["covid-19"],
+                )
+                hxl_resource = pipeline.generate_dataset_and_showcase(
+                    folder, country, dataset
                 )
                 assert dataset == {
                     "groups": [{"name": "jor"}],
@@ -262,12 +265,13 @@ class TestFTS:
                 }
                 assert hxl_resource == resources[2]
 
-                (
-                    dataset,
-                    showcase,
-                    hxl_resource,
-                ) = pipeline.generate_dataset_and_showcase(
-                    folder, locations.countries[2]
+                country = locations.countries[2]
+                dataset, showcase = dataset_generator.get_dataset_and_showcase(
+                    country,
+                    additional_tags=["covid-19"],
+                )
+                hxl_resource = pipeline.generate_dataset_and_showcase(
+                    folder, country, dataset
                 )
                 assert dataset == {
                     "groups": [{"name": "pse"}],

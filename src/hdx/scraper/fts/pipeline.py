@@ -9,25 +9,21 @@ Generates FTS datasets.
 
 import logging
 
-from hdx.data.hdxobject import HDXError
 from hdx.scraper.fts.flows import Flows
-from hdx.scraper.fts.helpers import get_dataset_and_showcase
 from hdx.scraper.fts.requirements_funding import RequirementsFunding
 from hdx.scraper.fts.requirements_funding_cluster import RequirementsFundingCluster
 from hdx.scraper.fts.requirements_funding_covid import RequirementsFundingCovid
 from hdx.utilities.dateparse import parse_date
 from hdx.utilities.dictandlist import dict_of_lists_add
-from slugify import slugify
 
 logger = logging.getLogger(__name__)
 
 
 class Pipeline:
-    def __init__(self, downloader, locations, today, notes, start_year=1998):
+    def __init__(self, downloader, locations, today, start_year=1998):
         self.downloader = downloader
         self.locations = locations
         self.today = today
-        self.notes = notes
         self.plans_by_year_by_country = dict()
         self.planidcodemapping = dict()
         self.planidswithonelocation = set()
@@ -102,52 +98,24 @@ class Pipeline:
             resources.insert(1, resource)
         return hxlresource
 
-    def generate_dataset_and_showcase(self, folder, country):
+    def generate_dataset_and_showcase(self, folder, country, dataset):
         """
         api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
         """
-        countryname = country["name"]
-        if countryname == "World":
-            logger.info(f"Ignoring {countryname}")
-            return None, None, None
-        title = f"{countryname} - Requirements and Funding Data"
-        countryiso3 = country["iso3"]
-        if countryiso3 is None:
-            logger.error(f"{title} has a problem! Iso3 is None!")
-            return None, None, None
-        logger.info(f"Adding FTS data for {countryname}")
-        latestyear = str(self.today.year)
-        slugified_name = slugify(
-            f"FTS Requirements and Funding Data for {countryname}"
-        ).lower()
-        showcase_url = (
-            f"https://fts.unocha.org/countries/{country['id']}/flows/{latestyear}"
-        )
-        dataset, showcase = get_dataset_and_showcase(
-            slugified_name,
-            title,
-            self.notes,
-            countryname,
-            showcase_url,
-            additional_tags=["covid-19"],
-        )
-        try:
-            dataset.add_country_location(countryiso3)
-        except HDXError as e:
-            logger.error(f"{title} has a problem! {e}")
-            return None, None, None
+
         resources, start_date = self.flows.generate_resources(
-            folder, dataset, latestyear, country
+            folder, dataset, self.today.year, country
         )
         if len(resources) == 0:
             logger.warning("No requirements or funding data available")
             return None, None, None
 
         hxl_resource = None
+        countryiso3 = country["iso3"]
         plans_by_year = self.plans_by_year_by_country.get(countryiso3)
         if plans_by_year is None:
             logger.error(
-                f"We have latest year funding data but no overall funding data for {title}"
+                f"We have latest year funding data but no overall funding data for {countryiso3}"
             )
         else:
             hxl_resource, reqfund_start_year = self.reqfund.generate_resource(
@@ -164,4 +132,4 @@ class Pipeline:
                 hxl_resource = other_hxl_resource
         dataset.resources = resources
         dataset.set_time_period(start_date, self.today)
-        return dataset, showcase, hxl_resource
+        return hxl_resource
