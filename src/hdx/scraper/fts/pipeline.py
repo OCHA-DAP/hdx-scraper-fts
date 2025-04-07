@@ -21,79 +21,81 @@ logger = logging.getLogger(__name__)
 
 class Pipeline:
     def __init__(self, downloader, locations, today, start_year=1998):
-        self.downloader = downloader
-        self.locations = locations
-        self.today = today
-        self.plans_by_year_by_country = dict()
-        self.planidcodemapping = dict()
-        self.planidswithonelocation = set()
-        self.globalplanids = set()
-        self.reqfund = RequirementsFunding(
-            downloader, locations, self.globalplanids, today
+        self._downloader = downloader
+        self._locations = locations
+        self._today = today
+        self._plans_by_year_by_country = {}
+        self._planidcodemapping = {}
+        self._planidswithonelocation = set()
+        self._globalplanids = set()
+        self._reqfund = RequirementsFunding(
+            downloader, locations, self._globalplanids, today
         )
         self.get_plans(start_year=start_year)
-        self.flows = Flows(downloader, locations, self.planidcodemapping)
-        self.others = self.setup_others(downloader, locations)
+        self._flows = Flows(downloader, locations, self._planidcodemapping)
+        self._others = self.setup_others(downloader, locations)
 
     def setup_others(self, downloader, locations):
         covid = RequirementsFundingCovid(
-            downloader, locations, self.plans_by_year_by_country
+            downloader, locations, self._plans_by_year_by_country
         )
-        cluster = RequirementsFundingCluster(downloader, self.planidswithonelocation)
+        cluster = RequirementsFundingCluster(downloader, self._planidswithonelocation)
         globalcluster = RequirementsFundingCluster(
-            downloader, self.planidswithonelocation, clusterlevel="global"
+            downloader, self._planidswithonelocation, clusterlevel="global"
         )
         return {"covid": covid, "cluster": cluster, "globalcluster": globalcluster}
 
     def get_plans(self, start_year=1998):
-        for year in range(self.today.year, start_year, -1):
-            data = self.downloader.download(f"2/fts/flow/plan/overview/progress/{year}")
+        for year in range(self._today.year, start_year, -1):
+            data = self._downloader.download(
+                f"2/fts/flow/plan/overview/progress/{year}"
+            )
             plans = data["plans"]
             for plan in plans:
                 planid = plan["id"]
-                self.planidcodemapping[planid] = plan["code"]
+                self._planidcodemapping[planid] = plan["code"]
                 countries = plan["countries"]
                 if countries:
-                    is_global = self.reqfund.add_country_requirements_funding(
+                    is_global = self._reqfund.add_country_requirements_funding(
                         planid, plan, countries
                     )
                     if is_global:
-                        self.globalplanids.add(planid)
+                        self._globalplanids.add(planid)
                     if len(countries) == 1:
-                        self.planidswithonelocation.add(planid)
+                        self._planidswithonelocation.add(planid)
                     for country in countries:
                         countryiso3 = country["iso3"]
                         if not countryiso3:
                             continue
-                        plans_by_year = self.plans_by_year_by_country.get(
+                        plans_by_year = self._plans_by_year_by_country.get(
                             countryiso3, {}
                         )
                         dict_of_lists_add(plans_by_year, year, plan)
-                        self.plans_by_year_by_country[countryiso3] = plans_by_year
+                        self._plans_by_year_by_country[countryiso3] = plans_by_year
 
     def call_others(self, row):
-        requirements_clusters, funding_clusters, notspecified, shared = self.others[
+        requirements_clusters, funding_clusters, notspecified, shared = self._others[
             "cluster"
         ].get_requirements_funding_plan(row)
-        self.others["cluster"].generate_rows_requirements_funding(
+        self._others["cluster"].generate_rows_requirements_funding(
             row, requirements_clusters, funding_clusters, notspecified, shared
         )
-        self.others["covid"].generate_plan_funding(row)
-        self.others["globalcluster"].generate_plan_requirements_funding(row)
+        self._others["covid"].generate_plan_funding(row)
+        self._others["globalcluster"].generate_plan_requirements_funding(row)
 
     def generate_other_resources(self, resources, folder, dataset, country):
         hxlresource = None
-        resource = self.others["globalcluster"].generate_resource(
+        resource = self._others["globalcluster"].generate_resource(
             folder, dataset, country
         )
         if resource:
             resources.insert(1, resource)
-        resource = self.others["cluster"].generate_resource(folder, dataset, country)
+        resource = self._others["cluster"].generate_resource(folder, dataset, country)
         if resource:
             resources.insert(1, resource)
-            if self.others["cluster"].can_make_quickchart(country["iso3"]):
+            if self._others["cluster"].can_make_quickchart(country["iso3"]):
                 hxlresource = resource
-        resource = self.others["covid"].generate_resource(folder, dataset, country)
+        resource = self._others["covid"].generate_resource(folder, dataset, country)
         if resource:
             resources.insert(1, resource)
         return hxlresource
@@ -103,8 +105,8 @@ class Pipeline:
         api.hpc.tools/v1/public/fts/flow?countryISO3=CMR&Year=2016&groupby=cluster
         """
 
-        resources, start_date = self.flows.generate_resources(
-            folder, dataset, self.today.year, country
+        resources, start_date = self._flows.generate_resources(
+            folder, dataset, self._today.year, country
         )
         if len(resources) == 0:
             logger.warning("No requirements or funding data available")
@@ -112,13 +114,13 @@ class Pipeline:
 
         hxl_resource = None
         countryiso3 = country["iso3"]
-        plans_by_year = self.plans_by_year_by_country.get(countryiso3)
+        plans_by_year = self._plans_by_year_by_country.get(countryiso3)
         if plans_by_year is None:
             logger.error(
                 f"We have latest year funding data but no overall funding data for {countryiso3}"
             )
         else:
-            hxl_resource, reqfund_start_year = self.reqfund.generate_resource(
+            hxl_resource, reqfund_start_year = self._reqfund.generate_resource(
                 folder, dataset, plans_by_year, country, self.call_others
             )
             reqfund_start_date = parse_date(f"{reqfund_start_year}-01-01")
@@ -131,5 +133,8 @@ class Pipeline:
             if other_hxl_resource:
                 hxl_resource = other_hxl_resource
         dataset.resources = resources
-        dataset.set_time_period(start_date, self.today)
+        dataset.set_time_period(start_date, self._today)
         return hxl_resource
+
+    def get_global_rows(self):
+        return self._reqfund.get_global_rows()

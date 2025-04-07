@@ -61,7 +61,7 @@ class TestFTS:
                 dataset_generator = DatasetGenerator(today, notes)
 
                 country = locations.countries[0]
-                dataset, showcase = dataset_generator.get_dataset_and_showcase(
+                dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
                     additional_tags=["covid-19"],
                 )
@@ -70,7 +70,7 @@ class TestFTS:
                 )
                 assert dataset == {
                     "groups": [{"name": "afg"}],
-                    "name": "fts-requirements-and-funding-data-for-afghanistan",
+                    "name": "afg-requirements-and-funding-data",
                     "title": "Afghanistan - Requirements and Funding Data",
                     "tags": [
                         {
@@ -141,7 +141,7 @@ class TestFTS:
                 check_resources(resources)
                 assert showcase == {
                     "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
-                    "name": "fts-requirements-and-funding-data-for-afghanistan-showcase",
+                    "name": "afg-requirements-and-funding-data-showcase",
                     "notes": "Click the image to go to the FTS funding summary page for Afghanistan",
                     "url": "https://fts.unocha.org/countries/1/flows/2020",
                     "title": "FTS Afghanistan Summary Page",
@@ -163,7 +163,7 @@ class TestFTS:
                 assert hxl_resource == resources[2]
 
                 country = locations.countries[1]
-                dataset, showcase = dataset_generator.get_dataset_and_showcase(
+                dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
                     additional_tags=["covid-19"],
                 )
@@ -172,7 +172,7 @@ class TestFTS:
                 )
                 assert dataset == {
                     "groups": [{"name": "jor"}],
-                    "name": "fts-requirements-and-funding-data-for-jordan",
+                    "name": "jor-requirements-and-funding-data",
                     "title": "Jordan - Requirements and Funding Data",
                     "tags": [
                         {
@@ -244,7 +244,7 @@ class TestFTS:
                 check_resources(resources)
                 assert showcase == {
                     "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
-                    "name": "fts-requirements-and-funding-data-for-jordan-showcase",
+                    "name": "jor-requirements-and-funding-data-showcase",
                     "notes": "Click the image to go to the FTS funding summary page for Jordan",
                     "url": "https://fts.unocha.org/countries/114/flows/2020",
                     "title": "FTS Jordan Summary Page",
@@ -266,7 +266,7 @@ class TestFTS:
                 assert hxl_resource == resources[2]
 
                 country = locations.countries[2]
-                dataset, showcase = dataset_generator.get_dataset_and_showcase(
+                dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
                     additional_tags=["covid-19"],
                 )
@@ -275,7 +275,7 @@ class TestFTS:
                 )
                 assert dataset == {
                     "groups": [{"name": "pse"}],
-                    "name": "fts-requirements-and-funding-data-for-occupied-palestinian-territory",
+                    "name": "pse-requirements-and-funding-data",
                     "title": "occupied Palestinian territory - Requirements and Funding Data",
                     "tags": [
                         {
@@ -354,7 +354,7 @@ class TestFTS:
                 check_resources(resources)
                 assert showcase == {
                     "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
-                    "name": "fts-requirements-and-funding-data-for-occupied-palestinian-territory-showcase",
+                    "name": "pse-requirements-and-funding-data-showcase",
                     "notes": "Click the image to go to the FTS funding summary page for occupied Palestinian territory",
                     "url": "https://fts.unocha.org/countries/171/flows/2020",
                     "title": "FTS occupied Palestinian territory Summary Page",
@@ -379,7 +379,7 @@ class TestFTS:
                     hapi_output = HAPIOutput(
                         configuration,
                         error_handler,
-                        pipeline.reqfund.global_rows,
+                        pipeline.get_global_rows(),
                         today,
                         folder,
                     )

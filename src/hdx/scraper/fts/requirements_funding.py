@@ -35,11 +35,11 @@ class RequirementsFunding:
             funding_url = f"1/fts/flow/custom-search?planid={planid}&groupby=location"
             data = self.downloader.download(funding_url)
             requirements = data.get("requirements")
-            country_requirements = dict()
+            country_requirements = {}
             if requirements is not None:
                 totalreq = requirements["totalRevisedReqs"]
                 countryreq_is_totalreq = True
-                for req_object in requirements.get("objects", list()):
+                for req_object in requirements.get("objects", []):
                     country_id = self.locations.get_countryid_from_object(req_object)
                     country_req = req_object.get("revisedRequirements")
                     if country_id is not None and country_req is not None:
@@ -50,11 +50,11 @@ class RequirementsFunding:
                     logger.info(
                         f"Ignoring {planid} country requirements as same as total requirements!"
                     )
-                    country_requirements = dict()
+                    country_requirements = {}
             fund_objects = data["report3"]["fundingTotals"]["objects"]
-            country_funding = dict()
+            country_funding = {}
             if len(fund_objects) == 1:
-                for fund_object in fund_objects[0].get("objectsBreakdown", list()):
+                for fund_object in fund_objects[0].get("objectsBreakdown", []):
                     country_id = self.locations.get_countryid_from_object(fund_object)
                     country_fund = fund_object.get("totalFunding")
                     if country_id is not None and country_fund is not None:
@@ -70,7 +70,7 @@ class RequirementsFunding:
         return False
 
     def get_country_funding(self, countryid, plans_by_year, start_year=2010):
-        funding_by_year = dict()
+        funding_by_year = {}
         if plans_by_year is not None:
             start_year = sorted(plans_by_year.keys())[0]
         for year in range(self.today.year + 5, start_year - 5, -11):
@@ -90,15 +90,15 @@ class RequirementsFunding:
         countryiso3 = country["iso3"]
         countryname = country["name"]
         funding_by_year = self.get_country_funding(country["id"], plans_by_year)
-        rows = list()
+        rows = []
 
         all_years = sorted(
             set(plans_by_year.keys()) | set(funding_by_year.keys()), reverse=True
         )
         for year in all_years:
             not_specified_funding = funding_by_year.get(year, "")
-            subrows = list()
-            for plan in plans_by_year.get(year, list()):
+            subrows = []
+            for plan in plans_by_year.get(year, []):
                 planid = plan["id"]
                 if planid in self.globalplanids:
                     continue
@@ -172,3 +172,6 @@ class RequirementsFunding:
             headers, rows, hxl_names, folder, filename, resourcedata
         )
         return results["resource"], all_years[-1]
+
+    def get_global_rows(self):
+        return self.global_rows

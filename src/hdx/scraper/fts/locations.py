@@ -3,9 +3,9 @@ from hdx.location.country import Country
 
 class Locations:
     def __init__(self, downloader):
-        self.name_to_iso3 = dict()
-        self.name_to_id = dict()
-        self.id_to_iso3 = dict()
+        self._name_to_iso3 = {}
+        self._name_to_id = {}
+        self._id_to_iso3 = {}
         countries = set()
         for country in downloader.download("1/public/location"):
             countryiso3 = country["iso3"]
@@ -13,9 +13,9 @@ class Locations:
                 continue
             countryid = country["id"]
             countryname = country["name"]
-            self.name_to_iso3[countryname] = countryiso3
-            self.name_to_id[countryname] = countryid
-            self.id_to_iso3[countryid] = countryiso3
+            self._name_to_iso3[countryname] = countryiso3
+            self._name_to_id[countryname] = countryid
+            self._id_to_iso3[countryid] = countryiso3
             hdxcountryname = Country.get_country_name_from_iso3(countryiso3)
             if hdxcountryname is None:
                 continue
@@ -30,8 +30,11 @@ class Locations:
         if countryid is None:
             countryname = object.get("name")
             if countryname is not None:
-                countryid = self.name_to_id.get(countryname)
+                countryid = self._name_to_id.get(countryname)
         return countryid
 
     def get_countryiso_from_name(self, name):
-        return self.name_to_iso3.get(name)
+        return self._name_to_iso3.get(name)
+
+    def get_id_to_iso3(self):
+        return self._id_to_iso3

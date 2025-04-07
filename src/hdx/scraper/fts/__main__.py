@@ -99,7 +99,7 @@ def main(
                 # for testing specific countries only
                 #             if country['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
                 #                 continue
-                dataset, showcase = dataset_generator.get_dataset_and_showcase(
+                dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
                     additional_tags=["covid-19"],
                 )
@@ -134,7 +134,7 @@ def main(
             hapi_output = HAPIOutput(
                 configuration,
                 error_handler,
-                pipeline.reqfund.global_rows,
+                pipeline.get_global_rows(),
                 today,
                 folder,
             )

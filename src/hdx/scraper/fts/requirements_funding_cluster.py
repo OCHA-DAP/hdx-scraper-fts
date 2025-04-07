@@ -12,7 +12,7 @@ class RequirementsFundingCluster:
         self.downloader = downloader
         self.planidswithonelocation = planidswithonelocation
         self.clusterlevel = clusterlevel
-        self.rows = list()
+        self.rows = []
         self.iso3_latestdata = {}
         self.iso3_latestpopulated = {}
 
@@ -25,14 +25,14 @@ class RequirementsFundingCluster:
         except DownloadError:
             logger.error(f"Problem with downloading cluster data for {planid}!")
             return None, None, None, None
-        requirements_clusters = dict()
+        requirements_clusters = {}
         for reqobject in data["requirements"]["objects"]:
             requirements = reqobject.get("revisedRequirements")
             if requirements is not None:
                 clusterid = reqobject.get("id")
                 if clusterid is not None:
                     requirements_clusters[clusterid] = (reqobject["name"], requirements)
-        funding_clusters = dict()
+        funding_clusters = {}
         fund_objects = data["report3"]["fundingTotals"]["objects"]
         notspecified = None
         if len(fund_objects) == 0:
@@ -82,7 +82,7 @@ class RequirementsFundingCluster:
         if year >= self.iso3_latestdata.get(countryiso3, year):
             self.iso3_latestdata[countryiso3] = year
         year = max(year, self.iso3_latestpopulated.get(countryiso3, year))
-        subrows = list()
+        subrows = []
         for clusterid, (fundname, funding) in funding_clusters.items():
             requirements_cluster = requirements_clusters.get(clusterid)
             if requirements_cluster is None:
@@ -142,7 +142,7 @@ class RequirementsFundingCluster:
         success, results = dataset.generate_resource_from_iterator(
             headers, self.rows, hxl_names, folder, filename, resourcedata
         )
-        self.rows = list()
+        self.rows = []
         if success:
             return results["resource"]
         else:

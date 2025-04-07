@@ -9,18 +9,18 @@ logger = logging.getLogger(__name__)
 class RequirementsFundingCovid:
     def __init__(self, downloader, locations, plans_by_year_by_country):
         self.downloader = downloader
-        self.covidfundingbyplanandlocation = dict()
-        self.rows = list()
-        self.get_covid_funding(locations.id_to_iso3, plans_by_year_by_country)
+        self.covidfundingbyplanandlocation = {}
+        self.rows = []
+        self.get_covid_funding(locations.get_id_to_iso3(), plans_by_year_by_country)
 
     def clear_rows(self):
-        self.rows = list()
+        self.rows = []
 
     def get_covid_funding(
         self, locationid_to_iso3, plans_by_year_by_country, covidstartyear=2020
     ):
-        multiplecountry_planids = dict()
-        planid_to_country = dict()
+        multiplecountry_planids = {}
+        planid_to_country = {}
         for plans_by_year in plans_by_year_by_country.values():
             for year in plans_by_year:
                 if year < covidstartyear:
@@ -97,7 +97,7 @@ class RequirementsFundingCovid:
         success, results = dataset.generate_resource_from_iterator(
             headers, self.rows, hxl_names, folder, filename, resourcedata
         )
-        self.rows = list()
+        self.rows = []
         if success:
             return results["resource"]
         else:

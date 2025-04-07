@@ -16,17 +16,17 @@ srcdestmap = {"sourceObjects": "src", "destinationObjects": "dest"}
 
 class Flows:
     def __init__(self, downloader, locations, planidcodemapping):
-        self.downloader = downloader
-        self.locations = locations
-        self.planidcodemapping = planidcodemapping
+        self._downloader = downloader
+        self._locations = locations
+        self._planidcodemapping = planidcodemapping
 
     def flatten_objects(self, objs, shortened, newrow):
-        objinfo_by_type = dict()
+        objinfo_by_type = {}
         plan_id = None
         destPlanId = None
         for obj in objs:
             objtype = obj["type"]
-            objinfo = objinfo_by_type.get(objtype, dict())
+            objinfo = objinfo_by_type.get(objtype, {})
             for key in obj:
                 if objtype == "Plan" and key == "id":
                     plan_id = obj[key]
@@ -64,9 +64,9 @@ class Flows:
                     if keyname[-1] != "s":
                         keyname = f"{keyname}s"
                     if "Location" in keyname:
-                        iso3s = list()
+                        iso3s = []
                         for country in values:
-                            iso3 = self.locations.get_countryiso_from_name(country)
+                            iso3 = self._locations.get_countryiso_from_name(country)
                             if iso3:
                                 iso3s.append(iso3)
                         values = iso3s
@@ -84,18 +84,18 @@ class Flows:
         return destPlanId
 
     def generate_resources(self, folder, dataset, latestyear, country):
-        fund_boundaries_info = dict()
-        fund_data = list()
+        fund_boundaries_info = {}
+        fund_data = []
         base_funding_url = f"1/fts/flow/custom-search?locationid={country['id']}&"
-        funding_url = self.downloader.get_url(f"{base_funding_url}year={latestyear}")
+        funding_url = self._downloader.get_url(f"{base_funding_url}year={latestyear}")
         while funding_url:
-            json = self.downloader.download(url=funding_url, data=False)
+            json = self._downloader.download(url=funding_url, data=False)
             fund_data.extend(json["data"]["flows"])
             funding_url = json["meta"].get("nextLink")
 
         start_date = default_enddate
         for row in fund_data:
-            newrow = dict()
+            newrow = {}
             destPlanId = None
             for key in row:
                 if key == "reportDetails":
@@ -141,13 +141,13 @@ class Flows:
                 newrow["originalCurrency"] = ""
             if "refCode" not in newrow:
                 newrow["refCode"] = ""
-            newrow["destPlanCode"] = self.planidcodemapping.get(destPlanId, "")
+            newrow["destPlanCode"] = self._planidcodemapping.get(destPlanId, "")
             boundary = row["boundary"]
-            rows = fund_boundaries_info.get(boundary, list())
+            rows = fund_boundaries_info.get(boundary, [])
             rows.append(newrow)
             fund_boundaries_info[boundary] = rows
 
-        resources = list()
+        resources = []
         for boundary in sorted(fund_boundaries_info.keys()):
             rows = sorted(
                 fund_boundaries_info[boundary], key=lambda k: k["date"], reverse=True

@@ -18,7 +18,7 @@ class HAPIOutput:
         self._error_handler = error_handler
         self._temp_dir = folder
         self._today = today
-        self.global_rows = global_rows
+        self._global_rows = global_rows
 
     def generate_dataset(self) -> Dataset:
         dataset = Dataset(self._configuration["hapi_dataset"])
@@ -26,7 +26,7 @@ class HAPIOutput:
         global_data = []
         duplicate_checks = []
         start_dates = []
-        for countryname, rows in self.global_rows.items():
+        for countryname, rows in self._global_rows.items():
             dataset_name = slugify(
                 f"FTS Requirements and Funding Data for {countryname}"
             ).lower()
