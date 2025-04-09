@@ -1,0 +1,42 @@
+countryCode,id,name,code,startDate,endDate,year,clusterCode,cluster,requirements,funding,percentFunded
+#country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#sector+cluster+code,#sector+cluster+name,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5253,Aviation,25000000,7982215,32
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5404,Aviation COVID-19,,3000000,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5254,Coordination,14939040,5077130,34
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5400,Coordination COVID-19,,1600000,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5130,Education in Emergencies,47281253,7281473,15
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5401,Education in Emergencies COVID-19,20823000,355645,2
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5247,Emergency Shelter and NFIs,55442757,24652964,44
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5407,Emergency Shelter and NFIs COVID-19,67456238,0,0
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5248,Food Security,309581740,116023570,37
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5402,Food Security COVID-19,60743080,48240976,79
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5249,Health,63476220,15383904,24
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5403,Health COVID-19,107614298,40546803,38
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5250,Nutrition,72495783,27379188,38
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5405,Nutrition COVID-19,42149424,7956832,19
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5251,Protection,62341224,43064770,69
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5406,Protection COVID-19,29534365,9011199,31
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5252,"Water, Sanitation and Hygiene",84803628,11592738,14
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,5408,"Water, Sanitation and Hygiene COVID-19",67368770,10612818,16
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,,Not specified,,160548636,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,,Multiple clusters/sectors (shared),,24156904,
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,5832,Education COVID-19,600000,,
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,5833,Health COVID-19,52045731,320251,1
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,5831,Multi-sector COVID-19,200000,2148882,1074
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,,Not specified,,16135147,
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,,Multiple clusters/sectors (shared),,0,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,4902,Coordination and Support Services,9767837,3652787,37
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,4906,Education,15331696,7762276,51
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,5524,Education COVID-19,7120698,668896,9
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,4905,Food Security Sector,213922868,116153543,54
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,5519,Food Security Sector COVID-19,18017577,10511246,58
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,4903,Health and Nutrition Cluster,35954220,14594406,41
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,5520,Health and Nutrition Cluster COVID-19,31304992,32051887,102
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,4904,Protection,33674019,39458588,117
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,5522,Protection COVID-19,2365740,1180043,50
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,4908,Shelter/NFIs,10209644,3155155,31
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,5521,Shelter/NFIs COVID-19,4092551,1736963,42
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,4907,WASH,29115790,10565415,36
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,5523,WASH COVID-19,9504052,4536303,48
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,,Not specified,,41594013,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,,Multiple clusters/sectors (shared),,7456391,

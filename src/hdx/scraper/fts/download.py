@@ -11,30 +11,30 @@ class FTSException(Exception):
 
 class FTSDownload:
     def __init__(
-            self,
-            configuration,
-            downloader,
-            countryiso3s=None,
-            years=None,
-            testfolder=None,
-            testpath=False,
+        self,
+        configuration,
+        downloader,
+        countryiso3s=None,
+        years=None,
+        testfolder=None,
+        testpath=False,
     ):
-        self.url = configuration["base_url"]
-        self.test_url = configuration["test_url"]
-        self.downloader = downloader
+        self._url = configuration["base_url"]
+        self._test_url = configuration["test_url"]
+        self._downloader = downloader
         if countryiso3s:
-            self.countryiso3s = countryiso3s.split(",")
+            self._countryiso3s = countryiso3s.split(",")
         else:
-            self.countryiso3s = None
+            self._countryiso3s = None
         if years:
-            self.years = years.split(",")
+            self._years = years.split(",")
         else:
-            self.years = None
-        self.testfolder = testfolder
-        self.testpath = testpath
+            self._years = None
+        self._testfolder = testfolder
+        self._testpath = testpath
 
     def get_url(self, partial_url):
-        return f"{self.url}{partial_url}"
+        return f"{self._url}{partial_url}"
 
     @staticmethod
     def get_testfile_path(partial_url=None, url=None):
@@ -56,11 +56,11 @@ class FTSDownload:
         return filename
 
     def download(self, partial_url=None, data=True, url=None):
-        if self.testpath:
+        if self._testpath:
             partial_url = self.get_testfile_path(partial_url, url)
         if partial_url is not None:
             url = self.get_url(partial_url)
-        r = self.downloader.download(url)
+        r = self._downloader.download(url)
         origjson = r.json()
         status = origjson["status"]
         if status != "ok":
@@ -80,40 +80,42 @@ class FTSDownload:
                 if plans is not None:
                     for i, plan in reversed(list(enumerate(plans))):
                         delete = False
-                        if self.countryiso3s:
+                        if self._countryiso3s:
                             countries = plan["countries"]
                             if countries:
                                 delete = True
                                 for country in countries:
-                                    if country["iso3"] in self.countryiso3s:
+                                    if country["iso3"] in self._countryiso3s:
                                         delete = False
                                         break
-                        if not delete and self.years:
+                        if not delete and self._years:
                             delete = True
                             for year in plan["usageYears"]:
-                                if year["year"] in self.years:
+                                if year["year"] in self._years:
                                     delete = False
                                     break
                         if delete:
                             del plans[i]
                     if len(plans) == 0:
                         save = False
-            elif self.countryiso3s or self.years:
+            elif self._countryiso3s or self._years:
                 for i, object in reversed(list(enumerate(json))):
                     if "iso3" in object:
                         countryiso3 = object["iso3"]
-                        if countryiso3 is None or countryiso3 not in self.countryiso3s:
+                        if countryiso3 is None or (
+                            self._countryiso3s and countryiso3 not in self._countryiso3s
+                        ):
                             del json[i]
                             continue
                     if "year" in object:
                         year = str(object["year"])
-                        if year is None or year not in self.years:
+                        if year is None or (self._years and year not in self._years):
                             del json[i]
         else:
             json = origjson
-        if save and self.testfolder and json:
+        if save and self._testfolder and json:
             filename = self.get_testfile_path(partial_url, url)
-            filepath = join(self.testfolder, filename)
+            filepath = join(self._testfolder, filename)
             meta = origjson.get("meta")
             if meta:
                 nextlink = meta.get("nextLink")
@@ -121,7 +123,7 @@ class FTSDownload:
                 nextlink = None
             if nextlink:
                 nextname = self.get_testfile_path(None, nextlink)
-                meta["nextLink"] = f"{self.test_url}{nextname}"
+                meta["nextLink"] = f"{self._test_url}{nextname}"
                 save_json(origjson, filepath)
                 meta["nextLink"] = nextlink
             else:

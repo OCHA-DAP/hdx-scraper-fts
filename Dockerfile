@@ -2,8 +2,13 @@ FROM public.ecr.aws/unocha/python:3.12-stable
 
 WORKDIR /srv
 
-COPY . .
+COPY .. .
 
-RUN pip --no-cache-dir install --upgrade -r requirements.txt
+RUN --mount=source=.git,target=.git,type=bind \
+    apk add --no-cache --upgrade --virtual .build-deps \
+        git && \
+    pip install --no-cache-dir . && \
+    apk del .build-deps && \
+    rm -rf /var/lib/apk/*
 
-CMD ["python3", "run.py"]
+CMD "python3 run.py"

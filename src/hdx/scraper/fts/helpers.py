@@ -1,6 +1,3 @@
-from hdx.data.dataset import Dataset
-from hdx.data.showcase import Showcase
-
 funding_hxl_names = {
     "date": "#date",
     "budgetYear": "#date+year+budget",
@@ -134,33 +131,3 @@ cluster_columns_to_keep = [
     "revisedRequirements",
     "totalFunding",
 ]
-
-
-def get_dataset_and_showcase(
-        slugified_name,
-        title,
-        description,
-        country,
-        showcase_url,
-        additional_tags=list(),
-):
-    dataset = Dataset(
-        {"name": slugified_name, "title": title, "notes": description})
-    dataset.set_maintainer("196196be-6037-4488-8b71-d786adf4c081")
-    dataset.set_organization("fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e")
-    dataset.set_expected_update_frequency("Every day")
-    dataset.set_subnational(False)
-    tags = ["hxl", "funding"]
-    tags.extend(additional_tags)
-    dataset.add_tags(tags)
-    showcase = Showcase(
-        {
-            "name": f"{slugified_name}-showcase",
-            "title": f"FTS {country} Summary Page",
-            "notes": f"Click the image to go to the FTS funding summary page for {country}",
-            "url": showcase_url,
-            "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
-        }
-    )
-    showcase.add_tags(tags)
-    return dataset, showcase

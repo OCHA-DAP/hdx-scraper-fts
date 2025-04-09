@@ -1,10 +1,10 @@
 ﻿location_code,has_hrp,in_gho,appeal_code,appeal_name,appeal_type,requirements_usd,funding_usd,funding_pct,reference_period_start,reference_period_end,dataset_hdx_id,resource_hdx_id,warning,error
 #country+code,#meta+has_hrp,#meta+in_gho,#activity+appeal+id+external,#activity+appeal+name,#activity+appeal+type+name,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct,#date+start,#date+end,#meta+dataset_id,#meta+resource_id,#meta+warning,#meta+error
-AFG,Y,Y,HAFG20,Afghanistan 2020,Humanitarian response plan,1131050820,564467765,50,2020-01-01,2020-12-31,6a60da4e-253f-474f-8683-7c9ed9a20bf9,96cc8cda-120f-483a-a7ce-5f89af4d99ee,,
-AFG,Y,Y,OGLBL20,Famine Prevention COVID-19 2020,Other,,15000000,,2020-05-01,2020-12-31,6a60da4e-253f-474f-8683-7c9ed9a20bf9,96cc8cda-120f-483a-a7ce-5f89af4d99ee,,
-AFG,Y,Y,Not specified,Not specified,,,146123534,,2020-01-01,2020-12-31,6a60da4e-253f-474f-8683-7c9ed9a20bf9,96cc8cda-120f-483a-a7ce-5f89af4d99ee,,
-JOR,N,Y,RSYR20,Syria Refugee Response and Resilience Plan (3RP) 2020,Regional response plan,1475421996,597249843,40,2020-01-01,2020-12-31,38af8a10-7dee-47dc-bd00-2db8c062ba9c,2142e68e-6be9-4ceb-8e0d-3da10413de32,,
-JOR,N,Y,OJOR20,Jordan Intersectoral COVID-19 Response Plan 2020,Other,52845731,18604280,35,2020-05-01,2020-12-31,38af8a10-7dee-47dc-bd00-2db8c062ba9c,2142e68e-6be9-4ceb-8e0d-3da10413de32,,
-JOR,N,Y,Not specified,Not specified,,,98392138,,2020-01-01,2020-12-31,38af8a10-7dee-47dc-bd00-2db8c062ba9c,2142e68e-6be9-4ceb-8e0d-3da10413de32,,
-PSE,N,Y,HPSE20,occupied Palestinian territory 2020 (part of 2018-2020 HRP),Humanitarian response plan,420381684,295077912,70,2020-01-01,2020-12-31,1a770477-7083-41bb-a88a-54f7b857c297,b4e5634e-42e0-4ca5-8893-8e15cad6b620,,
-PSE,N,Y,Not specified,Not specified,,,86430267,,2020-01-01,2020-12-31,1a770477-7083-41bb-a88a-54f7b857c297,b4e5634e-42e0-4ca5-8893-8e15cad6b620,,
+AFG,Y,Y,HAFG20,Afghanistan 2020,Humanitarian response plan,1131050820,564467765,50,2020-01-01,2020-12-31,1234,5678,,
+AFG,Y,Y,OGLBL20,Famine Prevention COVID-19 2020,Other,,15000000,,2020-05-01,2020-12-31,1234,5678,,
+AFG,Y,Y,Not specified,Not specified,,,146123534,,2020-01-01,2020-12-31,1234,5678,,
+JOR,N,Y,RSYR20,Syria Refugee Response and Resilience Plan (3RP) 2020,Regional response plan,1475421996,597249843,40,2020-01-01,2020-12-31,1234,5678,,
+JOR,N,Y,OJOR20,Jordan Intersectoral COVID-19 Response Plan 2020,Other,52845731,18604280,35,2020-05-01,2020-12-31,1234,5678,,
+JOR,N,Y,Not specified,Not specified,,,98392138,,2020-01-01,2020-12-31,1234,5678,,
+PSE,N,Y,HPSE20,occupied Palestinian territory 2020 (part of 2018-2020 HRP),Humanitarian response plan,420381684,295077912,70,2020-01-01,2020-12-31,1234,5678,,
+PSE,N,Y,Not specified,Not specified,,,86430267,,2020-01-01,2020-12-31,1234,5678,,
