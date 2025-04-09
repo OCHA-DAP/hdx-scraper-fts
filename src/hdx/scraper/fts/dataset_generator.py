@@ -9,18 +9,22 @@ logger = logging.getLogger(__name__)
 
 
 class DatasetGenerator:
-    def __init__(self, today, description):
+    def __init__(self, today, description, additional_tags=()):
         self._today = today
         self._description = description
+        self._additional_tags = additional_tags
 
     def get_dataset(
         self,
-        countryiso3,
-        countryname,
-        additional_tags=[],
+        countryiso3="world",
+        countryname=None,
     ):
+        if countryname:
+            slug = countryiso3
+        else:
+            countryname = slug = "Global"
         logger.info(f"Adding {countryname} FTS data")
-        slugified_name = slugify(f"{countryiso3} - Requirements and Funding Data")
+        slugified_name = slugify(f"{slug} - Requirements and Funding Data")
         title = f"{countryname} - Requirements and Funding Data"
         dataset = Dataset(
             {"name": slugified_name, "title": title, "notes": self._description}
@@ -43,14 +47,13 @@ class DatasetGenerator:
         dataset.set_expected_update_frequency("Every day")
         dataset.set_subnational(False)
         tags = ["hxl", "funding"]
-        tags.extend(additional_tags)
+        tags.extend(self._additional_tags)
         dataset.add_tags(tags)
         return dataset, slugified_name
 
     def get_country_dataset_and_showcase(
         self,
         country,
-        additional_tags=[],
     ):
         countryname = country["name"]
         if countryname == "World":
@@ -60,9 +63,7 @@ class DatasetGenerator:
         if countryiso3 is None:
             logger.error(f"{countryname} has a problem! ISO3 is None!")
             return None, None
-        dataset, slugified_name = self.get_dataset(
-            countryiso3, countryname, additional_tags
-        )
+        dataset, slugified_name = self.get_dataset(countryiso3, countryname)
 
         showcase_url = (
             f"https://fts.unocha.org/countries/{country['id']}/flows/{self._today.year}"
@@ -79,6 +80,6 @@ class DatasetGenerator:
         showcase.add_tags(dataset.get_tags())
         return dataset, showcase
 
-    def get_global_dataset(self, additional_tags=[]):
-        dataset, _ = self.get_dataset("world", "Global", additional_tags)
+    def get_global_dataset(self):
+        dataset, _ = self.get_dataset()
         return dataset

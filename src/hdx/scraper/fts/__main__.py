@@ -27,12 +27,17 @@ from hdx.scraper.fts.pipeline import Pipeline
 from hdx.utilities.dateparse import parse_date
 from hdx.utilities.downloader import Download
 from hdx.utilities.easy_logging import setup_logging
-from hdx.utilities.path import progress_storing_tempdir, script_dir_plus_file
+from hdx.utilities.path import (
+    progress_storing_folder,
+    script_dir_plus_file,
+    wheretostart_tempdir_batch,
+)
 
 setup_logging()
 logger = logging.getLogger(__name__)
 
 lookup = "hdx-scraper-fts"
+updated_by_script = "HDX Scraper: FTS"
 
 
 def main(
@@ -71,83 +76,121 @@ def main(
             extra_params_lookup=lookup,
             rate_limit={"calls": 1, "period": 1},
         ) as downloader:
-            configuration = Configuration.read()
-            ftsdownloader = FTSDownload(
-                configuration,
-                downloader,
-                countryiso3s=countries,
-                years=years,
-                testfolder=testfolder,
-            )
-            notes = configuration["notes"]
-            if today:
-                today = parse_date(today)
-            else:
-                today = datetime.now()
-
-            locations = Locations(ftsdownloader)
-            logger.info(
-                f"Number of country datasets to upload: {len(locations.countries)}"
-            )
-
-            pipeline = Pipeline(ftsdownloader, locations, today)
-            dataset_generator = DatasetGenerator(today, notes)
-            for info, country in progress_storing_tempdir(
-                "FTS", locations.countries, "iso3"
-            ):
+            with wheretostart_tempdir_batch(lookup) as info:
                 folder = info["folder"]
-                # for testing specific countries only
-                #             if country['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
-                #                 continue
-                dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
-                    country,
-                    additional_tags=["covid-19"],
+                batch = info["batch"]
+                configuration = Configuration.read()
+                ftsdownloader = FTSDownload(
+                    configuration,
+                    downloader,
+                    countryiso3s=countries,
+                    years=years,
+                    testfolder=testfolder,
                 )
-                if not dataset:
-                    continue
-                hxl_resource = pipeline.generate_dataset_and_showcase(
-                    folder, country, dataset
-                )
-                dataset.update_from_yaml()
-                if hxl_resource is None:
-                    dataset.preview_off()
+                notes = configuration["notes"]
+                if today:
+                    today = parse_date(today)
                 else:
-                    dataset.set_quickchart_resource(hxl_resource)
-                dataset.create_in_hdx(
-                    remove_additional_resources=True,
-                    match_resource_order=True,
-                    hxl_update=False,
-                    updated_by_script="HDX Scraper: FTS",
-                    batch=info["batch"],
+                    today = datetime.now()
+
+                locations = Locations(ftsdownloader)
+                logger.info(
+                    f"Number of country datasets to upload: {len(locations.countries)}"
                 )
-                if hxl_resource:
-                    if "cluster" in hxl_resource["name"]:
-                        dataset.generate_quickcharts(hxl_resource)
-                    else:
-                        dataset.generate_quickcharts(
-                            hxl_resource, bites_disabled=[False, True, True]
+
+                pipeline = Pipeline(ftsdownloader, folder, locations, today)
+                dataset_generator = DatasetGenerator(
+                    today, notes, additional_tags=("covid-19",)
+                )
+                for _, country in progress_storing_folder(
+                    info, locations.countries, "iso3"
+                ):
+                    # for testing specific countries only
+                    #             if country['iso3'] not in ['AFG', 'JOR', 'TUR', 'PHL', 'SDN', 'PSE']:
+                    #                 continue
+                    dataset, showcase = (
+                        dataset_generator.get_country_dataset_and_showcase(
+                            country,
                         )
+                    )
+                    if not dataset:
+                        continue
+                    hxl_resource = pipeline.generate_country_dataset_and_showcase(
+                        country, dataset
+                    )
+                    dataset.update_from_yaml(
+                        script_dir_plus_file(
+                            join("config", "hdx_dataset_static.yaml"), main
+                        ),
+                    )
+                    if hxl_resource is None:
+                        dataset.preview_off()
+                    else:
+                        dataset.set_quickchart_resource(hxl_resource)
+                    dataset.create_in_hdx(
+                        remove_additional_resources=True,
+                        match_resource_order=True,
+                        hxl_update=False,
+                        updated_by_script=updated_by_script,
+                        batch=batch,
+                    )
+                    if hxl_resource:
+                        if "cluster" in hxl_resource["name"]:
+                            dataset.generate_quickcharts(
+                                hxl_resource,
+                                path=script_dir_plus_file(
+                                    join("config", "hdx_resource_view_static.yaml"),
+                                    main,
+                                ),
+                            )
+                        else:
+                            dataset.generate_quickcharts(
+                                hxl_resource,
+                                path=script_dir_plus_file(
+                                    join("config", "hdx_resource_view_static.yaml"),
+                                    main,
+                                ),
+                                bites_disabled=[False, True, True],
+                            )
 
-                showcase.create_in_hdx()
-                showcase.add_dataset(dataset)
+                    showcase.create_in_hdx()
+                    showcase.add_dataset(dataset)
 
-            hapi_output = HAPIOutput(
-                configuration,
-                error_handler,
-                pipeline.get_global_rows(),
-                today,
-                folder,
-            )
-            dataset = hapi_output.generate_dataset()
-            dataset.update_from_yaml(
-                path=join("config", "hdx_hapi_dataset_static.yaml")
-            )
-            dataset.create_in_hdx(
-                remove_additional_resources=True,
-                match_resource_order=False,
-                hxl_update=False,
-                updated_by_script="HDX Scraper: FTS",
-            )
+                global_dataset = dataset_generator.get_global_dataset()
+                if global_dataset:
+                    global_results = pipeline.generate_global_dataset(global_dataset)
+                    global_dataset.update_from_yaml(
+                        script_dir_plus_file(
+                            join("config", "hdx_dataset_static.yaml"), main
+                        ),
+                    )
+                    global_dataset.create_in_hdx(
+                        remove_additional_resources=True,
+                        match_resource_order=True,
+                        hxl_update=False,
+                        updated_by_script=updated_by_script,
+                        batch=batch,
+                    )
+
+                hapi_output = HAPIOutput(
+                    configuration,
+                    error_handler,
+                    global_results,
+                    today,
+                    folder,
+                )
+                hapi_dataset = hapi_output.generate_dataset()
+                hapi_dataset.update_from_yaml(
+                    script_dir_plus_file(
+                        join("config", "hdx_hapi_dataset_static.yaml"), main
+                    ),
+                )
+                hapi_dataset.create_in_hdx(
+                    remove_additional_resources=True,
+                    match_resource_order=False,
+                    hxl_update=False,
+                    updated_by_script=updated_by_script,
+                )
 
 
 if __name__ == "__main__":

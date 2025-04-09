@@ -2,21 +2,21 @@ import copy
 import logging
 
 from hdx.scraper.fts.helpers import hxl_names
+from hdx.scraper.fts.resource_generator import ResourceGenerator
 
 logger = logging.getLogger(__name__)
 
 
-class RequirementsFundingCovid:
-    def __init__(self, downloader, locations, plans_by_year_by_country):
-        self.downloader = downloader
-        self.covidfundingbyplanandlocation = {}
-        self.rows = []
-        self.get_covid_funding(locations.get_id_to_iso3(), plans_by_year_by_country)
+class RequirementsFundingCovid(ResourceGenerator):
+    def __init__(self, downloader, folder, locations, plans_by_year_by_country):
+        super().__init__(downloader, folder, hxl_names)
+        self._covidfundingbyplanandlocation = {}
+        self._rows = []
+        self._get_covid_funding(locations.get_id_to_iso3(), plans_by_year_by_country)
+        self._filename = "fts_requirements_funding_covid"
+        self._description = "FTS Annual Requirements, Funding and Covid Funding Data"
 
-    def clear_rows(self):
-        self.rows = []
-
-    def get_covid_funding(
+    def _get_covid_funding(
         self, locationid_to_iso3, plans_by_year_by_country, covidstartyear=2020
     ):
         multiplecountry_planids = {}
@@ -40,7 +40,7 @@ class RequirementsFundingCovid:
                         multiplecountry_planids[planid] = countryiso3s
 
         onecountry_planids = ",".join(sorted(planid_to_country.keys()))
-        data = self.downloader.download(
+        data = self._downloader.download(
             f"1/fts/flow/custom-search?emergencyid=911&planid={onecountry_planids}&groupby=plan"
         )
         for fundingobject in data["report3"]["fundingTotals"]["objects"][0][
@@ -48,12 +48,12 @@ class RequirementsFundingCovid:
         ]:
             planid = fundingobject.get("id")
             countryiso3 = planid_to_country[planid]
-            self.covidfundingbyplanandlocation[f"{planid}-{countryiso3}"] = (
+            self._covidfundingbyplanandlocation[f"{planid}-{countryiso3}"] = (
                 fundingobject["totalFunding"]
             )
 
         for planid in multiplecountry_planids:
-            data = self.downloader.download(
+            data = self._downloader.download(
                 f"1/fts/flow/custom-search?emergencyid=911&planid={planid}&groupby=location"
             )
             fundingobjects = data["report3"]["fundingTotals"]["objects"]
@@ -63,14 +63,16 @@ class RequirementsFundingCovid:
                 locationid = int(fundingobject["id"])
                 countryiso3 = locationid_to_iso3.get(locationid)
                 if countryiso3:
-                    self.covidfundingbyplanandlocation[f"{planid}-{countryiso3}"] = (
+                    self._covidfundingbyplanandlocation[f"{planid}-{countryiso3}"] = (
                         fundingobject["totalFunding"]
                     )
 
     def generate_plan_funding(self, inrow):
         planid = inrow["id"]
         countryiso3 = inrow["countryCode"]
-        covidfunding = self.covidfundingbyplanandlocation.get(f"{planid}-{countryiso3}")
+        covidfunding = self._covidfundingbyplanandlocation.get(
+            f"{planid}-{countryiso3}"
+        )
         if covidfunding is None:
             logger.info(
                 f"Location {countryiso3} of plan {planid} has no COVID component!"
@@ -82,22 +84,17 @@ class RequirementsFundingCovid:
         row["covidPercentageOfFunding"] = int(
             covidfunding / inrow["funding"] * 100 + 0.5
         )
-        self.rows.append(row)
+        self._rows.append(row)
 
-    def generate_resource(self, folder, dataset, country):
-        if not self.rows:
+    def generate_country_resource(self, dataset, country):
+        if not self._rows:
             return None
-        headers = list(self.rows[0].keys())
-        filename = f"fts_requirements_funding_covid_{country['iso3'].lower()}.csv"
-        resourcedata = {
-            "name": filename,
-            "description": f"FTS Annual Requirements, Funding and Covid Funding Data for {country['name']}",
-            "format": "csv",
-        }
-        success, results = dataset.generate_resource_from_iterator(
-            headers, self.rows, hxl_names, folder, filename, resourcedata
+        countryiso3 = country["iso3"]
+        success, results = self.generate_resource(
+            dataset, self._rows, countryiso3, countryname=country["name"]
         )
-        self.rows = []
+        self._global_rows[countryiso3] = self._rows
+        self._rows = []
         if success:
             return results["resource"]
         else:

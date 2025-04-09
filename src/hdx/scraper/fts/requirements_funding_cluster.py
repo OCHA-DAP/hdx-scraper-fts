@@ -2,25 +2,32 @@ import copy
 import logging
 
 from hdx.scraper.fts.helpers import hxl_names
+from hdx.scraper.fts.resource_generator import ResourceGenerator
 from hdx.utilities.downloader import DownloadError
 
 logger = logging.getLogger(__name__)
 
 
-class RequirementsFundingCluster:
-    def __init__(self, downloader, planidswithonelocation, clusterlevel=""):
-        self.downloader = downloader
-        self.planidswithonelocation = planidswithonelocation
-        self.clusterlevel = clusterlevel
-        self.rows = []
-        self.iso3_latestdata = {}
-        self.iso3_latestpopulated = {}
+class RequirementsFundingCluster(ResourceGenerator):
+    def __init__(self, downloader, folder, planidswithonelocation, clusterlevel=""):
+        super().__init__(downloader, folder, hxl_names)
+        self._planidswithonelocation = planidswithonelocation
+        self._clusterlevel = clusterlevel
+        self._rows = []
+        self._iso3_latestdata = {}
+        self._iso3_latestpopulated = {}
+        self._filename = f"fts_requirements_funding_{clusterlevel}cluster"
+        self._description = "FTS Annual Requirements and Funding Data by Cluster"
+        if clusterlevel:
+            self._description = self._description.replace(
+                "Cluster", f"{clusterlevel.capitalize()} Cluster"
+            )
 
     def get_requirements_funding_plan(self, inrow):
         planid = inrow["id"]
         try:
-            data = self.downloader.download(
-                f"1/fts/flow/custom-search?planid={planid}&groupby={self.clusterlevel}cluster"
+            data = self._downloader.download(
+                f"1/fts/flow/custom-search?planid={planid}&groupby={self._clusterlevel}cluster"
             )
         except DownloadError:
             logger.error(f"Problem with downloading cluster data for {planid}!")
@@ -69,7 +76,7 @@ class RequirementsFundingCluster:
         if requirements_clusters is None and funding_clusters is None:
             return
         planid = inrow["id"]
-        if planid not in self.planidswithonelocation:
+        if planid not in self._planidswithonelocation:
             return
         base_row = copy.deepcopy(inrow)
         del base_row["typeId"]
@@ -79,9 +86,9 @@ class RequirementsFundingCluster:
         del base_row["percentFunded"]
         countryiso3 = base_row["countryCode"]
         year = base_row["year"]
-        if year >= self.iso3_latestdata.get(countryiso3, year):
-            self.iso3_latestdata[countryiso3] = year
-        year = max(year, self.iso3_latestpopulated.get(countryiso3, year))
+        if year >= self._iso3_latestdata.get(countryiso3, year):
+            self._iso3_latestdata[countryiso3] = year
+        year = max(year, self._iso3_latestpopulated.get(countryiso3, year))
         subrows = []
         for clusterid, (fundname, funding) in funding_clusters.items():
             requirements_cluster = requirements_clusters.get(clusterid)
@@ -94,7 +101,7 @@ class RequirementsFundingCluster:
             row = self.create_row(base_row, clusterid, fundname, requirements, funding)
             if requirements and funding != "":
                 row["percentFunded"] = int(funding / requirements * 100 + 0.5)
-                self.iso3_latestpopulated[countryiso3] = year
+                self._iso3_latestpopulated[countryiso3] = year
             else:
                 row["percentFunded"] = ""
             subrows.append(row)
@@ -106,14 +113,14 @@ class RequirementsFundingCluster:
             row = self.create_row(base_row, clusterid, reqname, requirements)
             subrows.append(row)
 
-        self.rows.extend(sorted(subrows, key=lambda k: k["cluster"]))
+        self._rows.extend(sorted(subrows, key=lambda k: k["cluster"]))
 
         row = self.create_row(base_row, name="Not specified", funding=notspecified)
-        self.rows.append(row)
+        self._rows.append(row)
         row = self.create_row(
             base_row, name="Multiple clusters/sectors (shared)", funding=shared
         )
-        self.rows.append(row)
+        self._rows.append(row)
 
     def generate_plan_requirements_funding(self, inrow):
         (
@@ -126,33 +133,25 @@ class RequirementsFundingCluster:
             inrow, requirements_clusters, funding_clusters, notspecified, shared
         )
 
-    def generate_resource(self, folder, dataset, country):
-        if not self.rows:
+    def generate_country_resource(self, dataset, country):
+        if not self._rows:
             return None
-        headers = list(self.rows[0].keys())
-        filename = f"fts_requirements_funding_{self.clusterlevel}cluster_{country['iso3'].lower()}.csv"
-        description = (
-            f"FTS Annual Requirements and Funding Data by Cluster for {country['name']}"
+        countryiso3 = country["iso3"]
+        success, results = self.generate_resource(
+            dataset, self._rows, countryiso3, countryname=country["name"]
         )
-        if self.clusterlevel:
-            description = description.replace(
-                "Cluster", f"{self.clusterlevel.capitalize()} Cluster"
-            )
-        resourcedata = {"name": filename, "description": description, "format": "csv"}
-        success, results = dataset.generate_resource_from_iterator(
-            headers, self.rows, hxl_names, folder, filename, resourcedata
-        )
-        self.rows = []
+        self._global_rows[countryiso3] = self._rows
+        self._rows = []
         if success:
             return results["resource"]
         else:
             return None
 
     def can_make_quickchart(self, countryiso3):
-        latest_year = self.iso3_latestdata.get(countryiso3)
+        latest_year = self._iso3_latestdata.get(countryiso3)
         if not latest_year:
             return False
-        populated_year = self.iso3_latestpopulated.get(countryiso3)
+        populated_year = self._iso3_latestpopulated.get(countryiso3)
         if not populated_year:
             return False
         if populated_year == latest_year:

@@ -57,16 +57,17 @@ class TestFTS:
                     f"Number of country datasets to upload: {len(locations.countries)}"
                 )
 
-                pipeline = Pipeline(ftsdownloader, locations, today, start_year=2019)
-                dataset_generator = DatasetGenerator(today, notes)
+                pipeline = Pipeline(
+                    ftsdownloader, folder, locations, today, start_year=2019
+                )
+                dataset_generator = DatasetGenerator(today, notes, ("covid-19",))
 
                 country = locations.countries[0]
                 dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
-                    additional_tags=["covid-19"],
                 )
-                hxl_resource = pipeline.generate_dataset_and_showcase(
-                    folder, country, dataset
+                hxl_resource = pipeline.generate_country_dataset_and_showcase(
+                    country, dataset
                 )
                 assert dataset == {
                     "groups": [{"name": "afg"}],
@@ -165,10 +166,9 @@ class TestFTS:
                 country = locations.countries[1]
                 dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
-                    additional_tags=["covid-19"],
                 )
-                hxl_resource = pipeline.generate_dataset_and_showcase(
-                    folder, country, dataset
+                hxl_resource = pipeline.generate_country_dataset_and_showcase(
+                    country, dataset
                 )
                 assert dataset == {
                     "groups": [{"name": "jor"}],
@@ -268,10 +268,9 @@ class TestFTS:
                 country = locations.countries[2]
                 dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
-                    additional_tags=["covid-19"],
                 )
-                hxl_resource = pipeline.generate_dataset_and_showcase(
-                    folder, country, dataset
+                hxl_resource = pipeline.generate_country_dataset_and_showcase(
+                    country, dataset
                 )
                 assert dataset == {
                     "groups": [{"name": "pse"}],
@@ -375,11 +374,116 @@ class TestFTS:
                 }
                 assert hxl_resource == resources[2]
 
+                global_dataset = dataset_generator.get_global_dataset()
+                global_results = pipeline.generate_global_dataset(global_dataset)
+                assert global_dataset == {
+                    "data_update_frequency": "1",
+                    "dataset_date": "[2016-02-26T00:00:00 TO 2020-12-31T23:59:59]",
+                    "groups": [{"name": "world"}],
+                    "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
+                    "name": "global-requirements-and-funding-data",
+                    "notes": "FTS publishes data on humanitarian funding flows as reported by "
+                    "donors and recipient organizations. It presents all humanitarian "
+                    "funding to a country and funding that is specifically reported or "
+                    "that can be specifically mapped against funding requirements stated "
+                    "in humanitarian response plans. The data comes from OCHA's "
+                    "[Financial Tracking Service](https://fts.unocha.org/), is encoded "
+                    "as utf-8 and the second row of the CSV contains "
+                    "[HXL](http://hxlstandard.org) tags.",
+                    "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
+                    "subnational": "0",
+                    "tags": [
+                        {
+                            "name": "hxl",
+                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                        },
+                        {
+                            "name": "funding",
+                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                        },
+                        {
+                            "name": "covid-19",
+                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                        },
+                    ],
+                    "title": "Global - Requirements and Funding Data",
+                }
+                resources = global_dataset.get_resources()
+                assert resources == [
+                    {
+                        "description": "FTS Annual Requirements and Funding Data globally",
+                        "format": "csv",
+                        "name": "fts_requirements_funding_global.csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "description": "FTS Annual Requirements, Funding and Covid Funding Data "
+                        "globally",
+                        "format": "csv",
+                        "name": "fts_requirements_funding_covid_global.csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "description": "FTS Annual Requirements and Funding Data by Cluster globally",
+                        "format": "csv",
+                        "name": "fts_requirements_funding_cluster_global.csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "description": "FTS Annual Requirements and Funding Data by Global Cluster "
+                        "globally",
+                        "format": "csv",
+                        "name": "fts_requirements_funding_globalcluster_global.csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "description": "FTS Incoming Funding Data globally for 2020",
+                        "format": "csv",
+                        "name": "fts_incoming_funding_global.csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "description": "FTS Internal Funding Data globally for 2020",
+                        "format": "csv",
+                        "name": "fts_internal_funding_global.csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                    {
+                        "description": "FTS Outgoing Funding Data globally for 2020",
+                        "format": "csv",
+                        "name": "fts_outgoing_funding_global.csv",
+                        "resource_type": "file.upload",
+                        "url_type": "upload",
+                    },
+                ]
+                assert len(global_results["rows"]) == 9
+                for filename in (
+                    "fts_requirements_funding_global.csv",
+                    "fts_requirements_funding_covid_global.csv",
+                    "fts_requirements_funding_cluster_global.csv",
+                    "fts_requirements_funding_globalcluster_global.csv",
+                    "fts_incoming_funding_global.csv",
+                    "fts_internal_funding_global.csv",
+                    "fts_outgoing_funding_global.csv",
+                ):
+                    assert_files_same(
+                        join("tests", "fixtures", filename),
+                        join(folder, filename),
+                    )
+
+                global_results["dataset"]["id"] = "1234"
+                global_results["resource"]["id"] = "5678"
                 with HDXErrorHandler() as error_handler:
                     hapi_output = HAPIOutput(
                         configuration,
                         error_handler,
-                        pipeline.get_global_rows(),
+                        global_results,
                         today,
                         folder,
                     )

@@ -1,0 +1,39 @@
+countryCode,id,name,code,startDate,endDate,year,clusterCode,cluster,requirements,funding,percentFunded
+#country+code,#activity+appeal+id+fts_internal,#activity+appeal+name,#activity+appeal+id+external,#date+start,#date+end,#date+year,#sector+cluster+code,#sector+cluster+name,#value+funding+required+usd,#value+funding+total+usd,#value+funding+pct
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,26512,Agriculture,,0,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,26513,COVID-19,,0,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,12,Child Protection,,2991009,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,26480,Coordination and support services,14939040,6677130,45
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,3,Education,68104253,7637118,11
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,4,Emergency Shelter and NFI,122898995,24652964,20
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,6,Food Security,370324820,157249186,42
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,13,Gender Based Violence,,1798400,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,7,Health,171090518,55674708,33
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,14,"Housing, Land and Property",,0,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,8,Logistics,25000000,10982215,44
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,15,Mine Action,,5280408,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,26479,Multi-sector,,1013349,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,9,Nutrition,114645207,35336020,31
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,10,Protection,91875589,29841887,32
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,11,Water Sanitation Hygiene,152172398,21636728,14
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,,Not specified,,158871041,
+AFG,929,Afghanistan 2020,HAFG20,2020-01-01,2020-12-31,2020,,Multiple clusters/sectors (shared),,44825602,
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,3,Education,600000,,
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,7,Health,52045731,320251,1
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,26479,Multi-sector,200000,2148882,1074
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,,Not specified,,16135147,
+JOR,1010,Jordan Intersectoral COVID-19 Response Plan 2020,OJOR20,2020-05-01,2020-12-31,2020,,Multiple clusters/sectors (shared),,0,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,12,Child Protection,,100023,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,26480,Coordination and support services,9767837,1395519,14
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,3,Education,22452394,6034566,27
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,4,Emergency Shelter and NFI,14302195,4383215,31
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,6,Food Security,231940445,82881826,36
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,13,Gender Based Violence,,342264,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,7,Health,51606715,24692490,48
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,15,Mine Action,,104188,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,26479,Multi-sector,,56191385,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,9,Nutrition,15652497,174776,1
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,10,Protection,36039759,40647372,113
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,11,Water Sanitation Hygiene,38619842,14314731,37
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,,Not specified,,35308948,
+PSE,832,occupied Palestinian territory 2020 (part of 2018-2020 HRP),HPSE20,2020-01-01,2020-12-31,2020,,Multiple clusters/sectors (shared),,28506609,

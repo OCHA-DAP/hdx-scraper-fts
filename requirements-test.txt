@@ -163,7 +163,10 @@ openpyxl==3.1.5
     #   -c requirements.txt
     #   hdx-python-utilities
 packaging==24.2
-    # via pytest
+    # via
+    #   -c requirements.txt
+    #   pytest
+    #   wheel
 petl==1.7.16
     # via
     #   -c requirements.txt
@@ -179,7 +182,7 @@ pockets==0.9.1
     # via
     #   -c requirements.txt
     #   sphinxcontrib-napoleon
-pydantic==2.11.2
+pydantic==2.11.3
     # via
     #   -c requirements.txt
     #   frictionless
@@ -350,7 +353,7 @@ validators==0.34.0
     # via
     #   -c requirements.txt
     #   frictionless
-wheel==0.45.1
+wheel==0.46.1
     # via
     #   -c requirements.txt
     #   libhxl

@@ -102,12 +102,14 @@ class FTSDownload:
                 for i, object in reversed(list(enumerate(json))):
                     if "iso3" in object:
                         countryiso3 = object["iso3"]
-                        if countryiso3 is None or countryiso3 not in self._countryiso3s:
+                        if countryiso3 is None or (
+                            self._countryiso3s and countryiso3 not in self._countryiso3s
+                        ):
                             del json[i]
                             continue
                     if "year" in object:
                         year = str(object["year"])
-                        if year is None or year not in self._years:
+                        if year is None or (self._years and year not in self._years):
                             del json[i]
         else:
             json = origjson

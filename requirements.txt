@@ -91,6 +91,8 @@ num2words==0.5.14
     # via quantulum3
 openpyxl==3.1.5
     # via hdx-python-utilities
+packaging==24.2
+    # via wheel
 petl==1.7.16
     # via frictionless
 ply==3.11
@@ -99,7 +101,7 @@ ply==3.11
     #   libhxl
 pockets==0.9.1
     # via sphinxcontrib-napoleon
-pydantic==2.11.2
+pydantic==2.11.3
     # via frictionless
 pydantic-core==2.33.1
     # via pydantic
@@ -202,7 +204,7 @@ urllib3==2.3.0
     #   requests
 validators==0.34.0
     # via frictionless
-wheel==0.45.1
+wheel==0.46.1
     # via libhxl
 xlrd==2.0.1
     # via hdx-python-utilities
