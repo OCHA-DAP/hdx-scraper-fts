@@ -115,7 +115,7 @@ class Pipeline:
         resources, start_date = self._flows.generate_country_resources(dataset, country)
         if len(resources) == 0:
             logger.warning("No requirements or funding data available")
-            return None, None, None
+            return None
 
         hxl_resource = None
         countryiso3 = country["iso3"]
