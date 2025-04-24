@@ -115,7 +115,7 @@ class Pipeline:
         resources, start_date = self._flows.generate_country_resources(dataset, country)
         if len(resources) == 0:
             logger.warning("No requirements or funding data available")
-            return None
+            return False, None
 
         hxl_resource = None
         countryiso3 = country["iso3"]
@@ -141,7 +141,7 @@ class Pipeline:
         dataset.set_time_period(start_date, self._today)
         if start_date < self._start_date:
             self._start_date = start_date
-        return hxl_resource
+        return True, hxl_resource
 
     def generate_global_dataset(self, dataset):
         success, results = self._reqfund.generate_global_resource(dataset)

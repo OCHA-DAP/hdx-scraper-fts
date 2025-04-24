@@ -115,9 +115,11 @@ def main(
                     )
                     if not dataset:
                         continue
-                    hxl_resource = pipeline.generate_country_dataset_and_showcase(
-                        country, dataset
+                    success, hxl_resource = (
+                        pipeline.generate_country_dataset_and_showcase(country, dataset)
                     )
+                    if not success:
+                        continue
                     dataset.update_from_yaml(
                         script_dir_plus_file(
                             join("config", "hdx_dataset_static.yaml"), main

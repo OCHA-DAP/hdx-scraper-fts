@@ -66,7 +66,7 @@ class TestFTS:
                 dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
                 )
-                hxl_resource = pipeline.generate_country_dataset_and_showcase(
+                success, hxl_resource = pipeline.generate_country_dataset_and_showcase(
                     country, dataset
                 )
                 assert dataset == {
@@ -167,7 +167,7 @@ class TestFTS:
                 dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
                 )
-                hxl_resource = pipeline.generate_country_dataset_and_showcase(
+                success, hxl_resource = pipeline.generate_country_dataset_and_showcase(
                     country, dataset
                 )
                 assert dataset == {
@@ -269,7 +269,7 @@ class TestFTS:
                 dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
                 )
-                hxl_resource = pipeline.generate_country_dataset_and_showcase(
+                success, hxl_resource = pipeline.generate_country_dataset_and_showcase(
                     country, dataset
                 )
                 assert dataset == {
