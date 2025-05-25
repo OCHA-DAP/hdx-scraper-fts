@@ -83,6 +83,10 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
+                            "name": "humanitarian financial tracking service-fts",
+                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                        },
+                        {
                             "name": "covid-19",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
@@ -156,6 +160,10 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
+                            "name": "humanitarian financial tracking service-fts",
+                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                        },
+                        {
                             "name": "covid-19",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
@@ -181,6 +189,10 @@ class TestFTS:
                         },
                         {
                             "name": "funding",
+                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                        },
+                        {
+                            "name": "humanitarian financial tracking service-fts",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
@@ -258,6 +270,10 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
+                            "name": "humanitarian financial tracking service-fts",
+                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                        },
+                        {
                             "name": "covid-19",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
@@ -283,6 +299,10 @@ class TestFTS:
                         },
                         {
                             "name": "funding",
+                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                        },
+                        {
+                            "name": "humanitarian financial tracking service-fts",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
@@ -367,6 +387,10 @@ class TestFTS:
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
+                            "name": "humanitarian financial tracking service-fts",
+                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                        },
+                        {
                             "name": "covid-19",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
@@ -399,6 +423,10 @@ class TestFTS:
                         },
                         {
                             "name": "funding",
+                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                        },
+                        {
+                            "name": "humanitarian financial tracking service-fts",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
                         {
@@ -499,6 +527,10 @@ class TestFTS:
                             },
                             {
                                 "name": "hxl",
+                                "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                            },
+                            {
+                                "name": "humanitarian financial tracking service-fts",
                                 "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                             },
                         ],

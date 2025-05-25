@@ -118,7 +118,7 @@ class HAPIOutput:
         start_date = min(start_dates)
         dataset.set_time_period(start_date, self._today)
 
-        tags = ["funding", "hxl"]
+        tags = ["funding", "hxl", "humanitarian financial tracking service-fts"]
         dataset.add_tags(tags)
 
         dataset.add_other_location("world")

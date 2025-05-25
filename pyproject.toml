@@ -10,11 +10,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hdx-scraper-fts"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
-  "hdx-python-api>=6.3.8",
-  "hdx-python-country>=3.9.2",
-  "hdx-python-utilities>=3.8.5",
+  "hdx-python-api>= 6.4.3",
+  "hdx-python-country>= 3.9.4",
+  "hdx-python-utilities>= 3.8.7",
 ]
 
 dynamic = ["version"]

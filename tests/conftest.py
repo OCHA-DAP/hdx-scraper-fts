@@ -47,6 +47,7 @@ def configuration(config_dir):
                 "hxl",
                 "funding",
                 "covid-19",
+                "humanitarian financial tracking service-fts",
             )
         ],
         "id": "4e61d464-4943-4e97-973a-84673c1aaa87",
