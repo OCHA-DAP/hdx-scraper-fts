@@ -61,12 +61,10 @@ def main(
     """
 
     logger.info(f"##### {lookup} version {__version__} ####")
-    if not User.check_current_user_organization_access(
-        "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e", "create_dataset"
-    ):
-        raise PermissionError(
-            "API Token does not give access to OCHA FTS organisation!"
-        )
+    configuration = Configuration.read()
+    User.check_current_user_write_access(
+        "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e", configuration=configuration
+    )
     if err_to_hdx is None:
         err_to_hdx = getenv("ERR_TO_HDX")
     with HDXErrorHandler(write_to_hdx=err_to_hdx) as error_handler:
@@ -79,7 +77,6 @@ def main(
             with wheretostart_tempdir_batch(lookup) as info:
                 folder = info["folder"]
                 batch = info["batch"]
-                configuration = Configuration.read()
                 ftsdownloader = FTSDownload(
                     configuration,
                     downloader,
