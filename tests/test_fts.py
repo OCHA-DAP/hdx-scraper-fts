@@ -10,15 +10,16 @@ from os.path import join
 import pytest
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.data.dataset import Dataset
+from hdx.utilities.compare import assert_files_same
+from hdx.utilities.dateparse import parse_date
+from hdx.utilities.downloader import Download
+from hdx.utilities.path import temp_dir
+
 from hdx.scraper.fts.dataset_generator import DatasetGenerator
 from hdx.scraper.fts.download import FTSDownload
 from hdx.scraper.fts.hapi_output import HAPIOutput
 from hdx.scraper.fts.locations import Locations
 from hdx.scraper.fts.pipeline import Pipeline
-from hdx.utilities.compare import assert_files_same
-from hdx.utilities.dateparse import parse_date
-from hdx.utilities.downloader import Download
-from hdx.utilities.path import temp_dir
 
 logger = logging.getLogger(__name__)
 

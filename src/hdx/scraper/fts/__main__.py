@@ -18,12 +18,6 @@ from hdx.api.configuration import Configuration
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.data.user import User
 from hdx.facades.infer_arguments import facade
-from hdx.scraper.fts._version import __version__
-from hdx.scraper.fts.dataset_generator import DatasetGenerator
-from hdx.scraper.fts.download import FTSDownload
-from hdx.scraper.fts.hapi_output import HAPIOutput
-from hdx.scraper.fts.locations import Locations
-from hdx.scraper.fts.pipeline import Pipeline
 from hdx.utilities.dateparse import parse_date
 from hdx.utilities.downloader import Download
 from hdx.utilities.easy_logging import setup_logging
@@ -32,6 +26,13 @@ from hdx.utilities.path import (
     script_dir_plus_file,
     wheretostart_tempdir_batch,
 )
+
+from hdx.scraper.fts._version import __version__
+from hdx.scraper.fts.dataset_generator import DatasetGenerator
+from hdx.scraper.fts.download import FTSDownload
+from hdx.scraper.fts.hapi_output import HAPIOutput
+from hdx.scraper.fts.locations import Locations
+from hdx.scraper.fts.pipeline import Pipeline
 
 setup_logging()
 logger = logging.getLogger(__name__)

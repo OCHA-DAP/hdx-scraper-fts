@@ -1,9 +1,10 @@
 import copy
 import logging
 
+from hdx.utilities.downloader import DownloadError
+
 from hdx.scraper.fts.helpers import hxl_names
 from hdx.scraper.fts.resource_generator import ResourceGenerator
-from hdx.utilities.downloader import DownloadError
 
 logger = logging.getLogger(__name__)
 
