@@ -9,12 +9,13 @@ Generates FTS datasets.
 
 import logging
 
+from hdx.utilities.dateparse import default_enddate, parse_date
+from hdx.utilities.dictandlist import dict_of_lists_add
+
 from hdx.scraper.fts.flows import Flows
 from hdx.scraper.fts.requirements_funding import RequirementsFunding
 from hdx.scraper.fts.requirements_funding_cluster import RequirementsFundingCluster
 from hdx.scraper.fts.requirements_funding_covid import RequirementsFundingCovid
-from hdx.utilities.dateparse import default_enddate, parse_date
-from hdx.utilities.dictandlist import dict_of_lists_add
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +138,7 @@ class Pipeline:
             )
             if other_hxl_resource:
                 hxl_resource = other_hxl_resource
-        dataset.resources = resources
+        dataset._resources = resources
         dataset.set_time_period(start_date, self._today)
         if start_date < self._start_date:
             self._start_date = start_date
