@@ -28,13 +28,13 @@ docopt==0.6.2
     #   num2words
 docutils==0.22
     # via defopt
-email-validator==2.2.0
+email-validator==2.3.0
     # via hdx-python-api
 et-xmlfile==2.0.0
     # via openpyxl
 frictionless==5.18.1
     # via hdx-python-utilities
-hdx-python-api==6.4.7
+hdx-python-api==6.5.0
     # via hdx-scraper-fts (pyproject.toml)
 hdx-python-country==3.9.6
     # via
@@ -45,7 +45,7 @@ hdx-python-utilities==3.9.0
     #   hdx-scraper-fts (pyproject.toml)
     #   hdx-python-api
     #   hdx-python-country
-humanize==4.12.3
+humanize==4.13.0
     # via frictionless
 idna==3.10
     # via
@@ -147,7 +147,7 @@ rpds-py==0.27.0
     # via
     #   jsonschema
     #   referencing
-ruamel-yaml==0.18.14
+ruamel-yaml==0.18.15
     # via hdx-python-utilities
 ruamel-yaml-clib==0.2.12
     # via ruamel-yaml
@@ -181,7 +181,7 @@ typeguard==4.4.4
     # via inflect
 typer==0.16.1
     # via frictionless
-typing-extensions==4.14.1
+typing-extensions==4.15.0
     # via
     #   frictionless
     #   pydantic

@@ -31,7 +31,7 @@ click==8.2.1
     # via
     #   -c requirements.txt
     #   typer
-coverage==7.10.4
+coverage==7.10.5
     # via pytest-cov
 defopt==7.0.0
     # via
@@ -50,7 +50,7 @@ docutils==0.22
     # via
     #   -c requirements.txt
     #   defopt
-email-validator==2.2.0
+email-validator==2.3.0
     # via
     #   -c requirements.txt
     #   hdx-python-api
@@ -62,7 +62,7 @@ frictionless==5.18.1
     # via
     #   -c requirements.txt
     #   hdx-python-utilities
-hdx-python-api==6.4.7
+hdx-python-api==6.5.0
     # via
     #   -c requirements.txt
     #   hdx-scraper-fts (pyproject.toml)
@@ -77,7 +77,7 @@ hdx-python-utilities==3.9.0
     #   hdx-scraper-fts (pyproject.toml)
     #   hdx-python-api
     #   hdx-python-country
-humanize==4.12.3
+humanize==4.13.0
     # via
     #   -c requirements.txt
     #   frictionless
@@ -262,7 +262,7 @@ rpds-py==0.27.0
     #   -c requirements.txt
     #   jsonschema
     #   referencing
-ruamel-yaml==0.18.14
+ruamel-yaml==0.18.15
     # via
     #   -c requirements.txt
     #   hdx-python-utilities
@@ -325,7 +325,7 @@ typer==0.16.1
     # via
     #   -c requirements.txt
     #   frictionless
-typing-extensions==4.14.1
+typing-extensions==4.15.0
     # via
     #   -c requirements.txt
     #   frictionless

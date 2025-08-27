@@ -12,7 +12,7 @@ build-backend = "hatchling.build"
 name = "hdx-scraper-fts"
 requires-python = ">=3.13"
 dependencies = [
-  "hdx-python-api>= 6.4.7",
+  "hdx-python-api>= 6.5.0",
   "hdx-python-country>= 3.9.6",
   "hdx-python-utilities>= 3.9.0",
 ]
