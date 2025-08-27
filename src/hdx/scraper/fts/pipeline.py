@@ -138,7 +138,7 @@ class Pipeline:
             )
             if other_hxl_resource:
                 hxl_resource = other_hxl_resource
-        dataset.resources = resources
+        dataset._resources = resources
         dataset.set_time_period(start_date, self._today)
         if start_date < self._start_date:
             self._start_date = start_date
