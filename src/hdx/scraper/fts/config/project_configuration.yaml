@@ -11,19 +11,19 @@ hapi_resource:
   name: "Global Coordination & Context: Funding"
   description: "Funding data from HDX HAPI, please see [the documentation](https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/coordination_and_context/#funding) for more information"
 
-hapi_hxl_tags:
-  location_code: "#country+code"
-  has_hrp: "#meta+has_hrp"
-  in_gho: "#meta+in_gho"
-  appeal_code: "#activity+appeal+id+external"
-  appeal_name: "#activity+appeal+name"
-  appeal_type: "#activity+appeal+type+name"
-  requirements_usd: "#value+funding+required+usd"
-  funding_usd: "#value+funding+total+usd"
-  funding_pct: "#value+funding+pct"
-  reference_period_start: "#date+start"
-  reference_period_end: "#date+end"
-  dataset_hdx_id: "#meta+dataset_id"
-  resource_hdx_id: "#meta+resource_id"
-  warning: "#meta+warning"
-  error: "#meta+error"
+hapi_headers:
+  - location_code
+  - has_hrp
+  - in_gho
+  - appeal_code
+  - appeal_name
+  - appeal_type
+  - requirements_usd
+  - funding_usd
+  - funding_pct
+  - reference_period_start
+  - reference_period_end
+  - dataset_hdx_id
+  - resource_hdx_id
+  - warning
+  - error

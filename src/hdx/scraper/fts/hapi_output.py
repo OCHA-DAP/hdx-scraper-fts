@@ -36,28 +36,28 @@ class HAPIOutput:
             if resource["name"] == resource_name:
                 resource_id = resource["id"]
                 break
+
         for row in self._global_results["rows"]:
             countryiso3 = row["countryCode"]
             if countryiso3[0] == "#":
                 continue
             errors = []
-
-            row["location_code"] = countryiso3
-            row["has_hrp"] = (
+            hapi_row = {"location_code": countryiso3}
+            hapi_row["has_hrp"] = (
                 "Y" if Country.get_hrp_status_from_iso3(countryiso3) else "N"
             )
-            row["in_gho"] = (
+            hapi_row["in_gho"] = (
                 "Y" if Country.get_gho_status_from_iso3(countryiso3) else "N"
             )
 
             appeal_code = row.get("code")
             if not appeal_code:
                 appeal_code = "Not specified"
-            row["appeal_code"] = appeal_code
+            hapi_row["appeal_code"] = appeal_code
 
-            row["appeal_name"] = row.get("name")
-            row["appeal_type"] = row.get("typeName")
-            row["requirements_usd"] = row.get("requirements")
+            hapi_row["appeal_name"] = row.get("name")
+            hapi_row["appeal_type"] = row.get("typeName")
+            hapi_row["requirements_usd"] = row.get("requirements")
 
             funding = row.get("funding")
             if not funding:
@@ -71,12 +71,12 @@ class HAPIOutput:
                     err_to_hdx=True,
                 )
                 errors.append("Negative funding value")
-            row["funding_usd"] = funding
+            hapi_row["funding_usd"] = funding
 
             funding_pct = row.get("percentFunded")
             if not funding_pct and row.get("requirements"):
                 funding_pct = 0
-            row["funding_pct"] = funding_pct
+            hapi_row["funding_pct"] = funding_pct
 
             if row.get("startDate"):
                 start_date = parse_date(row["startDate"])
@@ -93,13 +93,13 @@ class HAPIOutput:
             else:
                 start_date, end_date = parse_date_range(str(row["year"]))
             start_dates.append(start_date)
-            row["reference_period_start"] = iso_string_from_datetime(start_date)
-            row["reference_period_end"] = iso_string_from_datetime(end_date)
+            hapi_row["reference_period_start"] = iso_string_from_datetime(start_date)
+            hapi_row["reference_period_end"] = iso_string_from_datetime(end_date)
 
-            row["dataset_hdx_id"] = dataset_id
-            row["resource_hdx_id"] = resource_id
+            hapi_row["dataset_hdx_id"] = dataset_id
+            hapi_row["resource_hdx_id"] = resource_id
 
-            duplicate_check = (countryiso3, row["appeal_code"], start_date)
+            duplicate_check = (countryiso3, hapi_row["appeal_code"], start_date)
             if duplicate_check in duplicate_checks:
                 self._error_handler.add_message(
                     "Funding",
@@ -112,8 +112,8 @@ class HAPIOutput:
             else:
                 duplicate_checks.append(duplicate_check)
 
-            row["error"] = "|".join(errors)
-            global_data.append(row)
+            hapi_row["error"] = "|".join(errors)
+            global_data.append(hapi_row)
 
         start_date = min(start_dates)
         dataset.set_time_period(start_date, self._today)
@@ -123,15 +123,13 @@ class HAPIOutput:
 
         dataset.add_other_location("world")
 
-        hxl_tags = self._configuration["hapi_hxl_tags"]
-        headers = list(hxl_tags.keys())
-        dataset.generate_resource_from_iterable(
-            headers,
-            global_data,
-            hxl_tags,
+        headers = self._configuration["hapi_headers"]
+        dataset.generate_resource(
             self._temp_dir,
             "hdx_hapi_funding_global.csv",
+            global_data,
             self._configuration["hapi_resource"],
+            headers,
             encoding="utf-8-sig",
         )
         return dataset
