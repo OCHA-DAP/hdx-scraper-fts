@@ -112,6 +112,7 @@ class HAPIOutput:
             else:
                 duplicate_checks.append(duplicate_check)
 
+            hapi_row["warning"] = ""  # We have no warnings at present
             hapi_row["error"] = "|".join(errors)
             global_data.append(hapi_row)
 

@@ -31,7 +31,7 @@ click==8.3.0
     # via
     #   -c requirements.txt
     #   typer
-coverage==7.10.7
+coverage==7.11.0
     # via pytest-cov
 defopt==7.0.0
     # via
@@ -77,7 +77,7 @@ hdx-python-utilities==3.9.5
     #   hdx-scraper-fts (pyproject.toml)
     #   hdx-python-api
     #   hdx-python-country
-humanize==4.13.0
+humanize==4.14.0
     # via
     #   -c requirements.txt
     #   frictionless
@@ -94,7 +94,7 @@ inflect==7.5.0
     # via
     #   -c requirements.txt
     #   quantulum3
-iniconfig==2.1.0
+iniconfig==2.3.0
     # via pytest
 isodate==0.7.2
     # via
@@ -181,7 +181,7 @@ pockets==0.9.1
     # via
     #   -c requirements.txt
     #   sphinxcontrib-napoleon
-pydantic==2.12.2
+pydantic==2.12.3
     # via
     #   -c requirements.txt
     #   frictionless
@@ -245,7 +245,7 @@ requests==2.32.5
     #   hdx-python-api
     #   libhxl
     #   requests-file
-requests-file==2.1.0
+requests-file==3.0.1
     # via
     #   -c requirements.txt
     #   hdx-python-utilities
@@ -321,7 +321,7 @@ typeguard==4.4.4
     # via
     #   -c requirements.txt
     #   inflect
-typer==0.19.2
+typer==0.20.0
     # via
     #   -c requirements.txt
     #   frictionless
