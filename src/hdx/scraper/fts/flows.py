@@ -4,11 +4,6 @@ from hdx.utilities.dateparse import default_enddate, parse_date
 from hdx.utilities.dictandlist import dict_of_dicts_add, dict_of_lists_add
 from hdx.utilities.matching import multiple_replace
 
-from hdx.scraper.fts.helpers import (
-    country_all_columns_to_keep,
-    funding_hxl_names,
-    rename_columns,
-)
 from hdx.scraper.fts.resource_generator import ResourceGenerator
 
 logger = logging.getLogger(__name__)
@@ -17,8 +12,11 @@ srcdestmap = {"sourceObjects": "src", "destinationObjects": "dest"}
 
 
 class Flows(ResourceGenerator):
-    def __init__(self, downloader, folder, locations, planidcodemapping, today):
-        super().__init__(downloader, folder, funding_hxl_names)
+    def __init__(
+        self, configuration, downloader, folder, locations, planidcodemapping, today
+    ):
+        super().__init__(downloader, folder)
+        self._configuration = configuration
         self._locations = locations
         self._planidcodemapping = planidcodemapping
         self._latestyear = today.year
@@ -82,7 +80,7 @@ class Flows(ResourceGenerator):
                         )
                     else:
                         outputstr = values[0]
-                if keyname in country_all_columns_to_keep:
+                if keyname in self._configuration["country_all_columns_to_keep"]:
                     newrow[keyname] = outputstr
         return destPlanId
 
@@ -134,11 +132,11 @@ class Flows(ResourceGenerator):
                     else:
                         newrow[key] = ""
                     continue
-                renamed_column = rename_columns.get(key)
+                renamed_column = self._configuration["rename_columns"].get(key)
                 if renamed_column:
                     newrow[renamed_column] = value
                     continue
-                if key in country_all_columns_to_keep:
+                if key in self._configuration["country_all_columns_to_keep"]:
                     newrow[key] = value
             if "originalAmount" not in newrow:
                 newrow["originalAmount"] = ""
@@ -162,7 +160,7 @@ class Flows(ResourceGenerator):
                 dataset,
                 rows,
                 country["iso3"],
-                headers=list(funding_hxl_names.keys()),
+                headers=self._configuration["plans_headers"],
                 countryname=country["name"],
                 filename=filename,
                 description=description,
@@ -184,7 +182,7 @@ class Flows(ResourceGenerator):
                 dataset,
                 rows,
                 "global",
-                headers=list(funding_hxl_names.keys()),
+                headers=self._configuration["plans_headers"],
                 filename=filename,
                 description=description,
             )

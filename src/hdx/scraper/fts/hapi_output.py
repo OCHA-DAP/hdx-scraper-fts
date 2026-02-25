@@ -39,8 +39,6 @@ class HAPIOutput:
 
         for row in self._global_results["rows"]:
             countryiso3 = row["countryCode"]
-            if countryiso3[0] == "#":
-                continue
             errors = []
             hapi_row = {"location_code": countryiso3}
             hapi_row["has_hrp"] = (
@@ -119,7 +117,7 @@ class HAPIOutput:
         start_date = min(start_dates)
         dataset.set_time_period(start_date, self._today)
 
-        tags = ["funding", "hxl", "humanitarian financial tracking service-fts"]
+        tags = ["funding", "humanitarian financial tracking service-fts"]
         dataset.add_tags(tags)
 
         dataset.add_other_location("world")

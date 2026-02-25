@@ -1,7 +1,6 @@
 import copy
 import logging
 
-from hdx.scraper.fts.helpers import hxl_names
 from hdx.scraper.fts.resource_generator import ResourceGenerator
 
 logger = logging.getLogger(__name__)
@@ -9,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class RequirementsFundingCovid(ResourceGenerator):
     def __init__(self, downloader, folder, locations, plans_by_year_by_country):
-        super().__init__(downloader, folder, hxl_names)
+        super().__init__(downloader, folder)
         self._covidfundingbyplanandlocation = {}
         self._rows = []
         self._get_covid_funding(locations.get_id_to_iso3(), plans_by_year_by_country)

@@ -1,6 +1,5 @@
 import logging
 
-from hdx.scraper.fts.helpers import hxl_names
 from hdx.scraper.fts.resource_generator import ResourceGenerator
 
 logger = logging.getLogger(__name__)
@@ -8,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class RequirementsFunding(ResourceGenerator):
     def __init__(self, downloader, folder, locations, globalplanids, today):
-        super().__init__(downloader, folder, hxl_names)
+        super().__init__(downloader, folder)
         self._locations = locations
         self._globalplanids = globalplanids
         self._today = today

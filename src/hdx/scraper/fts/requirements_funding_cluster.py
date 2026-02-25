@@ -3,7 +3,6 @@ import logging
 
 from hdx.utilities.downloader import DownloadError
 
-from hdx.scraper.fts.helpers import hxl_names
 from hdx.scraper.fts.resource_generator import ResourceGenerator
 
 logger = logging.getLogger(__name__)
@@ -11,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class RequirementsFundingCluster(ResourceGenerator):
     def __init__(self, downloader, folder, planidswithonelocation, clusterlevel=""):
-        super().__init__(downloader, folder, hxl_names)
+        super().__init__(downloader, folder)
         self._planidswithonelocation = planidswithonelocation
         self._clusterlevel = clusterlevel
         self._rows = []
@@ -147,14 +146,3 @@ class RequirementsFundingCluster(ResourceGenerator):
             return results["resource"]
         else:
             return None
-
-    def can_make_quickchart(self, countryiso3):
-        latest_year = self._iso3_latestdata.get(countryiso3)
-        if not latest_year:
-            return False
-        populated_year = self._iso3_latestpopulated.get(countryiso3)
-        if not populated_year:
-            return False
-        if populated_year == latest_year:
-            return True
-        return False

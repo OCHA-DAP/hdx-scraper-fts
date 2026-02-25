@@ -96,7 +96,9 @@ def main(
                     f"Number of country datasets to upload: {len(locations.countries)}"
                 )
 
-                pipeline = Pipeline(ftsdownloader, folder, locations, today)
+                pipeline = Pipeline(
+                    configuration, ftsdownloader, folder, locations, today
+                )
                 dataset_generator = DatasetGenerator(
                     today, notes, additional_tags=("covid-19",)
                 )
@@ -113,8 +115,8 @@ def main(
                     )
                     if not dataset:
                         continue
-                    success, hxl_resource = (
-                        pipeline.generate_country_dataset_and_showcase(country, dataset)
+                    success = pipeline.generate_country_dataset_and_showcase(
+                        country, dataset
                     )
                     if not success:
                         continue
@@ -123,35 +125,12 @@ def main(
                             join("config", "hdx_dataset_static.yaml"), main
                         ),
                     )
-                    if hxl_resource is None:
-                        dataset.preview_off()
-                    else:
-                        dataset.set_quickchart_resource(hxl_resource)
                     dataset.create_in_hdx(
                         remove_additional_resources=True,
                         match_resource_order=True,
-                        hxl_update=False,
                         updated_by_script=updated_by_script,
                         batch=batch,
                     )
-                    if hxl_resource:
-                        if "cluster" in hxl_resource["name"]:
-                            dataset.generate_quickcharts(
-                                hxl_resource,
-                                path=script_dir_plus_file(
-                                    join("config", "hdx_resource_view_static.yaml"),
-                                    main,
-                                ),
-                            )
-                        else:
-                            dataset.generate_quickcharts(
-                                hxl_resource,
-                                path=script_dir_plus_file(
-                                    join("config", "hdx_resource_view_static.yaml"),
-                                    main,
-                                ),
-                                bites_disabled=[False, True, True],
-                            )
 
                     showcase.create_in_hdx()
                     showcase.add_dataset(dataset)
@@ -167,7 +146,6 @@ def main(
                     global_dataset.create_in_hdx(
                         remove_additional_resources=True,
                         match_resource_order=True,
-                        hxl_update=False,
                         updated_by_script=updated_by_script,
                         batch=batch,
                     )
@@ -188,7 +166,6 @@ def main(
                 hapi_dataset.create_in_hdx(
                     remove_additional_resources=True,
                     match_resource_order=False,
-                    hxl_update=False,
                     updated_by_script=updated_by_script,
                 )
 

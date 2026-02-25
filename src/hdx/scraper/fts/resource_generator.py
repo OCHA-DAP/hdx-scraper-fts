@@ -4,10 +4,9 @@ logger = logging.getLogger(__name__)
 
 
 class ResourceGenerator:
-    def __init__(self, downloader, folder, hxl_names):
+    def __init__(self, downloader, folder):
         self._downloader = downloader
         self._folder = folder
-        self._hxl_names = hxl_names
         self._global_rows = {}
         self._filename = ""
         self._description = ""
@@ -37,8 +36,8 @@ class ResourceGenerator:
             "description": description,
             "format": "csv",
         }
-        success, results = dataset.generate_resource_from_iterable(
-            headers, rows, self._hxl_names, self._folder, filename, resourcedata
+        success, results = dataset.generate_resource(
+            self._folder, filename, rows, resourcedata, headers
         )
         return success, results
 
