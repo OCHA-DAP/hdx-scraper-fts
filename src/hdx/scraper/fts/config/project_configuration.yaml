@@ -1,7 +1,108 @@
 # Collector specific configuration
 base_url: "https://api.hpc.tools/v"
 test_url: "https://github.com/OCHA-DAP/hdx-scraper-fts/raw/main/tests/fixtures/input/"
-notes: "FTS publishes data on humanitarian funding flows as reported by donors and recipient organizations. It presents all humanitarian funding to a country and funding that is specifically reported or that can be specifically mapped against funding requirements stated in humanitarian response plans. The data comes from OCHA's [Financial Tracking Service](https://fts.unocha.org/), is encoded as utf-8 and the second row of the CSV contains [HXL](http://hxlstandard.org) tags."
+notes: "FTS publishes data on humanitarian funding flows as reported by donors and recipient organizations. It presents all humanitarian funding to a country and funding that is specifically reported or that can be specifically mapped against funding requirements stated in humanitarian response plans. The data comes from OCHA's [Financial Tracking Service](https://fts.unocha.org/) and is encoded as utf-8."
+
+plans_headers:
+  - date
+  - budgetYear
+  - description
+  - amountUSD
+  - srcOrganization
+  - srcOrganizationTypes
+  - srcLocations
+  - srcUsageYearStart
+  - srcUsageYearEnd
+  - destPlan
+  - destPlanCode
+  - destPlanId
+  - destOrganization
+  - destOrganizationTypes
+  - destGlobalClusters
+  - destLocations
+  - destProject
+  - destProjectCode
+  - destEmergency
+  - destUsageYearStart
+  - destUsageYearEnd
+  - contributionType
+  - flowType
+  - method
+  - boundary
+  - onBoundary
+  - status
+  - firstReportedDate
+  - decisionDate
+  - keywords
+  - originalAmount
+  - originalCurrency
+  - exchangeRate
+  - id
+  - refCode
+  - createdAt
+  - updatedAt
+
+requirements_headers:
+  - countryCode
+  - id
+  - name
+  - code
+  - typeId
+  - typeName
+  - startDate
+  - endDate
+  - year
+  - clusterCode
+  - cluster
+  - requirements
+  - funding
+  - percentFunded
+  - covidFunding
+  - covidPercentageOfFunding
+
+rename_columns:
+  totalFunding: funding
+  revisedRequirements: requirements
+  clusterName: cluster
+
+country_all_columns_to_keep:
+  - date
+  - budgetYear
+  - description
+  - amountUSD
+  - srcOrganization
+  - srcOrganizationTypes
+  - srcLocations
+  - srcUsageYearStart
+  - srcUsageYearEnd
+  - destPlan
+  - destPlanCode
+  - destPlanId
+  - destOrganization
+  - destOrganizationTypes
+  - destGlobalClusters
+  - destLocations
+  - destProject
+  - destProjectCode
+  - destEmergency
+  - destUsageYearStart
+  - destUsageYearEnd
+  - contributionType
+  - flowType
+  - method
+  - boundary
+  - onBoundary
+  - status
+  - firstReportedDate
+  - decisionDate
+  - keywords
+  - originalAmount
+  - originalCurrency
+  - exchangeRate
+  - id
+  - refCode
+  - createdAt
+  - updatedAt
 
 hapi_dataset:
   name: "hdx-hapi-funding"

@@ -46,7 +46,7 @@ class DatasetGenerator:
         dataset.set_organization("fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e")
         dataset.set_expected_update_frequency("Every day")
         dataset.set_subnational(False)
-        tags = ["hxl", "funding", "humanitarian financial tracking service-fts"]
+        tags = ["funding", "humanitarian financial tracking service-fts"]
         tags.extend(self._additional_tags)
         dataset.add_tags(tags)
         return dataset, slugified_name

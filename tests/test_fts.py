@@ -59,7 +59,12 @@ class TestFTS:
                 )
 
                 pipeline = Pipeline(
-                    ftsdownloader, folder, locations, today, start_year=2019
+                    configuration,
+                    ftsdownloader,
+                    folder,
+                    locations,
+                    today,
+                    start_year=2019,
                 )
                 dataset_generator = DatasetGenerator(today, notes, ("covid-19",))
 
@@ -67,18 +72,12 @@ class TestFTS:
                 dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
                 )
-                success, hxl_resource = pipeline.generate_country_dataset_and_showcase(
-                    country, dataset
-                )
+                pipeline.generate_country_dataset_and_showcase(country, dataset)
                 assert dataset == {
                     "groups": [{"name": "afg"}],
                     "name": "afg-requirements-and-funding-data",
                     "title": "Afghanistan - Requirements and Funding Data",
                     "tags": [
-                        {
-                            "name": "hxl",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
                         {
                             "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
@@ -141,10 +140,6 @@ class TestFTS:
                     "title": "FTS Afghanistan Summary Page",
                     "tags": [
                         {
-                            "name": "hxl",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
                             "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
@@ -158,24 +153,16 @@ class TestFTS:
                         },
                     ],
                 }
-                assert hxl_resource == resources[2]
-
                 country = locations.countries[1]
                 dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
                 )
-                success, hxl_resource = pipeline.generate_country_dataset_and_showcase(
-                    country, dataset
-                )
+                pipeline.generate_country_dataset_and_showcase(country, dataset)
                 assert dataset == {
                     "groups": [{"name": "jor"}],
                     "name": "jor-requirements-and-funding-data",
                     "title": "Jordan - Requirements and Funding Data",
                     "tags": [
-                        {
-                            "name": "hxl",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
                         {
                             "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
@@ -239,10 +226,6 @@ class TestFTS:
                     "title": "FTS Jordan Summary Page",
                     "tags": [
                         {
-                            "name": "hxl",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
                             "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
@@ -256,24 +239,17 @@ class TestFTS:
                         },
                     ],
                 }
-                assert hxl_resource == resources[2]
 
                 country = locations.countries[2]
                 dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
                     country,
                 )
-                success, hxl_resource = pipeline.generate_country_dataset_and_showcase(
-                    country, dataset
-                )
+                pipeline.generate_country_dataset_and_showcase(country, dataset)
                 assert dataset == {
                     "groups": [{"name": "pse"}],
                     "name": "pse-requirements-and-funding-data",
                     "title": "occupied Palestinian territory - Requirements and Funding Data",
                     "tags": [
-                        {
-                            "name": "hxl",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
                         {
                             "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
@@ -342,10 +318,6 @@ class TestFTS:
                     "title": "FTS occupied Palestinian territory Summary Page",
                     "tags": [
                         {
-                            "name": "hxl",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
                             "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
@@ -359,7 +331,6 @@ class TestFTS:
                         },
                     ],
                 }
-                assert hxl_resource == resources[2]
 
                 global_dataset = dataset_generator.get_global_dataset()
                 global_results = pipeline.generate_global_dataset(global_dataset)
@@ -369,21 +340,16 @@ class TestFTS:
                     "groups": [{"name": "world"}],
                     "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                     "name": "global-requirements-and-funding-data",
-                    "notes": "FTS publishes data on humanitarian funding flows as reported by "
-                    "donors and recipient organizations. It presents all humanitarian "
+                    "notes": "FTS publishes data on humanitarian funding flows as reported "
+                    "by donors and recipient organizations. It presents all humanitarian "
                     "funding to a country and funding that is specifically reported or "
                     "that can be specifically mapped against funding requirements stated "
                     "in humanitarian response plans. The data comes from OCHA's "
-                    "[Financial Tracking Service](https://fts.unocha.org/), is encoded "
-                    "as utf-8 and the second row of the CSV contains "
-                    "[HXL](http://hxlstandard.org) tags.",
+                    "[Financial Tracking Service](https://fts.unocha.org/) and is "
+                    "encoded as utf-8.",
                     "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
                     "subnational": "0",
                     "tags": [
-                        {
-                            "name": "hxl",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
                         {
                             "name": "funding",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
@@ -439,7 +405,7 @@ class TestFTS:
                         "name": "fts_outgoing_funding_global.csv",
                     },
                 ]
-                assert len(global_results["rows"]) == 9
+                assert len(global_results["rows"]) == 8
                 for filename in (
                     "fts_requirements_funding_global.csv",
                     "fts_requirements_funding_covid_global.csv",
@@ -472,10 +438,6 @@ class TestFTS:
                         "tags": [
                             {
                                 "name": "funding",
-                                "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                            },
-                            {
-                                "name": "hxl",
                                 "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                             },
                             {
