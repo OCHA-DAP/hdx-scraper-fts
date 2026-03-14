@@ -241,7 +241,7 @@ shellingham==1.5.4
     # via
     #   -c requirements.txt
     #   typer
-simpleeval==1.0.3
+simpleeval==1.0.5
     # via
     #   -c requirements.txt
     #   frictionless
