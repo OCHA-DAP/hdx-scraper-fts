@@ -175,7 +175,7 @@ pyphonetics==0.5.3
     # via
     #   -c requirements.txt
     #   hdx-python-utilities
-pytest==9.0.2
+pytest==9.0.3
     # via
     #   hdx-scraper-fts (pyproject.toml)
     #   pytest-cov
