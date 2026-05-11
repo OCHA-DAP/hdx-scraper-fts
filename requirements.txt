@@ -164,7 +164,7 @@ typing-inspection==0.4.2
     # via pydantic
 unidecode==1.4.0
     # via pyphonetics
-urllib3==2.6.3
+urllib3==2.7.0
     # via requests
 validators==0.35.0
     # via frictionless
