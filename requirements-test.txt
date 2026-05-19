@@ -84,7 +84,7 @@ humanize==4.15.0
     # via
     #   -c requirements.txt
     #   frictionless
-idna==3.11
+idna==3.15
     # via
     #   -c requirements.txt
     #   email-validator
