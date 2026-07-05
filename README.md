@@ -5,7 +5,7 @@
 
 This script connects to the [FTS API](https://api.hpc.tools/docs/v1/) and extracts
 requirements and funding data country by country creating a dataset per country in
-HDX. It makes in the order of 5000 reads from FTS and 1000 read/writes (API calls)
+HDX. It reads from the FTS API and makes read/write API calls
 to HDX. It saves 3 temporary files per country each less than 5 KB and these are
 what are uploaded to HDX, and these files are then deleted. Plan overview, country
 funding trend, and flow data are fetched from the FTS API; plan IDs are mapped to
@@ -13,19 +13,18 @@ countries; requirements and funding are aggregated by country, cluster, and glob
 cluster; COVID-19 specific funding tracks are handled separately; the per-country
 standard datasets (requirements/funding, cluster-level, and COVID breakdown files)
 are uploaded to HDX first; a global standard dataset is then generated and
-uploaded; and finally a HAPI funding dataset is produced from the global data. It
-runs every weekday at around 9 AM UTC and takes approximately 1 hour to complete.
+uploaded; and finally a HAPI funding dataset is produced from the global data.
 
 ## Data Pipeline
 
-### API reads (~5000 calls per run)
+### API reads
 
-- **FTS API reads** (~5000 reads): plan overview, country funding trends, and flow
+- **FTS API reads**: plan overview, country funding trends, and flow
   data fetched from the [FTS API](https://api.hpc.tools/docs/v1/).
-- **HDX reads** (~1000 reads): metadata reads for existing per-country datasets
+- **HDX reads**: metadata reads for existing per-country datasets
   before updating.
 
-### API writes (~1000 calls per run)
+### API writes
 
 - **Per-country datasets** (~one write per country): each country dataset contains
   3 files — requirements/funding, cluster-level, and COVID-19 breakdown.
