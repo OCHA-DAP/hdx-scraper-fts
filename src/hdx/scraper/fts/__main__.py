@@ -12,7 +12,6 @@ import logging
 from datetime import datetime
 from os import getenv
 from os.path import expanduser, join
-from typing import Optional
 
 from hdx.api.configuration import Configuration
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
@@ -46,7 +45,7 @@ def main(
     countries: str = "",
     years: str = "",
     testfolder: str = "",
-    err_to_hdx: Optional[bool] = None,
+    err_to_hdx: bool | None = None,
 ) -> None:
     """Generate dataset and create it in HDX
 

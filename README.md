@@ -55,11 +55,13 @@ uploaded; and finally a HAPI funding dataset is produced from the global data.
 
 ### Environment
 
-Development is currently done using Python 3.13. Install packages with:
+Development is currently done using Python 3.13. The environment can be created with:
 
 ```shell
-    pip install -r requirements.txt
+    uv sync
 ```
+
+This creates a .venv folder with the versions specified in the project's uv.lock file.
 
 ### Installing and running
 
@@ -81,15 +83,15 @@ For the script to run, you will need to have a file called
 To run, execute:
 
 ```shell
-    python run.py
+    uv run python run.py
 ```
 
 ### Pre-commit
 
-Be sure to install `pre-commit`, which is run every time you make a git commit:
+pre-commit will be installed when syncing uv. It is run every time you make a git
+commit if you call it like this:
 
 ```shell
-    pip install pre-commit
     pre-commit install
 ```
 
@@ -104,31 +106,39 @@ To check if your changes pass pre-commit without committing, run:
 
 ## Packages
 
-[Hatch](https://hatch.pypa.io/) is used for package management. If you've
-introduced a new package to the source code (i.e. anywhere in `src/`), please
-add it to the `project.dependencies` section of `pyproject.toml` with any known
-version constraints.
+[uv](https://github.com/astral-sh/uv) is used for package management.  If
+you've introduced a new package to the source code (i.e. anywhere in `src/`),
+please add it to the `project.dependencies` section of `pyproject.toml` with
+any known version constraints.
 
-To add packages required only for testing, add them to the `test` section under
-`[project.optional-dependencies]`.
+To add packages required only for testing, add them to the
+`[dependency-groups]`.
+
+Any changes to the dependencies will be automatically reflected in
+`uv.lock` with `pre-commit`, but you can re-generate the files without committing by
+executing:
+
+```shell
+    uv lock --upgrade
+```
 
 ## Project
 
-[Hatch](https://hatch.pypa.io/) is used for project management. The project can be
+[uv](https://github.com/astral-sh/uv) is used for project management. The project can be
 built using:
 
 ```shell
-    hatch build
+    uv build
 ```
 
 Linting and syntax checking can be run with:
 
 ```shell
-    hatch fmt --check
+    uv run ruff check
 ```
 
 To run the tests and view coverage, execute:
 
 ```shell
-    hatch test
+    uv run pytest
 ```
