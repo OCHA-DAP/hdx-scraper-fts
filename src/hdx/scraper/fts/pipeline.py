@@ -10,7 +10,7 @@ Generates FTS datasets.
 import logging
 
 from hdx.utilities.dateparse import default_enddate, parse_date
-from hdx.utilities.dictandlist import dict_of_lists_add
+from hdx.utilities.dictandlist import dict_of_dicts_add, dict_of_lists_add
 
 from hdx.scraper.fts.flows import Flows
 from hdx.scraper.fts.noncountry_funding import NonCountryFunding
@@ -29,8 +29,8 @@ class Pipeline:
         self._downloader = downloader
         self._locations = locations
         self._today = today
+        self._plans_by_year = {}
         self._plans_by_id = {}
-        self._multicountry_plans = {}
         self._plans_by_year_by_country = {}
         self._planidcodemapping = {}
         self._planidswithonelocation = set()
@@ -69,12 +69,9 @@ class Pipeline:
             for plan in plans:
                 planid = plan["id"]
                 self._planidcodemapping[planid] = plan["code"]
-                self._plans_by_id[(planid, year)] = plan
+                dict_of_dicts_add(self._plans_by_year, year, planid, plan)
                 self._plans_by_id[planid] = plan
                 countries = plan["countries"]
-                # e.g. plan 996 (2020) has one location, Global, with no iso3
-                if len(countries) != 1 or not countries[0]["iso3"]:
-                    dict_of_lists_add(self._multicountry_plans, year, plan)
                 if countries:
                     is_global = self._reqfund.add_country_requirements_funding(
                         planid, plan, countries
@@ -155,15 +152,15 @@ class Pipeline:
         noncountry_funding = NonCountryFunding(
             self._downloader,
             self._locations,
+            self._plans_by_year,
             self._plans_by_id,
-            self._multicountry_plans,
         )
-        noncountry_rows = noncountry_funding.generate_rows(
-            self._reqfund.get_global_rows()
-        )
+        country_rows = self._reqfund.get_global_rows()
+        noncountry_rows = noncountry_funding.generate_rows(country_rows)
         success, results = self._reqfund.generate_global_resource(
             dataset,
             self._configuration["requirements_global_headers"],
+            country_rows,
             noncountry_rows,
         )
         self._others["covid"].generate_global_resource(dataset)

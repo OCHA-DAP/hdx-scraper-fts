@@ -1,4 +1,9 @@
 import logging
+from collections import defaultdict
+
+from hdx.utilities.dictandlist import dict_of_lists_add
+
+from hdx.scraper.fts.requirements_funding import create_row as create_base_row
 
 logger = logging.getLogger(__name__)
 
@@ -12,11 +17,11 @@ class NonCountryFunding:
 
     location_type_order = ("global", "region", "other", "unknown", "multiple")
 
-    def __init__(self, downloader, locations, plans_by_id, multicountry_plans):
+    def __init__(self, downloader, locations, plans_by_year, plans_by_id):
         self._downloader = downloader
         self._countryids = {int(country["id"]) for country in locations.countries}
+        self._plans_by_year = plans_by_year
         self._plans_by_id = plans_by_id
-        self._multicountry_plans = multicountry_plans
 
     @staticmethod
     def get_location_type(location_id, name):
@@ -30,36 +35,15 @@ class NonCountryFunding:
 
     @staticmethod
     def create_row(location, location_type, year, plan=None, name="Not specified"):
-        row = {
-            "countryCode": "",
+        return {
             "location": location,
             "locationType": location_type,
-            "id": "",
-            "name": name,
-            "code": "",
-            "typeId": "",
-            "typeName": "",
-            "isPartOfGHO": "N",
-            "startDate": "",
-            "endDate": "",
-            "year": year,
-            "requirements": "",
-            "funding": "",
-            "percentFunded": "",
+            **create_base_row("", year, plan, name),
         }
-        if plan:
-            row["id"] = plan["id"]
-            row["name"] = plan["name"]
-            row["code"] = plan["code"]
-            row["typeId"] = plan["planType"]["id"]
-            row["typeName"] = plan["planType"]["name"]
-            row["isPartOfGHO"] = "Y" if plan.get("isPartOfGHO") else "N"
-            row["startDate"] = plan["startDate"]
-            row["endDate"] = plan["endDate"]
-        return row
 
     def get_plan(self, planid, year):
-        return self._plans_by_id.get((planid, year), self._plans_by_id.get(planid))
+        plan = self._plans_by_year.get(year, {}).get(planid)
+        return plan or self._plans_by_id.get(planid)
 
     def generate_location_rows(self, location_id, location, location_type, year, total):
         """Plan rows for one non-country location plus a "Not specified" row
@@ -154,24 +138,24 @@ class NonCountryFunding:
         """For plans with more or less than 1 country, requirements and funding
         not in location rows go on a "Multiple locations" row for that plan.
         Returns the rows and the total funding put on them."""
-        requirements_in_rows = {}
-        funding_in_rows = {}
+        requirements_in_rows = defaultdict(int)
+        funding_in_rows = defaultdict(int)
         for row in location_rows:
             planid = row["id"]
             if not planid:
                 continue
             if row["requirements"]:
-                requirements_in_rows[planid] = (
-                    requirements_in_rows.get(planid, 0) + row["requirements"]
-                )
+                requirements_in_rows[planid] += row["requirements"]
             if row["funding"]:
-                funding_in_rows[planid] = (
-                    funding_in_rows.get(planid, 0) + row["funding"]
-                )
+                funding_in_rows[planid] += row["funding"]
         rows = []
         total_funding = 0
-        for plan in self._multicountry_plans.get(year, []):
-            planid = plan["id"]
+        for planid, plan in self._plans_by_year.get(year, {}).items():
+            countries = plan["countries"]
+            # Single-country plans are in country rows. Plan 996 (2020) has one
+            # location, Global, with no iso3, so it is kept
+            if len(countries) == 1 and countries[0]["iso3"]:
+                continue
             requirements = (plan.get("requirements") or {}).get("revisedRequirements")
             funding = (plan.get("funding") or {}).get("totalFunding")
             requirements = (requirements or 0) - requirements_in_rows.get(planid, 0)
@@ -202,7 +186,7 @@ class NonCountryFunding:
         first"""
         country_rows_by_year = {}
         for row in country_rows:
-            country_rows_by_year.setdefault(row["year"], []).append(row)
+            dict_of_lists_add(country_rows_by_year, row["year"], row)
         rows = []
         for year in sorted(country_rows_by_year, reverse=True):
             rows.extend(self.generate_year_rows(year, country_rows_by_year[year]))

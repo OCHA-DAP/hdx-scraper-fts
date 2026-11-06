@@ -482,6 +482,8 @@ class TestFTS:
         reqfund.add_country_global_rows({}, country)
         assert reqfund.get_global_rows() == [
             {
+                "location": "Denmark",
+                "locationType": "country",
                 "countryCode": "DNK",
                 "id": "",
                 "name": "Not specified",

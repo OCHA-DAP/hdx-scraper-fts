@@ -5,6 +5,34 @@ from hdx.scraper.fts.resource_generator import ResourceGenerator
 logger = logging.getLogger(__name__)
 
 
+def create_row(countryiso3, year, plan=None, name="Not specified"):
+    row = {
+        "countryCode": countryiso3,
+        "id": "",
+        "name": name,
+        "code": "",
+        "typeId": "",
+        "typeName": "",
+        "isPartOfGHO": "N",
+        "startDate": "",
+        "endDate": "",
+        "year": year,
+        "requirements": "",
+        "funding": "",
+        "percentFunded": "",
+    }
+    if plan:
+        row["id"] = plan["id"]
+        row["name"] = plan["name"]
+        row["code"] = plan["code"]
+        row["typeId"] = plan["planType"]["id"]
+        row["typeName"] = plan["planType"]["name"]
+        row["isPartOfGHO"] = "Y" if plan.get("isPartOfGHO") else "N"
+        row["startDate"] = plan["startDate"]
+        row["endDate"] = plan["endDate"]
+    return row
+
+
 class RequirementsFunding(ResourceGenerator):
     def __init__(self, downloader, folder, locations, globalplanids, today):
         super().__init__(downloader, folder)
@@ -117,21 +145,10 @@ class RequirementsFunding(ResourceGenerator):
                     percentFunded = country.get("percentFunded", "")
                     if not_specified_funding and funding:
                         not_specified_funding -= funding
-                    row = {
-                        "countryCode": countryiso3,
-                        "id": planid,
-                        "name": plan["name"],
-                        "code": plan["code"],
-                        "typeId": plan["planType"]["id"],
-                        "typeName": plan["planType"]["name"],
-                        "isPartOfGHO": "Y" if plan.get("isPartOfGHO") else "N",
-                        "startDate": plan["startDate"],
-                        "endDate": plan["endDate"],
-                        "year": year,
-                        "requirements": requirements,
-                        "funding": funding,
-                        "percentFunded": percentFunded,
-                    }
+                    row = create_row(countryiso3, year, plan)
+                    row["requirements"] = requirements
+                    row["funding"] = funding
+                    row["percentFunded"] = percentFunded
                     subrows.append(row)
 
                 if found_other_countries:
@@ -143,23 +160,9 @@ class RequirementsFunding(ResourceGenerator):
                 rows.append(row)
                 call_others(row)
 
-            rows.append(
-                {
-                    "countryCode": countryiso3,
-                    "id": "",
-                    "name": "Not specified",
-                    "code": "",
-                    "typeId": "",
-                    "typeName": "",
-                    "isPartOfGHO": "N",
-                    "startDate": "",
-                    "endDate": "",
-                    "year": year,
-                    "requirements": "",
-                    "funding": not_specified_funding,
-                    "percentFunded": "",
-                }
-            )
+            row = create_row(countryiso3, year)
+            row["funding"] = not_specified_funding
+            rows.append(row)
         return rows, all_years
 
     def generate_country_resource(
@@ -183,20 +186,13 @@ class RequirementsFunding(ResourceGenerator):
             self._global_rows[country["name"]] = rows
 
     def get_global_rows(self):
-        rows = []
-        for countryname in sorted(self._global_rows):
-            rows.extend(self._global_rows[countryname])
-        return rows
+        return [
+            {"location": countryname, "locationType": "country", **row}
+            for countryname in sorted(self._global_rows)
+            for row in self._global_rows[countryname]
+        ]
 
-    def generate_global_resource(self, dataset, headers, noncountry_rows):
-        rows = []
-        for countryname in sorted(self._global_rows):
-            for row in self._global_rows[countryname]:
-                row = {
-                    "location": countryname,
-                    "locationType": "country",
-                    **row,
-                }
-                rows.append({header: row[header] for header in headers})
-        rows.extend(noncountry_rows)
-        return self.generate_resource(dataset, rows, "global", headers=headers)
+    def generate_global_resource(self, dataset, headers, country_rows, noncountry_rows):
+        return self.generate_resource(
+            dataset, country_rows + noncountry_rows, "global", headers=headers
+        )
