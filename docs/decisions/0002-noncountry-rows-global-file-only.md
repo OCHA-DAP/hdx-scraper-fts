@@ -55,6 +55,25 @@ Three ways to label rows that have no ISO3 code were considered:
   −25.1m). FTS's global total includes them. FTS's country pages and the country
   trends endpoint, which country rows use, exclude them: Netherlands 2020 shows
   2.5m on both.
+- The FTS Power BI report (fts.unocha.org/home/2026/powerbi, data as of
+  2026-11-05) was compared against a 2026-11-06 dry run:
+  - **2025 and 2024 totals match:** 28,274.3m vs 28,274.8m, and 37,119.5m vs
+    37,119.3m.
+  - **2020 GHO funding matches:** 19,502.5m vs 19,502.3m.
+  - **Country figures match:** the report uses the same per-country figures as
+    FTS country pages (Netherlands 2.5m, Germany 2.9m), and the same Global
+    figure (2,243.2m).
+  - **2020 total differs:** 29,046.0m vs 29,157.8m. The report's "*Not
+    Specified" (1,004.7m) plus "*(Multi-Location)" (203.6m) is 119.7m less than
+    the file's "Not specified" location plus "Multiple locations" rows. Its
+    split between those two buckets cannot be rebuilt from the API.
+  - **API total does not fit:** adjusting to the API year total would fix 2020
+    but break 2024, where the report (37,119.5m) does not equal the API total
+    (37,097m). The adjustment was therefore not made.
+  - **2020 GHO required is 56.5m higher in the report:** 38,593.2m vs the plan
+    overview's 38,536.7m. The cause is unknown.
+  - **Exact match:** would need the FTS team to explain how the report builds
+    these buckets.
 - Per-location plan totals include funding shared with other locations, so a
   non-country "Not specified" row can be smaller than expected, or negative.
 - Users who summed the whole global file before will now get larger totals.
