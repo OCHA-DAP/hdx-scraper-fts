@@ -13,6 +13,7 @@ from hdx.utilities.dateparse import default_enddate, parse_date
 from hdx.utilities.dictandlist import dict_of_lists_add
 
 from hdx.scraper.fts.flows import Flows
+from hdx.scraper.fts.noncountry_funding import NonCountryFunding
 from hdx.scraper.fts.requirements_funding import RequirementsFunding
 from hdx.scraper.fts.requirements_funding_cluster import RequirementsFundingCluster
 from hdx.scraper.fts.requirements_funding_covid import RequirementsFundingCovid
@@ -24,8 +25,12 @@ class Pipeline:
     def __init__(
         self, configuration, downloader, folder, locations, today, start_year=1998
     ):
+        self._configuration = configuration
         self._downloader = downloader
+        self._locations = locations
         self._today = today
+        self._plans_by_id = {}
+        self._multicountry_plans = {}
         self._plans_by_year_by_country = {}
         self._planidcodemapping = {}
         self._planidswithonelocation = set()
@@ -64,7 +69,12 @@ class Pipeline:
             for plan in plans:
                 planid = plan["id"]
                 self._planidcodemapping[planid] = plan["code"]
+                self._plans_by_id[(planid, year)] = plan
+                self._plans_by_id[planid] = plan
                 countries = plan["countries"]
+                # e.g. plan 996 (2020) has one location, Global, with no iso3
+                if len(countries) != 1 or not countries[0]["iso3"]:
+                    dict_of_lists_add(self._multicountry_plans, year, plan)
                 if countries:
                     is_global = self._reqfund.add_country_requirements_funding(
                         planid, plan, countries
@@ -117,15 +127,13 @@ class Pipeline:
             return False
 
         countryiso3 = country["iso3"]
-        plans_by_year = self._plans_by_year_by_country.get(countryiso3)
-        if plans_by_year is None:
-            logger.error(
-                f"We have latest year funding data but no overall funding data for {countryiso3}"
-            )
+        plans_by_year = self._plans_by_year_by_country.get(countryiso3, {})
+        resource, reqfund_start_year = self._reqfund.generate_country_resource(
+            dataset, plans_by_year, country, self.call_others
+        )
+        if resource is None:
+            logger.error(f"No requirements or funding data for {countryiso3}")
         else:
-            resource, reqfund_start_year = self._reqfund.generate_country_resource(
-                dataset, plans_by_year, country, self.call_others
-            )
             reqfund_start_date = parse_date(f"{reqfund_start_year}-01-01")
             if reqfund_start_date < start_date:
                 start_date = reqfund_start_date
@@ -137,8 +145,27 @@ class Pipeline:
             self._start_date = start_date
         return True
 
+    def add_country_to_global(self, country):
+        """Add requirements/funding rows to the global file for a country that
+        has no country dataset (e.g. no flows)"""
+        plans_by_year = self._plans_by_year_by_country.get(country["iso3"], {})
+        self._reqfund.add_country_global_rows(plans_by_year, country)
+
     def generate_global_dataset(self, dataset):
-        success, results = self._reqfund.generate_global_resource(dataset)
+        noncountry_funding = NonCountryFunding(
+            self._downloader,
+            self._locations,
+            self._plans_by_id,
+            self._multicountry_plans,
+        )
+        noncountry_rows = noncountry_funding.generate_rows(
+            self._reqfund.get_global_rows()
+        )
+        success, results = self._reqfund.generate_global_resource(
+            dataset,
+            self._configuration["requirements_global_headers"],
+            noncountry_rows,
+        )
         self._others["covid"].generate_global_resource(dataset)
         self._others["cluster"].generate_global_resource(dataset)
         self._others["globalcluster"].generate_global_resource(dataset)

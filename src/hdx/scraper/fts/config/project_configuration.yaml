@@ -60,6 +60,23 @@ requirements_headers:
   - covidFunding
   - covidPercentageOfFunding
 
+requirements_global_headers:
+  - countryCode
+  - location
+  - locationType
+  - id
+  - name
+  - code
+  - typeId
+  - typeName
+  - isPartOfGHO
+  - startDate
+  - endDate
+  - year
+  - requirements
+  - funding
+  - percentFunded
+
 rename_columns:
   totalFunding: funding
   revisedRequirements: requirements

@@ -72,7 +72,7 @@ class RequirementsFunding(ResourceGenerator):
 
     def get_country_funding(self, countryid, plans_by_year, start_year=2010):
         funding_by_year = {}
-        if plans_by_year is not None:
+        if plans_by_year:
             start_year = sorted(plans_by_year.keys())[0]
         for year in range(self._today.year + 5, start_year - 5, -11):
             data = self._downloader.download(
@@ -85,11 +85,8 @@ class RequirementsFunding(ResourceGenerator):
                     funding_by_year[year] = funding
         return funding_by_year
 
-    def generate_country_resource(
-        self, dataset, plans_by_year, country, call_others=lambda x: None
-    ):
+    def generate_country_rows(self, plans_by_year, country, call_others=lambda x: None):
         countryiso3 = country["iso3"]
-        countryname = country["name"]
         funding_by_year = self.get_country_funding(country["id"], plans_by_year)
         rows = []
 
@@ -127,6 +124,7 @@ class RequirementsFunding(ResourceGenerator):
                         "code": plan["code"],
                         "typeId": plan["planType"]["id"],
                         "typeName": plan["planType"]["name"],
+                        "isPartOfGHO": "Y" if plan.get("isPartOfGHO") else "N",
                         "startDate": plan["startDate"],
                         "endDate": plan["endDate"],
                         "year": year,
@@ -153,6 +151,7 @@ class RequirementsFunding(ResourceGenerator):
                     "code": "",
                     "typeId": "",
                     "typeName": "",
+                    "isPartOfGHO": "N",
                     "startDate": "",
                     "endDate": "",
                     "year": year,
@@ -161,8 +160,43 @@ class RequirementsFunding(ResourceGenerator):
                     "percentFunded": "",
                 }
             )
+        return rows, all_years
+
+    def generate_country_resource(
+        self, dataset, plans_by_year, country, call_others=lambda x: None
+    ):
+        rows, all_years = self.generate_country_rows(
+            plans_by_year, country, call_others
+        )
+        if not rows:
+            return None, None
+        countryname = country["name"]
         self._global_rows[countryname] = rows
         _, results = self.generate_resource(
-            dataset, rows, countryiso3, countryname=countryname
+            dataset, rows, country["iso3"], countryname=countryname
         )
         return results["resource"], all_years[-1]
+
+    def add_country_global_rows(self, plans_by_year, country):
+        rows, _ = self.generate_country_rows(plans_by_year, country)
+        if rows:
+            self._global_rows[country["name"]] = rows
+
+    def get_global_rows(self):
+        rows = []
+        for countryname in sorted(self._global_rows):
+            rows.extend(self._global_rows[countryname])
+        return rows
+
+    def generate_global_resource(self, dataset, headers, noncountry_rows):
+        rows = []
+        for countryname in sorted(self._global_rows):
+            for row in self._global_rows[countryname]:
+                row = {
+                    "location": countryname,
+                    "locationType": "country",
+                    **row,
+                }
+                rows.append({header: row[header] for header in headers})
+        rows.extend(noncountry_rows)
+        return self.generate_resource(dataset, rows, "global", headers=headers)

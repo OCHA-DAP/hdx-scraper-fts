@@ -1,4 +1,4 @@
-countryCode,id,name,code,typeId,typeName,startDate,endDate,year,requirements,funding,percentFunded
-AFG,929,Afghanistan 2020,HAFG20,4,Humanitarian response plan,2020-01-01,2020-12-31,2020,1131050820,564467765,50
-AFG,1006,Famine Prevention COVID-19 2020,OGLBL20,1614,Other,2020-05-01,2020-12-31,2020,,15000000,
-AFG,,Not specified,,,,,,2020,,146123534,
+countryCode,id,name,code,typeId,typeName,isPartOfGHO,startDate,endDate,year,requirements,funding,percentFunded
+AFG,929,Afghanistan 2020,HAFG20,4,Humanitarian response plan,Y,2020-01-01,2020-12-31,2020,1131050820,564467765,50
+AFG,1006,Famine Prevention COVID-19 2020,OGLBL20,1614,Other,Y,2020-05-01,2020-12-31,2020,,15000000,
+AFG,,Not specified,,,,N,,,2020,,146123534,
