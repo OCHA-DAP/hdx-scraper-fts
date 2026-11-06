@@ -56,6 +56,9 @@ The pipeline in `__main__.py`:
      - `RequirementsFundingCovid` (`requirements_funding_covid.py`) — COVID-19 specific funding
        breakdown, derived from plans spanning 2020 onwards.
      - `Flows` (`flows.py`) — flow-level data (source/destination objects) per plan.
+     - `NonCountryFunding` (`noncountry_funding.py`) — global-file-only rows for funding to
+       non-country locations (Global, regions, unspecified), shared funding and unattributed
+       plan requirements and funding, plus a per-year reconciliation warning against FTS's total.
    - `DatasetGenerator` (`dataset_generator.py`) builds per-country and global `Dataset`/`Showcase`
      objects and uploads them to HDX.
    - `HAPIOutput` (`hapi_output.py`) derives a HAPI funding dataset from the global results and
@@ -73,6 +76,17 @@ The pipeline in `__main__.py`:
   (API base URL, notes template) live in `config/project_configuration.yaml`.
 - **Batch tracking**: `wheretostart_tempdir_batch` / `progress_storing_folder` allow the run to
   resume partway through the country list if interrupted.
+- **Global file layout**: `fts_requirements_funding_global.csv` has extra `location`/`locationType`
+  columns (header list `requirements_global_headers` in `project_configuration.yaml`); country
+  files do not. Countries with no dataset (no flows) still get rows in the global file.
+- **HAPI `in_gho`** is country-based, unlike the plan-based `isPartOfGHO`
+  (see `docs/decisions/0001-hapi-in-gho-country-based.md`).
+- **Tests** read fixtures from local `tests/fixtures/input/` (`conftest.py` sets `base_url`).
+
+## Decision Records
+
+Non-trivial design decisions are recorded in `docs/decisions/` (see `docs/decisions/README.md`) —
+the distilled decision, not the full planning narrative, belongs here.
 
 ## Environment
 

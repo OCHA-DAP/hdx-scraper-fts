@@ -1,6 +1,9 @@
 license_id: cc-by
 methodology: Registry
-caveats: HDX HAPI is refreshed daily, but the source datasets may have different update schedules. Please refer to the source datasets for each subcategory to verify their specific update frequency.
+caveats: |
+  HDX HAPI is refreshed daily, but the source datasets may have different update schedules. Please refer to the source datasets for each subcategory to verify their specific update frequency.
+
+  in_gho is the country's current GHO status, not whether the appeal was part of the GHO in that year. For appeal-level GHO membership by year, use the isPartOfGHO column in the [global requirements and funding dataset](https://data.humdata.org/dataset/global-requirements-and-funding-data).
 dataset_source: OCHA Financial Tracking System (FTS)
 package_creator: HDX Data Systems Team
 private: False

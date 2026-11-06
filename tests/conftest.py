@@ -24,7 +24,7 @@ def config_dir(fixtures_dir):
 
 
 @pytest.fixture(scope="session")
-def configuration(config_dir):
+def configuration(config_dir, input_dir):
     UserAgent.set_global("test")
     Configuration._create(
         hdx_read_only=True,
@@ -53,5 +53,5 @@ def configuration(config_dir):
         "name": "approved",
     }
     configuration = Configuration.read()
-    configuration["base_url"] = configuration["test_url"]
+    configuration["base_url"] = f"{input_dir}/"
     return configuration

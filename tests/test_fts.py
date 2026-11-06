@@ -19,7 +19,9 @@ from hdx.scraper.fts.dataset_generator import DatasetGenerator
 from hdx.scraper.fts.download import FTSDownload
 from hdx.scraper.fts.hapi_output import HAPIOutput
 from hdx.scraper.fts.locations import Locations
+from hdx.scraper.fts.noncountry_funding import NonCountryFunding
 from hdx.scraper.fts.pipeline import Pipeline
+from hdx.scraper.fts.requirements_funding import RequirementsFunding
 
 logger = logging.getLogger(__name__)
 
@@ -405,7 +407,10 @@ class TestFTS:
                         "name": "fts_outgoing_funding_global.csv",
                     },
                 ]
-                assert len(global_results["rows"]) == 8
+                # Fixtures cover only AFG, JOR and PSE, so funding of multi-country plans
+                # (e.g. 3RP) to other countries lands on "Multiple locations" plan rows and
+                # the shared "Multiple locations" row goes negative
+                assert len(global_results["rows"]) == 18
                 for filename in (
                     "fts_requirements_funding_global.csv",
                     "fts_requirements_funding_covid_global.csv",
@@ -461,3 +466,49 @@ class TestFTS:
                         join("tests", "fixtures", "hdx_hapi_funding_global.csv"),
                         join(folder, "hdx_hapi_funding_global.csv"),
                     )
+
+    def test_country_without_plans(self):
+        class StubDownloader:
+            @staticmethod
+            def download(partial_url):
+                if partial_url.endswith("/2025"):
+                    return [{"year": 2020, "totalFunding": 65000000}]
+                return []
+
+        reqfund = RequirementsFunding(
+            StubDownloader(), "", None, set(), parse_date("2020-12-31")
+        )
+        country = {"id": 60, "iso3": "DNK", "name": "Denmark"}
+        reqfund.add_country_global_rows({}, country)
+        assert reqfund.get_global_rows() == [
+            {
+                "location": "Denmark",
+                "locationType": "country",
+                "countryCode": "DNK",
+                "id": "",
+                "name": "Not specified",
+                "code": "",
+                "typeId": "",
+                "typeName": "",
+                "isPartOfGHO": "N",
+                "startDate": "",
+                "endDate": "",
+                "year": 2020,
+                "requirements": "",
+                "funding": 65000000,
+                "percentFunded": "",
+            }
+        ]
+        reqfund = RequirementsFunding(
+            StubDownloader(), "", None, set(), parse_date("2010-12-31")
+        )
+        reqfund.add_country_global_rows({}, country)
+        assert reqfund.get_global_rows() == []
+
+    def test_check_total(self, caplog):
+        rows = [{"funding": 100}, {"funding": ""}, {"funding": -1}]
+        with caplog.at_level(logging.WARNING):
+            NonCountryFunding.check_total(2020, rows, 100)
+            assert "differs" not in caplog.text
+            NonCountryFunding.check_total(2020, rows, 200)
+            assert "2020: total funding in global file 99 differs" in caplog.text

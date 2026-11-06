@@ -113,11 +113,13 @@ def main(
                         )
                     )
                     if not dataset:
+                        pipeline.add_country_to_global(country)
                         continue
                     success = pipeline.generate_country_dataset_and_showcase(
                         country, dataset
                     )
                     if not success:
+                        pipeline.add_country_to_global(country)
                         continue
                     dataset.update_from_yaml(
                         script_dir_plus_file(

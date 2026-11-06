@@ -38,6 +38,9 @@ class HAPIOutput:
                 break
 
         for row in self._global_results["rows"]:
+            # Non-country rows (Global, regions, multiple locations) have no ISO3
+            if row["locationType"] != "country":
+                continue
             countryiso3 = row["countryCode"]
             errors = []
             hapi_row = {"location_code": countryiso3}

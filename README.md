@@ -50,6 +50,18 @@ uploaded; and finally a HAPI funding dataset is produced from the global data.
    cluster, and global cluster.
 3. **COVID-19 tracking**: funding flows tagged with COVID-19 are extracted and
    reported separately.
+4. **GHO flag**: `isPartOfGHO` (Y/N) is the plan's GHO membership in that year,
+   from the plan overview. "Not specified" rows (funding outside any plan) are N.
+5. **Non-country rows** (global requirements/funding file only): funding to
+   Global, regional and unspecified locations, funding shared across several
+   locations, and plan requirements and funding not attributed to a single
+   country. These rows have a blank `countryCode` and are identified by
+   `location`/`locationType`. A
+   warning is logged per year if the file's total funding differs from FTS's by
+   more than 1%. See `docs/decisions/0002-noncountry-rows-global-file-only.md`.
+6. **HAPI**: non-country rows are skipped. `in_gho` is the country's current GHO
+   status, not the plan's `isPartOfGHO`, so the two can disagree for past years.
+   See `docs/decisions/0001-hapi-in-gho-country-based.md`.
 
 ## Development
 
