@@ -1,0 +1,14 @@
+# Ignore the local virtual environment
+.venv/
+.venv
+
+# Ignore build artifacts and cache
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+.idea/
+.vscode/
