@@ -42,11 +42,10 @@ class Flows(ResourceGenerator):
                     else:
                         dict_of_lists_add(objinfo, key, value)
             objinfo_by_type[objtype] = objinfo
-        for objtype in objinfo_by_type:
+        for objtype, objinfo in objinfo_by_type.items():
             prefix = f"{shortened}{objtype}"
-            for key in objinfo_by_type[objtype]:
+            for key, values in objinfo.items():
                 keyname = f"{prefix}{key.capitalize()}"
-                values = objinfo_by_type[objtype][key]
                 replacements = {
                     "OrganizationOrganization": "Organization",
                     "Name": "",
@@ -127,8 +126,7 @@ class Flows(ResourceGenerator):
                         datestr = value[:10]
                         newrow[key] = datestr
                         date = parse_date(datestr)
-                        if date < start_date:
-                            start_date = date
+                        start_date = min(start_date, date)
                     else:
                         newrow[key] = ""
                     continue

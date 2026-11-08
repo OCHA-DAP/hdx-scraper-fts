@@ -49,36 +49,399 @@ class TestFTS:
                 actual_file = join(folder, resource_name)
                 assert_files_same(expected_file, actual_file)
 
-        with temp_dir("FTS-TEST", delete_on_failure=False) as folder:
-            with Download(user_agent="test") as downloader:
-                ftsdownloader = FTSDownload(configuration, downloader, testpath=True)
-                notes = configuration["notes"]
-                today = parse_date("2020-12-31")
+        with (
+            temp_dir("FTS-TEST", delete_on_failure=False) as folder,
+            Download(user_agent="test") as downloader,
+        ):
+            ftsdownloader = FTSDownload(configuration, downloader, testpath=True)
+            notes = configuration["notes"]
+            today = parse_date("2020-12-31")
 
-                locations = Locations(ftsdownloader)
-                logger.info(
-                    f"Number of country datasets to upload: {len(locations.countries)}"
+            locations = Locations(ftsdownloader)
+            logger.info(
+                f"Number of country datasets to upload: {len(locations.countries)}"
+            )
+
+            pipeline = Pipeline(
+                configuration,
+                ftsdownloader,
+                folder,
+                locations,
+                today,
+                start_year=2019,
+            )
+            dataset_generator = DatasetGenerator(today, notes, ("covid-19",))
+
+            country = locations.countries[0]
+            dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
+                country,
+            )
+            pipeline.generate_country_dataset_and_showcase(country, dataset)
+            assert dataset == {
+                "groups": [{"name": "afg"}],
+                "name": "afg-requirements-and-funding-data",
+                "title": "Afghanistan - Requirements and Funding Data",
+                "tags": [
+                    {
+                        "name": "funding",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "humanitarian financial tracking service-fts",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "covid-19",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                ],
+                "dataset_date": "[2016-03-31T00:00:00 TO 2020-12-31T23:59:59]",
+                "data_update_frequency": "1",
+                "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
+                "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
+                "subnational": "0",
+                "notes": notes,
+            }
+            resources = dataset.get_resources()
+            assert resources == [
+                {
+                    "name": "fts_requirements_funding_afg.csv",
+                    "description": "FTS Annual Requirements and Funding Data for Afghanistan",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_requirements_funding_covid_afg.csv",
+                    "description": "FTS Annual Requirements, Funding and Covid Funding Data for Afghanistan",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_requirements_funding_cluster_afg.csv",
+                    "description": "FTS Annual Requirements and Funding Data by Cluster for Afghanistan",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_requirements_funding_globalcluster_afg.csv",
+                    "description": "FTS Annual Requirements and Funding Data by Global Cluster for Afghanistan",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_incoming_funding_afg.csv",
+                    "description": "FTS Incoming Funding Data for Afghanistan for 2020",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_internal_funding_afg.csv",
+                    "description": "FTS Internal Funding Data for Afghanistan for 2020",
+                    "format": "csv",
+                },
+            ]
+            check_resources(resources)
+            assert showcase == {
+                "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
+                "name": "afg-requirements-and-funding-data-showcase",
+                "notes": "Click the image to go to the FTS funding summary page for Afghanistan",
+                "url": "https://fts.unocha.org/countries/1/flows/2020",
+                "title": "FTS Afghanistan Summary Page",
+                "tags": [
+                    {
+                        "name": "funding",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "humanitarian financial tracking service-fts",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "covid-19",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                ],
+            }
+            country = locations.countries[1]
+            dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
+                country,
+            )
+            pipeline.generate_country_dataset_and_showcase(country, dataset)
+            assert dataset == {
+                "groups": [{"name": "jor"}],
+                "name": "jor-requirements-and-funding-data",
+                "title": "Jordan - Requirements and Funding Data",
+                "tags": [
+                    {
+                        "name": "funding",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "humanitarian financial tracking service-fts",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "covid-19",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                ],
+                "dataset_date": "[2017-04-05T00:00:00 TO 2020-12-31T23:59:59]",
+                "data_update_frequency": "1",
+                "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
+                "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
+                "subnational": "0",
+                "notes": notes,
+            }
+
+            resources = dataset.get_resources()
+            assert resources == [
+                {
+                    "name": "fts_requirements_funding_jor.csv",
+                    "description": "FTS Annual Requirements and Funding Data for Jordan",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_requirements_funding_covid_jor.csv",
+                    "description": "FTS Annual Requirements, Funding and Covid Funding Data for Jordan",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_requirements_funding_cluster_jor.csv",
+                    "description": "FTS Annual Requirements and Funding Data by Cluster for Jordan",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_requirements_funding_globalcluster_jor.csv",
+                    "description": "FTS Annual Requirements and Funding Data by Global Cluster for Jordan",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_incoming_funding_jor.csv",
+                    "description": "FTS Incoming Funding Data for Jordan for 2020",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_internal_funding_jor.csv",
+                    "description": "FTS Internal Funding Data for Jordan for 2020",
+                    "format": "csv",
+                },
+            ]
+            check_resources(resources)
+            assert showcase == {
+                "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
+                "name": "jor-requirements-and-funding-data-showcase",
+                "notes": "Click the image to go to the FTS funding summary page for Jordan",
+                "url": "https://fts.unocha.org/countries/114/flows/2020",
+                "title": "FTS Jordan Summary Page",
+                "tags": [
+                    {
+                        "name": "funding",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "humanitarian financial tracking service-fts",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "covid-19",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                ],
+            }
+
+            country = locations.countries[2]
+            dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
+                country,
+            )
+            pipeline.generate_country_dataset_and_showcase(country, dataset)
+            assert dataset == {
+                "groups": [{"name": "pse"}],
+                "name": "pse-requirements-and-funding-data",
+                "title": "occupied Palestinian territory - Requirements and Funding Data",
+                "tags": [
+                    {
+                        "name": "funding",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "humanitarian financial tracking service-fts",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "covid-19",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                ],
+                "dataset_date": "[2016-02-26T00:00:00 TO 2020-12-31T23:59:59]",
+                "data_update_frequency": "1",
+                "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
+                "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
+                "subnational": "0",
+                "notes": notes,
+            }
+
+            resources = dataset.get_resources()
+            assert resources == [
+                {
+                    "name": "fts_requirements_funding_pse.csv",
+                    "description": "FTS Annual Requirements and Funding Data for occupied Palestinian territory",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_requirements_funding_covid_pse.csv",
+                    "description": "FTS Annual Requirements, Funding and Covid Funding Data for occupied Palestinian territory",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_requirements_funding_cluster_pse.csv",
+                    "description": "FTS Annual Requirements and Funding Data by Cluster for occupied Palestinian territory",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_requirements_funding_globalcluster_pse.csv",
+                    "description": "FTS Annual Requirements and Funding Data by Global Cluster for occupied Palestinian territory",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_incoming_funding_pse.csv",
+                    "description": "FTS Incoming Funding Data for occupied Palestinian territory for 2020",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_internal_funding_pse.csv",
+                    "description": "FTS Internal Funding Data for occupied Palestinian territory for 2020",
+                    "format": "csv",
+                },
+                {
+                    "name": "fts_outgoing_funding_pse.csv",
+                    "description": "FTS Outgoing Funding Data for occupied Palestinian territory for 2020",
+                    "format": "csv",
+                },
+            ]
+            check_resources(resources)
+            assert showcase == {
+                "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
+                "name": "pse-requirements-and-funding-data-showcase",
+                "notes": "Click the image to go to the FTS funding summary page for occupied Palestinian territory",
+                "url": "https://fts.unocha.org/countries/171/flows/2020",
+                "title": "FTS occupied Palestinian territory Summary Page",
+                "tags": [
+                    {
+                        "name": "funding",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "humanitarian financial tracking service-fts",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "covid-19",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                ],
+            }
+
+            global_dataset = dataset_generator.get_global_dataset()
+            global_results = pipeline.generate_global_dataset(global_dataset)
+            assert global_dataset == {
+                "data_update_frequency": "1",
+                "dataset_date": "[2016-02-26T00:00:00 TO 2020-12-31T23:59:59]",
+                "groups": [{"name": "world"}],
+                "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
+                "name": "global-requirements-and-funding-data",
+                "notes": "FTS publishes data on humanitarian funding flows as reported "
+                "by donors and recipient organizations. It presents all humanitarian "
+                "funding to a country and funding that is specifically reported or "
+                "that can be specifically mapped against funding requirements stated "
+                "in humanitarian response plans. The data comes from OCHA's "
+                "[Financial Tracking Service](https://fts.unocha.org/) and is "
+                "encoded as utf-8.",
+                "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
+                "subnational": "0",
+                "tags": [
+                    {
+                        "name": "funding",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "humanitarian financial tracking service-fts",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                    {
+                        "name": "covid-19",
+                        "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
+                    },
+                ],
+                "title": "Global - Requirements and Funding Data",
+            }
+            resources = global_dataset.get_resources()
+            assert resources == [
+                {
+                    "description": "FTS Annual Requirements and Funding Data globally",
+                    "format": "csv",
+                    "name": "fts_requirements_funding_global.csv",
+                },
+                {
+                    "description": "FTS Annual Requirements, Funding and Covid Funding Data "
+                    "globally",
+                    "format": "csv",
+                    "name": "fts_requirements_funding_covid_global.csv",
+                },
+                {
+                    "description": "FTS Annual Requirements and Funding Data by Cluster globally",
+                    "format": "csv",
+                    "name": "fts_requirements_funding_cluster_global.csv",
+                },
+                {
+                    "description": "FTS Annual Requirements and Funding Data by Global Cluster "
+                    "globally",
+                    "format": "csv",
+                    "name": "fts_requirements_funding_globalcluster_global.csv",
+                },
+                {
+                    "description": "FTS Incoming Funding Data globally for 2020",
+                    "format": "csv",
+                    "name": "fts_incoming_funding_global.csv",
+                },
+                {
+                    "description": "FTS Internal Funding Data globally for 2020",
+                    "format": "csv",
+                    "name": "fts_internal_funding_global.csv",
+                },
+                {
+                    "description": "FTS Outgoing Funding Data globally for 2020",
+                    "format": "csv",
+                    "name": "fts_outgoing_funding_global.csv",
+                },
+            ]
+            # Fixtures cover only AFG, JOR and PSE, so funding of multi-country plans
+            # (e.g. 3RP) to other countries lands on "Multiple locations" plan rows and
+            # the shared "Multiple locations" row goes negative
+            assert len(global_results["rows"]) == 18
+            for filename in (
+                "fts_requirements_funding_global.csv",
+                "fts_requirements_funding_covid_global.csv",
+                "fts_requirements_funding_cluster_global.csv",
+                "fts_requirements_funding_globalcluster_global.csv",
+                "fts_incoming_funding_global.csv",
+                "fts_internal_funding_global.csv",
+                "fts_outgoing_funding_global.csv",
+            ):
+                assert_files_same(
+                    join("tests", "fixtures", filename),
+                    join(folder, filename),
                 )
 
-                pipeline = Pipeline(
+            global_results["dataset"]["id"] = "1234"
+            global_results["resource"]["id"] = "5678"
+            with HDXErrorHandler() as error_handler:
+                hapi_output = HAPIOutput(
                     configuration,
-                    ftsdownloader,
-                    folder,
-                    locations,
+                    error_handler,
+                    global_results,
                     today,
-                    start_year=2019,
+                    folder,
                 )
-                dataset_generator = DatasetGenerator(today, notes, ("covid-19",))
-
-                country = locations.countries[0]
-                dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
-                    country,
-                )
-                pipeline.generate_country_dataset_and_showcase(country, dataset)
+                dataset = hapi_output.generate_dataset()
                 assert dataset == {
-                    "groups": [{"name": "afg"}],
-                    "name": "afg-requirements-and-funding-data",
-                    "title": "Afghanistan - Requirements and Funding Data",
+                    "name": "hdx-hapi-funding",
+                    "title": "HDX HAPI - Coordination & Context: Funding",
+                    "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
                     "tags": [
                         {
                             "name": "funding",
@@ -88,384 +451,23 @@ class TestFTS:
                             "name": "humanitarian financial tracking service-fts",
                             "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                         },
-                        {
-                            "name": "covid-19",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
                     ],
-                    "dataset_date": "[2016-03-31T00:00:00 TO 2020-12-31T23:59:59]",
-                    "data_update_frequency": "1",
-                    "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
-                    "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
-                    "subnational": "0",
-                    "notes": notes,
-                }
-                resources = dataset.get_resources()
-                assert resources == [
-                    {
-                        "name": "fts_requirements_funding_afg.csv",
-                        "description": "FTS Annual Requirements and Funding Data for Afghanistan",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_requirements_funding_covid_afg.csv",
-                        "description": "FTS Annual Requirements, Funding and Covid Funding Data for Afghanistan",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_requirements_funding_cluster_afg.csv",
-                        "description": "FTS Annual Requirements and Funding Data by Cluster for Afghanistan",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_requirements_funding_globalcluster_afg.csv",
-                        "description": "FTS Annual Requirements and Funding Data by Global Cluster for Afghanistan",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_incoming_funding_afg.csv",
-                        "description": "FTS Incoming Funding Data for Afghanistan for 2020",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_internal_funding_afg.csv",
-                        "description": "FTS Internal Funding Data for Afghanistan for 2020",
-                        "format": "csv",
-                    },
-                ]
-                check_resources(resources)
-                assert showcase == {
-                    "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
-                    "name": "afg-requirements-and-funding-data-showcase",
-                    "notes": "Click the image to go to the FTS funding summary page for Afghanistan",
-                    "url": "https://fts.unocha.org/countries/1/flows/2020",
-                    "title": "FTS Afghanistan Summary Page",
-                    "tags": [
-                        {
-                            "name": "funding",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "humanitarian financial tracking service-fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "covid-19",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                    ],
-                }
-                country = locations.countries[1]
-                dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
-                    country,
-                )
-                pipeline.generate_country_dataset_and_showcase(country, dataset)
-                assert dataset == {
-                    "groups": [{"name": "jor"}],
-                    "name": "jor-requirements-and-funding-data",
-                    "title": "Jordan - Requirements and Funding Data",
-                    "tags": [
-                        {
-                            "name": "funding",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "humanitarian financial tracking service-fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "covid-19",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                    ],
-                    "dataset_date": "[2017-04-05T00:00:00 TO 2020-12-31T23:59:59]",
-                    "data_update_frequency": "1",
-                    "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
-                    "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
-                    "subnational": "0",
-                    "notes": notes,
-                }
-
-                resources = dataset.get_resources()
-                assert resources == [
-                    {
-                        "name": "fts_requirements_funding_jor.csv",
-                        "description": "FTS Annual Requirements and Funding Data for Jordan",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_requirements_funding_covid_jor.csv",
-                        "description": "FTS Annual Requirements, Funding and Covid Funding Data for Jordan",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_requirements_funding_cluster_jor.csv",
-                        "description": "FTS Annual Requirements and Funding Data by Cluster for Jordan",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_requirements_funding_globalcluster_jor.csv",
-                        "description": "FTS Annual Requirements and Funding Data by Global Cluster for Jordan",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_incoming_funding_jor.csv",
-                        "description": "FTS Incoming Funding Data for Jordan for 2020",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_internal_funding_jor.csv",
-                        "description": "FTS Internal Funding Data for Jordan for 2020",
-                        "format": "csv",
-                    },
-                ]
-                check_resources(resources)
-                assert showcase == {
-                    "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
-                    "name": "jor-requirements-and-funding-data-showcase",
-                    "notes": "Click the image to go to the FTS funding summary page for Jordan",
-                    "url": "https://fts.unocha.org/countries/114/flows/2020",
-                    "title": "FTS Jordan Summary Page",
-                    "tags": [
-                        {
-                            "name": "funding",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "humanitarian financial tracking service-fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "covid-19",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                    ],
-                }
-
-                country = locations.countries[2]
-                dataset, showcase = dataset_generator.get_country_dataset_and_showcase(
-                    country,
-                )
-                pipeline.generate_country_dataset_and_showcase(country, dataset)
-                assert dataset == {
-                    "groups": [{"name": "pse"}],
-                    "name": "pse-requirements-and-funding-data",
-                    "title": "occupied Palestinian territory - Requirements and Funding Data",
-                    "tags": [
-                        {
-                            "name": "funding",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "humanitarian financial tracking service-fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "covid-19",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                    ],
-                    "dataset_date": "[2016-02-26T00:00:00 TO 2020-12-31T23:59:59]",
-                    "data_update_frequency": "1",
-                    "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
-                    "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
-                    "subnational": "0",
-                    "notes": notes,
-                }
-
-                resources = dataset.get_resources()
-                assert resources == [
-                    {
-                        "name": "fts_requirements_funding_pse.csv",
-                        "description": "FTS Annual Requirements and Funding Data for occupied Palestinian territory",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_requirements_funding_covid_pse.csv",
-                        "description": "FTS Annual Requirements, Funding and Covid Funding Data for occupied Palestinian territory",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_requirements_funding_cluster_pse.csv",
-                        "description": "FTS Annual Requirements and Funding Data by Cluster for occupied Palestinian territory",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_requirements_funding_globalcluster_pse.csv",
-                        "description": "FTS Annual Requirements and Funding Data by Global Cluster for occupied Palestinian territory",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_incoming_funding_pse.csv",
-                        "description": "FTS Incoming Funding Data for occupied Palestinian territory for 2020",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_internal_funding_pse.csv",
-                        "description": "FTS Internal Funding Data for occupied Palestinian territory for 2020",
-                        "format": "csv",
-                    },
-                    {
-                        "name": "fts_outgoing_funding_pse.csv",
-                        "description": "FTS Outgoing Funding Data for occupied Palestinian territory for 2020",
-                        "format": "csv",
-                    },
-                ]
-                check_resources(resources)
-                assert showcase == {
-                    "image_url": "https://fts.unocha.org/themes/custom/fts_public/img/logos/fts-logo.svg",
-                    "name": "pse-requirements-and-funding-data-showcase",
-                    "notes": "Click the image to go to the FTS funding summary page for occupied Palestinian territory",
-                    "url": "https://fts.unocha.org/countries/171/flows/2020",
-                    "title": "FTS occupied Palestinian territory Summary Page",
-                    "tags": [
-                        {
-                            "name": "funding",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "humanitarian financial tracking service-fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "covid-19",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                    ],
-                }
-
-                global_dataset = dataset_generator.get_global_dataset()
-                global_results = pipeline.generate_global_dataset(global_dataset)
-                assert global_dataset == {
-                    "data_update_frequency": "1",
-                    "dataset_date": "[2016-02-26T00:00:00 TO 2020-12-31T23:59:59]",
                     "groups": [{"name": "world"}],
-                    "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
-                    "name": "global-requirements-and-funding-data",
-                    "notes": "FTS publishes data on humanitarian funding flows as reported "
-                    "by donors and recipient organizations. It presents all humanitarian "
-                    "funding to a country and funding that is specifically reported or "
-                    "that can be specifically mapped against funding requirements stated "
-                    "in humanitarian response plans. The data comes from OCHA's "
-                    "[Financial Tracking Service](https://fts.unocha.org/) and is "
-                    "encoded as utf-8.",
-                    "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
-                    "subnational": "0",
-                    "tags": [
-                        {
-                            "name": "funding",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "humanitarian financial tracking service-fts",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                        {
-                            "name": "covid-19",
-                            "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                        },
-                    ],
-                    "title": "Global - Requirements and Funding Data",
                 }
-                resources = global_dataset.get_resources()
-                assert resources == [
-                    {
-                        "description": "FTS Annual Requirements and Funding Data globally",
-                        "format": "csv",
-                        "name": "fts_requirements_funding_global.csv",
-                    },
-                    {
-                        "description": "FTS Annual Requirements, Funding and Covid Funding Data "
-                        "globally",
-                        "format": "csv",
-                        "name": "fts_requirements_funding_covid_global.csv",
-                    },
-                    {
-                        "description": "FTS Annual Requirements and Funding Data by Cluster globally",
-                        "format": "csv",
-                        "name": "fts_requirements_funding_cluster_global.csv",
-                    },
-                    {
-                        "description": "FTS Annual Requirements and Funding Data by Global Cluster "
-                        "globally",
-                        "format": "csv",
-                        "name": "fts_requirements_funding_globalcluster_global.csv",
-                    },
-                    {
-                        "description": "FTS Incoming Funding Data globally for 2020",
-                        "format": "csv",
-                        "name": "fts_incoming_funding_global.csv",
-                    },
-                    {
-                        "description": "FTS Internal Funding Data globally for 2020",
-                        "format": "csv",
-                        "name": "fts_internal_funding_global.csv",
-                    },
-                    {
-                        "description": "FTS Outgoing Funding Data globally for 2020",
-                        "format": "csv",
-                        "name": "fts_outgoing_funding_global.csv",
-                    },
-                ]
-                # Fixtures cover only AFG, JOR and PSE, so funding of multi-country plans
-                # (e.g. 3RP) to other countries lands on "Multiple locations" plan rows and
-                # the shared "Multiple locations" row goes negative
-                assert len(global_results["rows"]) == 18
-                for filename in (
-                    "fts_requirements_funding_global.csv",
-                    "fts_requirements_funding_covid_global.csv",
-                    "fts_requirements_funding_cluster_global.csv",
-                    "fts_requirements_funding_globalcluster_global.csv",
-                    "fts_incoming_funding_global.csv",
-                    "fts_internal_funding_global.csv",
-                    "fts_outgoing_funding_global.csv",
-                ):
-                    assert_files_same(
-                        join("tests", "fixtures", filename),
-                        join(folder, filename),
-                    )
 
-                global_results["dataset"]["id"] = "1234"
-                global_results["resource"]["id"] = "5678"
-                with HDXErrorHandler() as error_handler:
-                    hapi_output = HAPIOutput(
-                        configuration,
-                        error_handler,
-                        global_results,
-                        today,
-                        folder,
-                    )
-                    dataset = hapi_output.generate_dataset()
-                    assert dataset == {
-                        "name": "hdx-hapi-funding",
-                        "title": "HDX HAPI - Coordination & Context: Funding",
-                        "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
-                        "tags": [
-                            {
-                                "name": "funding",
-                                "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                            },
-                            {
-                                "name": "humanitarian financial tracking service-fts",
-                                "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
-                            },
-                        ],
-                        "groups": [{"name": "world"}],
-                    }
+                resources = dataset.get_resources()
+                assert resources[0] == {
+                    "name": "Global Coordination & Context: Funding",
+                    "description": "Funding data from HDX HAPI, please see [the documentation]"
+                    "(https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/coordination_and_context/#funding) "
+                    "for more information",
+                    "format": "csv",
+                }
 
-                    resources = dataset.get_resources()
-                    assert resources[0] == {
-                        "name": "Global Coordination & Context: Funding",
-                        "description": "Funding data from HDX HAPI, please see [the documentation]"
-                        "(https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/coordination_and_context/#funding) "
-                        "for more information",
-                        "format": "csv",
-                    }
-
-                    assert_files_same(
-                        join("tests", "fixtures", "hdx_hapi_funding_global.csv"),
-                        join(folder, "hdx_hapi_funding_global.csv"),
-                    )
+                assert_files_same(
+                    join("tests", "fixtures", "hdx_hapi_funding_global.csv"),
+                    join(folder, "hdx_hapi_funding_global.csv"),
+                )
 
     def test_country_without_plans(self):
         class StubDownloader:

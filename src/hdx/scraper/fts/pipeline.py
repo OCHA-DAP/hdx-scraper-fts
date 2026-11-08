@@ -132,14 +132,12 @@ class Pipeline:
             logger.error(f"No requirements or funding data for {countryiso3}")
         else:
             reqfund_start_date = parse_date(f"{reqfund_start_year}-01-01")
-            if reqfund_start_date < start_date:
-                start_date = reqfund_start_date
+            start_date = min(start_date, reqfund_start_date)
             resources.insert(0, resource)
             self.generate_other_resources(resources, dataset, country)
         dataset._resources = resources
         dataset.set_time_period(start_date, self._today)
-        if start_date < self._start_date:
-            self._start_date = start_date
+        self._start_date = min(self._start_date, start_date)
         return True
 
     def add_country_to_global(self, country):
@@ -157,7 +155,7 @@ class Pipeline:
         )
         country_rows = self._reqfund.get_global_rows()
         noncountry_rows = noncountry_funding.generate_rows(country_rows)
-        success, results = self._reqfund.generate_global_resource(
+        _, results = self._reqfund.generate_global_resource(
             dataset,
             self._configuration["requirements_global_headers"],
             country_rows,

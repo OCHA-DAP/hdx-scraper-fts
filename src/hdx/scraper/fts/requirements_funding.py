@@ -101,7 +101,7 @@ class RequirementsFunding(ResourceGenerator):
     def get_country_funding(self, countryid, plans_by_year, start_year=2010):
         funding_by_year = {}
         if plans_by_year:
-            start_year = sorted(plans_by_year.keys())[0]
+            start_year = min(plans_by_year)
         for year in range(self._today.year + 5, start_year - 5, -11):
             data = self._downloader.download(
                 f"2/country/{countryid}/summary/trends/{year}"
@@ -129,20 +129,22 @@ class RequirementsFunding(ResourceGenerator):
                 if planid in self._globalplanids:
                     continue
                 found_other_countries = False
-                for country in plan["countries"]:
-                    adminlevel = country.get("adminlevel", country.get("adminLevel"))
-                    if adminlevel == 0 and country["iso3"] != countryiso3:
+                for plan_country in plan["countries"]:
+                    adminlevel = plan_country.get(
+                        "adminlevel", plan_country.get("adminLevel")
+                    )
+                    if adminlevel == 0 and plan_country["iso3"] != countryiso3:
                         found_other_countries = True
                         continue
-                    requirements = country.get("requirements")
-                    funding = country.get("funding")
+                    requirements = plan_country.get("requirements")
+                    funding = plan_country.get("funding")
                     if requirements is None:
                         if funding is None:
                             continue
                         requirements = ""
                     if funding is None:
                         funding = ""
-                    percentFunded = country.get("percentFunded", "")
+                    percentFunded = plan_country.get("percentFunded", "")
                     if not_specified_funding and funding:
                         not_specified_funding -= funding
                     row = create_row(countryiso3, year, plan)
