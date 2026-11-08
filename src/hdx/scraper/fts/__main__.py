@@ -50,11 +50,11 @@ def main(
     """Generate dataset and create it in HDX
 
     Args:
-        today (str): Date to use for today. Defaults to "".
-        countries (str): Countries to run. Defaults to "".
-        years (str): Years to run. Defaults to "".
-        testfolder (str): Output test data to folder. Defaults to "".
-        err_to_hdx (Optional[bool]): Whether to write any errors to HDX metadata. Defaults to None.
+        today: Date to use for today. Defaults to "".
+        countries: Countries to run. Defaults to "".
+        years: Years to run. Defaults to "".
+        testfolder: Output test data to folder. Defaults to "".
+        err_to_hdx: Whether to write any errors to HDX metadata. Defaults to None.
 
     Returns:
         None
