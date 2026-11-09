@@ -31,7 +31,9 @@ class Locations:
             countryname = object.get("name")
             if countryname is not None:
                 countryid = self._name_to_id.get(countryname)
-        return countryid
+        if countryid is None:
+            return None
+        return int(countryid)
 
     def get_countryiso_from_name(self, name):
         return self._name_to_iso3.get(name)

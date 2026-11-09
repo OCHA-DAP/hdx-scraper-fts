@@ -68,7 +68,7 @@ class TestFTS:
                 folder,
                 locations,
                 today,
-                start_year=2019,
+                start_year=2020,
             )
             dataset_generator = DatasetGenerator(today, notes, ("covid-19",))
 
@@ -412,7 +412,7 @@ class TestFTS:
             # Fixtures cover only AFG, JOR and PSE, so funding of multi-country plans
             # (e.g. 3RP) to other countries lands on "Multiple locations" plan rows and
             # the shared "Multiple locations" row goes negative
-            assert len(global_results["rows"]) == 18
+            assert len(global_results["rows"]) == 19
             for filename in (
                 "fts_requirements_funding_global.csv",
                 "fts_requirements_funding_covid_global.csv",
@@ -478,7 +478,7 @@ class TestFTS:
                 return []
 
         reqfund = RequirementsFunding(
-            StubDownloader(), "", None, set(), parse_date("2020-12-31")
+            StubDownloader(), "", None, set(), parse_date("2020-12-31"), 1999
         )
         country = {"id": 60, "iso3": "DNK", "name": "Denmark"}
         reqfund.add_country_global_rows({}, country)
@@ -502,10 +502,254 @@ class TestFTS:
             }
         ]
         reqfund = RequirementsFunding(
-            StubDownloader(), "", None, set(), parse_date("2010-12-31")
+            StubDownloader(), "", None, set(), parse_date("2010-12-31"), 1999
         )
         reqfund.add_country_global_rows({}, country)
         assert reqfund.get_global_rows() == []
+
+    def test_plan_countries_by_location(self):
+        # Plan with null countries: ZWE has funding, MOZ only requirements and
+        # 30 goes to no location
+        plan = {
+            "id": 1,
+            "name": "Plan",
+            "code": "P1",
+            "planType": {"id": 1, "name": "Other"},
+            "startDate": "2025-01-01",
+            "endDate": "2025-12-31",
+            "countries": [],
+            "countriesByLocation": True,
+            "requirements": {"revisedRequirements": 100},
+            "funding": {"totalFunding": 50},
+        }
+
+        class StubDownloader:
+            @staticmethod
+            def download(partial_url):
+                return {
+                    "requirements": {
+                        "totalRevisedReqs": 100,
+                        "objects": [
+                            {
+                                "id": "152",
+                                "name": "Mozambique",
+                                "revisedRequirements": 40,
+                            },
+                            {"id": 243, "name": "Zimbabwe", "revisedRequirements": 20},
+                        ],
+                    },
+                    "report3": {
+                        "fundingTotals": {
+                            "objects": [
+                                {
+                                    "objectsBreakdown": [
+                                        {
+                                            "id": "243",
+                                            "name": "Zimbabwe",
+                                            "totalFunding": 20,
+                                        },
+                                        {"name": "Not specified", "totalFunding": 30},
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                }
+
+        class StubLocations:
+            countries = ()
+
+            @staticmethod
+            def get_countryid_from_object(object):
+                countryid = object.get("id")
+                return None if countryid is None else int(countryid)
+
+            @staticmethod
+            def get_id_to_iso3():
+                return {152: "MOZ", 243: "ZWE"}
+
+        reqfund = RequirementsFunding(
+            StubDownloader(),
+            "",
+            StubLocations(),
+            set(),
+            parse_date("2025-12-31"),
+            1999,
+        )
+        countries = plan["countries"]
+        reqfund.add_country_requirements_funding(1, plan, countries)
+        assert [(c["iso3"], c["requirements"], c["funding"]) for c in countries] == [
+            ("MOZ", 40, None),
+            ("ZWE", 20, 20),
+        ]
+        assert plan["noLocationFunding"] == 30
+
+        noncountry = NonCountryFunding(None, StubLocations(), {2025: {1: plan}}, {})
+        rows = noncountry.generate_location_rows(
+            None, "Not specified", "unknown", 2025, 100
+        )
+        assert [(row["id"], row["funding"]) for row in rows] == [(1, 30), ("", 70)]
+        country_rows = [
+            {"id": 1, "requirements": c["requirements"], "funding": c["funding"]}
+            for c in countries
+        ]
+        rows, funding = noncountry.generate_unattributed_rows(2025, country_rows + rows)
+        assert funding == 0
+        assert [(row["id"], row["requirements"], row["funding"]) for row in rows] == [
+            (1, 40, "")
+        ]
+
+    def test_pipeline_plan_countries_by_location(self, configuration):
+        # Plan 131 (2003) has null countries: Zimbabwe 1,243,781 funding, no
+        # location 309,344,656 funding and all 464,103,581 requirements
+        no_cluster = {
+            "requirements": {"objects": []},
+            "report3": {
+                "fundingTotals": {
+                    "objects": [
+                        {"objectsBreakdown": [], "totalBreakdown": {"sharedFunding": 0}}
+                    ]
+                }
+            },
+        }
+        responses = {
+            "1/public/location": [{"id": 250, "iso3": "ZWE", "name": "Zimbabwe"}],
+            "2/fts/flow/plan/overview/progress/2003": {
+                "plans": [
+                    {
+                        "id": 131,
+                        "name": "Humanitarian Crisis in Southern Africa - REGION (July 2003 - June 2004)",
+                        "code": "R0304",
+                        "customLocationCode": None,
+                        "planType": {"id": 111, "name": "Regional response plan"},
+                        "startDate": "2003-07-01",
+                        "endDate": "2004-06-30",
+                        "countries": None,
+                        "requirements": {"revisedRequirements": 464103581},
+                        "funding": {"totalFunding": 310588437, "progress": 66.92},
+                    }
+                ]
+            },
+            "1/fts/flow/custom-search?planid=131&groupby=location": {
+                "requirements": {
+                    "totalRevisedReqs": 464103581,
+                    "objects": [
+                        {"name": "Not specified", "revisedRequirements": 464103581}
+                    ],
+                },
+                "report3": {
+                    "fundingTotals": {
+                        "objects": [
+                            {
+                                "objectsBreakdown": [
+                                    {
+                                        "name": "Not specified",
+                                        "totalFunding": 309344656,
+                                    },
+                                    {
+                                        "id": "250",
+                                        "name": "Zimbabwe",
+                                        "totalFunding": 1243781,
+                                    },
+                                ]
+                            }
+                        ]
+                    }
+                },
+            },
+            "1/fts/flow/custom-search?emergencyid=911&planid=&groupby=plan": {
+                "report3": {"fundingTotals": {"objects": [{"objectsBreakdown": []}]}}
+            },
+            "1/fts/flow/custom-search?planid=131&groupby=cluster": no_cluster,
+            "1/fts/flow/custom-search?planid=131&groupby=globalcluster": no_cluster,
+            # 2002 is before the start year so is dropped
+            "2/country/250/summary/trends/2008": [
+                {"year": 2002, "totalFunding": 235047986},
+                {"year": 2003, "totalFunding": 51546079},
+            ],
+            "1/fts/flow/custom-search?year=2003&groupby=location": {
+                "report3": {
+                    "fundingTotals": {
+                        "total": -521065356,
+                        "objects": [
+                            {
+                                "objectsBreakdown": [
+                                    {
+                                        "name": "Not specified",
+                                        "totalFunding": -572611435,
+                                    },
+                                    {
+                                        "id": "250",
+                                        "name": "Zimbabwe",
+                                        "totalFunding": 51546079,
+                                    },
+                                ]
+                            }
+                        ],
+                    }
+                }
+            },
+        }
+
+        class StubDownloader:
+            @staticmethod
+            def download(partial_url):
+                return responses[partial_url]
+
+        locations = Locations(StubDownloader())
+        today = parse_date("2003-12-31")
+        pipeline = Pipeline(
+            configuration, StubDownloader(), "", locations, today, start_year=2003
+        )
+        plan = pipeline._plans_by_id[131]
+        assert plan["countries"] == [
+            {
+                "id": 250,
+                "iso3": "ZWE",
+                "name": "Zimbabwe",
+                "adminlevel": 0,
+                "requirements": None,
+                "funding": 1243781,
+            }
+        ]
+        assert plan["noLocationFunding"] == 309344656
+        assert 131 not in pipeline._planidswithonelocation
+        assert pipeline._plans_by_year_by_country == {"ZWE": {2003: [plan]}}
+
+        country = locations.countries[0]
+        plans_by_year = pipeline._plans_by_year_by_country["ZWE"]
+        rows, years = pipeline._reqfund.generate_country_rows(
+            plans_by_year, country, pipeline.call_others
+        )
+        assert years == [2003]
+        assert [(row["id"], row["requirements"], row["funding"]) for row in rows] == [
+            (131, "", 1243781),
+            ("", "", 50302298),
+        ]
+        # Plan-wide cluster breakdown is not country-specific and there is no
+        # COVID component
+        for other in pipeline._others.values():
+            assert other._rows == []
+
+        pipeline.add_country_to_global(country)
+        noncountry_funding = NonCountryFunding(
+            pipeline._downloader,
+            locations,
+            pipeline._plans_by_year,
+            pipeline._plans_by_id,
+        )
+        country_rows = pipeline._reqfund.get_global_rows()
+        rows = noncountry_funding.generate_rows(country_rows)
+        assert [
+            (row["location"], row["id"], row["requirements"], row["funding"])
+            for row in rows
+        ] == [
+            ("Not specified", 131, "", 309344656),
+            ("Not specified", "", "", -881956091),
+            ("Multiple locations", 131, 464103581, ""),
+        ]
+        total = sum(row["funding"] for row in country_rows + rows if row["funding"])
+        assert total == -521065356
 
     def test_check_total(self, caplog):
         rows = [{"funding": 100}, {"funding": ""}, {"funding": -1}]

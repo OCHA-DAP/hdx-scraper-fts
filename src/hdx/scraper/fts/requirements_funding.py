@@ -34,16 +34,21 @@ def create_row(countryiso3, year, plan=None, name="Not specified"):
 
 
 class RequirementsFunding(ResourceGenerator):
-    def __init__(self, downloader, folder, locations, globalplanids, today):
+    def __init__(self, downloader, folder, locations, globalplanids, today, start_year):
         super().__init__(downloader, folder)
         self._locations = locations
         self._globalplanids = globalplanids
         self._today = today
+        self._start_year = start_year
         self._filename = "fts_requirements_funding"
         self._description = "FTS Annual Requirements and Funding Data"
 
     def add_country_requirements_funding(self, planid, plan, countries):
-        if len(countries) == 1:
+        """Plans with countriesByLocation have requirements and funding split by
+        location even for one country, and countries filled from the locations
+        with requirements or funding"""
+        by_location = plan.get("countriesByLocation")
+        if len(countries) == 1 and not by_location:
             requirements = plan.get("requirements")
             if requirements is not None:
                 requirements = requirements.get("revisedRequirements")
@@ -65,6 +70,7 @@ class RequirementsFunding(ResourceGenerator):
             data = self._downloader.download(funding_url)
             requirements = data.get("requirements")
             country_requirements = {}
+            country_names = {}
             if requirements is not None:
                 totalreq = requirements["totalRevisedReqs"]
                 countryreq_is_totalreq = True
@@ -73,6 +79,7 @@ class RequirementsFunding(ResourceGenerator):
                     country_req = req_object.get("revisedRequirements")
                     if country_id is not None and country_req is not None:
                         country_requirements[country_id] = country_req
+                        country_names[country_id] = req_object["name"]
                         if country_req != totalreq:
                             countryreq_is_totalreq = False
                 if countryreq_is_totalreq:
@@ -84,10 +91,31 @@ class RequirementsFunding(ResourceGenerator):
             country_funding = {}
             if len(fund_objects) == 1:
                 for fund_object in fund_objects[0].get("objectsBreakdown", []):
-                    country_id = self._locations.get_countryid_from_object(fund_object)
                     country_fund = fund_object.get("totalFunding")
-                    if country_id is not None and country_fund is not None:
-                        country_funding[int(country_id)] = country_fund
+                    country_id = self._locations.get_countryid_from_object(fund_object)
+                    if country_id is None:
+                        # Funding to no location, e.g. plan 180 (2005) 457.9m
+                        if fund_object.get("id") is None and country_fund:
+                            plan["noLocationFunding"] = country_fund
+                        continue
+                    if country_fund is not None:
+                        country_funding[country_id] = country_fund
+                        country_names[country_id] = fund_object["name"]
+            if by_location:
+                id_to_iso3 = self._locations.get_id_to_iso3()
+                for countryid in sorted(
+                    country_requirements.keys() | country_funding.keys()
+                ):
+                    countryiso3 = id_to_iso3.get(countryid)
+                    if countryiso3:
+                        countries.append(
+                            {
+                                "id": countryid,
+                                "iso3": countryiso3,
+                                "name": country_names[countryid],
+                                "adminlevel": 0,
+                            }
+                        )
             for country in countries:
                 countryid = country["id"]
                 requirements = country_requirements.get(countryid)
@@ -98,24 +126,24 @@ class RequirementsFunding(ResourceGenerator):
                     country["percentFunded"] = int(funding / requirements * 100 + 0.5)
         return False
 
-    def get_country_funding(self, countryid, plans_by_year, start_year=2010):
+    def get_country_funding(self, countryid):
+        """trends/{year} gives funding for year - 10 to year, so years are
+        queried until the first plan year is covered"""
         funding_by_year = {}
-        if plans_by_year:
-            start_year = min(plans_by_year)
-        for year in range(self._today.year + 5, start_year - 5, -11):
+        for year in range(self._today.year + 5, self._start_year - 1, -11):
             data = self._downloader.download(
                 f"2/country/{countryid}/summary/trends/{year}"
             )
             for object in data:
                 year = object["year"]
                 funding = object["totalFunding"]
-                if funding:
+                if funding and year >= self._start_year:
                     funding_by_year[year] = funding
         return funding_by_year
 
     def generate_country_rows(self, plans_by_year, country, call_others=lambda x: None):
         countryiso3 = country["iso3"]
-        funding_by_year = self.get_country_funding(country["id"], plans_by_year)
+        funding_by_year = self.get_country_funding(country["id"])
         rows = []
 
         all_years = sorted(

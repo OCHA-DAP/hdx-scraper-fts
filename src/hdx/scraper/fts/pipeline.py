@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class Pipeline:
     def __init__(
-        self, configuration, downloader, folder, locations, today, start_year=1998
+        self, configuration, downloader, folder, locations, today, start_year=1999
     ):
         self._configuration = configuration
         self._downloader = downloader
@@ -36,9 +36,9 @@ class Pipeline:
         self._planidswithonelocation = set()
         self._globalplanids = set()
         self._reqfund = RequirementsFunding(
-            downloader, folder, locations, self._globalplanids, today
+            downloader, folder, locations, self._globalplanids, today, start_year
         )
-        self.get_plans(start_year=start_year)
+        self.get_plans(start_year)
         self._flows = Flows(
             configuration, downloader, folder, locations, self._planidcodemapping, today
         )
@@ -60,8 +60,8 @@ class Pipeline:
         )
         return {"covid": covid, "cluster": cluster, "globalcluster": globalcluster}
 
-    def get_plans(self, start_year=1998):
-        for year in range(self._today.year, start_year, -1):
+    def get_plans(self, start_year):
+        for year in range(self._today.year, start_year - 1, -1):
             data = self._downloader.download(
                 f"2/fts/flow/plan/overview/progress/{year}"
             )
@@ -72,13 +72,21 @@ class Pipeline:
                 dict_of_dicts_add(self._plans_by_year, year, planid, plan)
                 self._plans_by_id[planid] = plan
                 countries = plan["countries"]
-                if countries:
+                # 22 plans in 2000-2006 and 2017 have null countries, e.g. 180
+                # Indian Ocean Earthquake-Tsunami 2005. Their countries are
+                # filled from their requirements and funding by location.
+                by_location = countries is None
+                if by_location:
+                    countries = []
+                    plan["countries"] = countries
+                    plan["countriesByLocation"] = True
+                if countries or by_location:
                     is_global = self._reqfund.add_country_requirements_funding(
                         planid, plan, countries
                     )
                     if is_global:
                         self._globalplanids.add(planid)
-                    if len(countries) == 1:
+                    if len(countries) == 1 and not by_location:
                         self._planidswithonelocation.add(planid)
                     for country in countries:
                         countryiso3 = country["iso3"]
