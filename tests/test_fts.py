@@ -11,12 +11,13 @@ import pytest
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.data.dataset import Dataset
 from hdx.utilities.compare import assert_files_same
-from hdx.utilities.dateparse import parse_date
+from hdx.utilities.dateparse import default_enddate, parse_date
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
 
 from hdx.scraper.fts.dataset_generator import DatasetGenerator
 from hdx.scraper.fts.download import FTSDownload
+from hdx.scraper.fts.flows import earliest_date
 from hdx.scraper.fts.hapi_output import HAPIOutput
 from hdx.scraper.fts.locations import Locations
 from hdx.scraper.fts.noncountry_funding import NonCountryFunding
@@ -68,8 +69,10 @@ class TestFTS:
                 folder,
                 locations,
                 today,
-                start_year=2019,
+                start_year=2020,
+                flows_start_year=2020,
             )
+            pipeline.get_flows()
             dataset_generator = DatasetGenerator(today, notes, ("covid-19",))
 
             country = locations.countries[0]
@@ -95,7 +98,7 @@ class TestFTS:
                         "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                     },
                 ],
-                "dataset_date": "[2016-03-31T00:00:00 TO 2020-12-31T23:59:59]",
+                "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
                 "data_update_frequency": "1",
                 "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                 "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
@@ -126,12 +129,12 @@ class TestFTS:
                 },
                 {
                     "name": "fts_incoming_funding_afg.csv",
-                    "description": "FTS Incoming Funding Data for Afghanistan for 2020",
+                    "description": "FTS Incoming Funding Data for Afghanistan for all years",
                     "format": "csv",
                 },
                 {
                     "name": "fts_internal_funding_afg.csv",
-                    "description": "FTS Internal Funding Data for Afghanistan for 2020",
+                    "description": "FTS Internal Funding Data for Afghanistan for all years",
                     "format": "csv",
                 },
             ]
@@ -180,7 +183,7 @@ class TestFTS:
                         "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                     },
                 ],
-                "dataset_date": "[2017-04-05T00:00:00 TO 2020-12-31T23:59:59]",
+                "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
                 "data_update_frequency": "1",
                 "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                 "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
@@ -212,12 +215,12 @@ class TestFTS:
                 },
                 {
                     "name": "fts_incoming_funding_jor.csv",
-                    "description": "FTS Incoming Funding Data for Jordan for 2020",
+                    "description": "FTS Incoming Funding Data for Jordan for all years",
                     "format": "csv",
                 },
                 {
                     "name": "fts_internal_funding_jor.csv",
-                    "description": "FTS Internal Funding Data for Jordan for 2020",
+                    "description": "FTS Internal Funding Data for Jordan for all years",
                     "format": "csv",
                 },
             ]
@@ -267,7 +270,7 @@ class TestFTS:
                         "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                     },
                 ],
-                "dataset_date": "[2016-02-26T00:00:00 TO 2020-12-31T23:59:59]",
+                "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
                 "data_update_frequency": "1",
                 "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                 "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
@@ -299,17 +302,12 @@ class TestFTS:
                 },
                 {
                     "name": "fts_incoming_funding_pse.csv",
-                    "description": "FTS Incoming Funding Data for occupied Palestinian territory for 2020",
+                    "description": "FTS Incoming Funding Data for occupied Palestinian territory for all years",
                     "format": "csv",
                 },
                 {
                     "name": "fts_internal_funding_pse.csv",
-                    "description": "FTS Internal Funding Data for occupied Palestinian territory for 2020",
-                    "format": "csv",
-                },
-                {
-                    "name": "fts_outgoing_funding_pse.csv",
-                    "description": "FTS Outgoing Funding Data for occupied Palestinian territory for 2020",
+                    "description": "FTS Internal Funding Data for occupied Palestinian territory for all years",
                     "format": "csv",
                 },
             ]
@@ -340,7 +338,7 @@ class TestFTS:
             global_results = pipeline.generate_global_dataset(global_dataset)
             assert global_dataset == {
                 "data_update_frequency": "1",
-                "dataset_date": "[2016-02-26T00:00:00 TO 2020-12-31T23:59:59]",
+                "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
                 "groups": [{"name": "world"}],
                 "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                 "name": "global-requirements-and-funding-data",
@@ -394,33 +392,21 @@ class TestFTS:
                     "name": "fts_requirements_funding_globalcluster_global.csv",
                 },
                 {
-                    "description": "FTS Incoming Funding Data globally for 2020",
+                    "description": "FTS Funding Data globally for all years",
                     "format": "csv",
-                    "name": "fts_incoming_funding_global.csv",
-                },
-                {
-                    "description": "FTS Internal Funding Data globally for 2020",
-                    "format": "csv",
-                    "name": "fts_internal_funding_global.csv",
-                },
-                {
-                    "description": "FTS Outgoing Funding Data globally for 2020",
-                    "format": "csv",
-                    "name": "fts_outgoing_funding_global.csv",
+                    "name": "fts_funding_global.csv",
                 },
             ]
             # Fixtures cover only AFG, JOR and PSE, so funding of multi-country plans
             # (e.g. 3RP) to other countries lands on "Multiple locations" plan rows and
             # the shared "Multiple locations" row goes negative
-            assert len(global_results["rows"]) == 18
+            assert len(global_results["rows"]) == 19
             for filename in (
                 "fts_requirements_funding_global.csv",
                 "fts_requirements_funding_covid_global.csv",
                 "fts_requirements_funding_cluster_global.csv",
                 "fts_requirements_funding_globalcluster_global.csv",
-                "fts_incoming_funding_global.csv",
-                "fts_internal_funding_global.csv",
-                "fts_outgoing_funding_global.csv",
+                "fts_funding_global.csv",
             ):
                 assert_files_same(
                     join("tests", "fixtures", filename),
@@ -478,7 +464,7 @@ class TestFTS:
                 return []
 
         reqfund = RequirementsFunding(
-            StubDownloader(), "", None, set(), parse_date("2020-12-31")
+            StubDownloader(), "", None, set(), parse_date("2020-12-31"), 1999
         )
         country = {"id": 60, "iso3": "DNK", "name": "Denmark"}
         reqfund.add_country_global_rows({}, country)
@@ -502,10 +488,254 @@ class TestFTS:
             }
         ]
         reqfund = RequirementsFunding(
-            StubDownloader(), "", None, set(), parse_date("2010-12-31")
+            StubDownloader(), "", None, set(), parse_date("2010-12-31"), 1999
         )
         reqfund.add_country_global_rows({}, country)
         assert reqfund.get_global_rows() == []
+
+    def test_plan_countries_by_location(self):
+        # Plan with null countries: ZWE has funding, MOZ only requirements and
+        # 30 goes to no location
+        plan = {
+            "id": 1,
+            "name": "Plan",
+            "code": "P1",
+            "planType": {"id": 1, "name": "Other"},
+            "startDate": "2025-01-01",
+            "endDate": "2025-12-31",
+            "countries": [],
+            "countriesByLocation": True,
+            "requirements": {"revisedRequirements": 100},
+            "funding": {"totalFunding": 50},
+        }
+
+        class StubDownloader:
+            @staticmethod
+            def download(partial_url):
+                return {
+                    "requirements": {
+                        "totalRevisedReqs": 100,
+                        "objects": [
+                            {
+                                "id": "152",
+                                "name": "Mozambique",
+                                "revisedRequirements": 40,
+                            },
+                            {"id": 243, "name": "Zimbabwe", "revisedRequirements": 20},
+                        ],
+                    },
+                    "report3": {
+                        "fundingTotals": {
+                            "objects": [
+                                {
+                                    "objectsBreakdown": [
+                                        {
+                                            "id": "243",
+                                            "name": "Zimbabwe",
+                                            "totalFunding": 20,
+                                        },
+                                        {"name": "Not specified", "totalFunding": 30},
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                }
+
+        class StubLocations:
+            countries = ()
+
+            @staticmethod
+            def get_countryid_from_object(object):
+                countryid = object.get("id")
+                return None if countryid is None else int(countryid)
+
+            @staticmethod
+            def get_id_to_iso3():
+                return {152: "MOZ", 243: "ZWE"}
+
+        reqfund = RequirementsFunding(
+            StubDownloader(),
+            "",
+            StubLocations(),
+            set(),
+            parse_date("2025-12-31"),
+            1999,
+        )
+        countries = plan["countries"]
+        reqfund.add_country_requirements_funding(1, plan, countries)
+        assert [(c["iso3"], c["requirements"], c["funding"]) for c in countries] == [
+            ("MOZ", 40, None),
+            ("ZWE", 20, 20),
+        ]
+        assert plan["noLocationFunding"] == 30
+
+        noncountry = NonCountryFunding(None, StubLocations(), {2025: {1: plan}}, {})
+        rows = noncountry.generate_location_rows(
+            None, "Not specified", "unknown", 2025, 100
+        )
+        assert [(row["id"], row["funding"]) for row in rows] == [(1, 30), ("", 70)]
+        country_rows = [
+            {"id": 1, "requirements": c["requirements"], "funding": c["funding"]}
+            for c in countries
+        ]
+        rows, funding = noncountry.generate_unattributed_rows(2025, country_rows + rows)
+        assert funding == 0
+        assert [(row["id"], row["requirements"], row["funding"]) for row in rows] == [
+            (1, 40, "")
+        ]
+
+    def test_pipeline_plan_countries_by_location(self, configuration):
+        # Plan 131 (2003) has null countries: Zimbabwe 1,243,781 funding, no
+        # location 309,344,656 funding and all 464,103,581 requirements
+        no_cluster = {
+            "requirements": {"objects": []},
+            "report3": {
+                "fundingTotals": {
+                    "objects": [
+                        {"objectsBreakdown": [], "totalBreakdown": {"sharedFunding": 0}}
+                    ]
+                }
+            },
+        }
+        responses = {
+            "1/public/location": [{"id": 250, "iso3": "ZWE", "name": "Zimbabwe"}],
+            "2/fts/flow/plan/overview/progress/2003": {
+                "plans": [
+                    {
+                        "id": 131,
+                        "name": "Humanitarian Crisis in Southern Africa - REGION (July 2003 - June 2004)",
+                        "code": "R0304",
+                        "customLocationCode": None,
+                        "planType": {"id": 111, "name": "Regional response plan"},
+                        "startDate": "2003-07-01",
+                        "endDate": "2004-06-30",
+                        "countries": None,
+                        "requirements": {"revisedRequirements": 464103581},
+                        "funding": {"totalFunding": 310588437, "progress": 66.92},
+                    }
+                ]
+            },
+            "1/fts/flow/custom-search?planid=131&groupby=location": {
+                "requirements": {
+                    "totalRevisedReqs": 464103581,
+                    "objects": [
+                        {"name": "Not specified", "revisedRequirements": 464103581}
+                    ],
+                },
+                "report3": {
+                    "fundingTotals": {
+                        "objects": [
+                            {
+                                "objectsBreakdown": [
+                                    {
+                                        "name": "Not specified",
+                                        "totalFunding": 309344656,
+                                    },
+                                    {
+                                        "id": "250",
+                                        "name": "Zimbabwe",
+                                        "totalFunding": 1243781,
+                                    },
+                                ]
+                            }
+                        ]
+                    }
+                },
+            },
+            "1/fts/flow/custom-search?emergencyid=911&planid=&groupby=plan": {
+                "report3": {"fundingTotals": {"objects": [{"objectsBreakdown": []}]}}
+            },
+            "1/fts/flow/custom-search?planid=131&groupby=cluster": no_cluster,
+            "1/fts/flow/custom-search?planid=131&groupby=globalcluster": no_cluster,
+            # 2002 is before the start year so is dropped
+            "2/country/250/summary/trends/2008": [
+                {"year": 2002, "totalFunding": 235047986},
+                {"year": 2003, "totalFunding": 51546079},
+            ],
+            "1/fts/flow/custom-search?year=2003&groupby=location": {
+                "report3": {
+                    "fundingTotals": {
+                        "total": -521065356,
+                        "objects": [
+                            {
+                                "objectsBreakdown": [
+                                    {
+                                        "name": "Not specified",
+                                        "totalFunding": -572611435,
+                                    },
+                                    {
+                                        "id": "250",
+                                        "name": "Zimbabwe",
+                                        "totalFunding": 51546079,
+                                    },
+                                ]
+                            }
+                        ],
+                    }
+                }
+            },
+        }
+
+        class StubDownloader:
+            @staticmethod
+            def download(partial_url):
+                return responses[partial_url]
+
+        locations = Locations(StubDownloader())
+        today = parse_date("2003-12-31")
+        pipeline = Pipeline(
+            configuration, StubDownloader(), "", locations, today, start_year=2003
+        )
+        plan = pipeline._plans_by_id[131]
+        assert plan["countries"] == [
+            {
+                "id": 250,
+                "iso3": "ZWE",
+                "name": "Zimbabwe",
+                "adminlevel": 0,
+                "requirements": None,
+                "funding": 1243781,
+            }
+        ]
+        assert plan["noLocationFunding"] == 309344656
+        assert 131 not in pipeline._planidswithonelocation
+        assert pipeline._plans_by_year_by_country == {"ZWE": {2003: [plan]}}
+
+        country = locations.countries[0]
+        plans_by_year = pipeline._plans_by_year_by_country["ZWE"]
+        rows, years = pipeline._reqfund.generate_country_rows(
+            plans_by_year, country, pipeline.call_others
+        )
+        assert years == [2003]
+        assert [(row["id"], row["requirements"], row["funding"]) for row in rows] == [
+            (131, "", 1243781),
+            ("", "", 50302298),
+        ]
+        # Plan-wide cluster breakdown is not country-specific and there is no
+        # COVID component
+        for other in pipeline._others.values():
+            assert other._rows == []
+
+        pipeline.add_country_to_global(country)
+        noncountry_funding = NonCountryFunding(
+            pipeline._downloader,
+            locations,
+            pipeline._plans_by_year,
+            pipeline._plans_by_id,
+        )
+        country_rows = pipeline._reqfund.get_global_rows()
+        rows = noncountry_funding.generate_rows(country_rows)
+        assert [
+            (row["location"], row["id"], row["requirements"], row["funding"])
+            for row in rows
+        ] == [
+            ("Not specified", 131, "", 309344656),
+            ("Not specified", "", "", -881956091),
+            ("Multiple locations", 131, 464103581, ""),
+        ]
+        total = sum(row["funding"] for row in country_rows + rows if row["funding"])
+        assert total == -521065356
 
     def test_check_total(self, caplog):
         rows = [{"funding": 100}, {"funding": ""}, {"funding": -1}]
@@ -514,3 +744,8 @@ class TestFTS:
             assert "differs" not in caplog.text
             NonCountryFunding.check_total(2020, rows, 200)
             assert "2020: total funding in global file 99 differs" in caplog.text
+
+    def test_earliest_date(self):
+        rows = [{"date": "1900-01-01"}, {"date": ""}, {"date": "1992-12-31"}]
+        assert earliest_date(rows, 1990) == parse_date("1992-12-31")
+        assert earliest_date([{"date": "1900-01-01"}], 1990) == default_enddate

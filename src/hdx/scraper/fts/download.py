@@ -21,6 +21,7 @@ class FTSDownload:
     ):
         self._url = configuration["base_url"]
         self._test_url = configuration["test_url"]
+        self._timeout = configuration.get("timeout")
         self._downloader = downloader
         if countryiso3s:
             self._countryiso3s = countryiso3s.split(",")
@@ -60,7 +61,7 @@ class FTSDownload:
             partial_url = self.get_testfile_path(partial_url, url)
         if partial_url is not None:
             url = self.get_url(partial_url)
-        r = self._downloader.download(url)
+        r = self._downloader.download(url, timeout=self._timeout)
         origjson = r.json()
         status = origjson["status"]
         if status != "ok":

@@ -96,6 +96,7 @@ def main(
         logger.info(f"Number of country datasets to upload: {len(locations.countries)}")
 
         pipeline = Pipeline(configuration, ftsdownloader, folder, locations, today)
+        pipeline.get_flows()
         dataset_generator = DatasetGenerator(
             today, notes, additional_tags=("covid-19",)
         )

@@ -1,0 +1,358 @@
+{
+  "status": "ok",
+  "data": {
+    "flows": [
+      {
+        "id": "168511",
+        "amountUSD": 1,
+        "fullParkedAmountUSD": 1501502,
+        "budgetYear": "2017",
+        "childFlowIds": [
+          168515,
+          168512,
+          168513,
+          168514,
+          168516
+        ],
+        "contributionType": "financial",
+        "createdAt": "2017-12-27T13:13:07.486Z",
+        "date": "2017-11-30T00:00:00Z",
+        "decisionDate": null,
+        "description": "Education in Emergencies, Multiyear 2017-2021, total amount CHF 1,500,000 (7F-09970.01)",
+        "grandBargainEarmarkingType": null,
+        "exchangeRate": 0.999,
+        "firstReportedDate": "2017-12-01T00:00:00Z",
+        "flowType": "Parked",
+        "keywords": [
+          "Multiyear"
+        ],
+        "newMoney": true,
+        "originalAmount": 0,
+        "originalCurrency": "CHF",
+        "method": "Traditional aid",
+        "parentFlowId": null,
+        "status": "commitment",
+        "updatedAt": "2021-01-12T09:47:19.706Z",
+        "versionId": 1,
+        "sourceObjects": [
+          {
+            "type": "Organization",
+            "id": "2924",
+            "name": "Switzerland, Government of",
+            "behavior": "single",
+            "organizationTypes": [
+              "Governments"
+            ],
+            "organizationSubTypes": [
+              "National Governments"
+            ],
+            "organizationLevels": [
+              "National and Sub-National State Actors"
+            ]
+          },
+          {
+            "type": "Location",
+            "id": "217",
+            "name": "Switzerland",
+            "behavior": "single"
+          },
+          {
+            "type": "UsageYear",
+            "id": "38",
+            "name": "2017",
+            "behavior": "single"
+          }
+        ],
+        "destinationObjects": [
+          {
+            "type": "Organization",
+            "id": "2178",
+            "name": "Norwegian Refugee Council",
+            "behavior": "single",
+            "organizationTypes": [
+              "NGOs"
+            ],
+            "organizationSubTypes": [
+              "International NGOs"
+            ],
+            "organizationLevels": [
+              "International Actors"
+            ]
+          },
+          {
+            "type": "Location",
+            "id": "1",
+            "name": "Afghanistan",
+            "behavior": "single"
+          },
+          {
+            "type": "UsageYear",
+            "id": "40",
+            "name": "2019",
+            "behavior": "shared"
+          },
+          {
+            "type": "UsageYear",
+            "id": "38",
+            "name": "2017",
+            "behavior": "shared"
+          },
+          {
+            "type": "UsageYear",
+            "id": "39",
+            "name": "2018",
+            "behavior": "shared"
+          },
+          {
+            "type": "UsageYear",
+            "id": "41",
+            "name": "2020",
+            "behavior": "shared"
+          },
+          {
+            "type": "UsageYear",
+            "id": "42",
+            "name": "2021",
+            "behavior": "shared"
+          }
+        ],
+        "boundary": "incoming",
+        "onBoundary": "shared",
+        "reportDetails": [
+          {
+            "sourceType": "Primary",
+            "organization": "Switzerland, Government of",
+            "reportChannel": "Email",
+            "date": "2017-12-01T00:00:00.000Z"
+          }
+        ],
+        "refCode": "7F-09970.01"
+      },
+      {
+        "id": "198462",
+        "amountUSD": 0,
+        "fullParkedAmountUSD": 995575,
+        "budgetYear": "2019",
+        "childFlowIds": [
+          284266,
+          284267,
+          284268
+        ],
+        "contributionType": "financial",
+        "createdAt": "2018-12-18T04:26:41.707Z",
+        "date": "2019-09-25T00:00:00Z",
+        "decisionDate": "2019-09-25T00:00:00Z",
+        "description": "Strengthening Regional and National Emergency Preparedness and Response Capacities in the Caribbean (ECHO/-AM/BUD/2019/91045)",
+        "grandBargainEarmarkingType": [
+          "earmarked"
+        ],
+        "exchangeRate": 0.904,
+        "firstReportedDate": "2019-09-30T00:00:00Z",
+        "flowType": "Parked",
+        "keywords": [
+          "Multiyear"
+        ],
+        "newMoney": true,
+        "originalAmount": 0,
+        "originalCurrency": "EUR",
+        "method": "Traditional aid",
+        "parentFlowId": null,
+        "status": "commitment",
+        "updatedAt": "2023-07-21T15:12:26.336Z",
+        "versionId": 2,
+        "sourceObjects": [
+          {
+            "type": "Organization",
+            "id": "8523",
+            "name": "European Commission's Humanitarian Aid and Civil Protection Department",
+            "behavior": "single",
+            "organizationTypes": [
+              "Multilateral Organizations"
+            ],
+            "organizationSubTypes": [
+              "Other Multilateral Organizations"
+            ],
+            "organizationLevels": [
+              "International Actors"
+            ]
+          },
+          {
+            "type": "UsageYear",
+            "id": "40",
+            "name": "2019",
+            "behavior": "single"
+          }
+        ],
+        "destinationObjects": [
+          {
+            "type": "Organization",
+            "id": "3049",
+            "name": "World Food Programme",
+            "behavior": "single",
+            "organizationTypes": [
+              "Multilateral Organizations"
+            ],
+            "organizationSubTypes": [
+              "UN Agencies"
+            ],
+            "organizationLevels": [
+              "International Actors"
+            ]
+          },
+          {
+            "type": "Location",
+            "id": "251",
+            "name": "Global",
+            "behavior": "single"
+          },
+          {
+            "type": "UsageYear",
+            "id": "42",
+            "name": "2021",
+            "behavior": "shared"
+          },
+          {
+            "type": "UsageYear",
+            "id": "41",
+            "name": "2020",
+            "behavior": "shared"
+          },
+          {
+            "type": "UsageYear",
+            "id": "40",
+            "name": "2019",
+            "behavior": "shared"
+          }
+        ],
+        "boundary": "incoming",
+        "onBoundary": "shared",
+        "reportDetails": [
+          {
+            "sourceType": "Primary",
+            "organization": "European Commission's Humanitarian Aid and Civil Protection Department",
+            "reportChannel": "From EDRIS",
+            "date": "2020-03-30T00:00:00.000Z"
+          }
+        ],
+        "refCode": "ECHO/-AM/BUD/2019/91045"
+      },
+      {
+        "id": "302497",
+        "amountUSD": 3838339,
+        "budgetYear": "2024",
+        "childFlowIds": null,
+        "contributionType": "financial",
+        "createdAt": "2025-07-02T02:33:52.666Z",
+        "date": "2025-07-01T00:00:00Z",
+        "decisionDate": "2024-01-01T00:00:00Z",
+        "description": "OCHA unearmarked allocation 2024",
+        "grandBargainEarmarkingType": [
+          "softly earmarked"
+        ],
+        "exchangeRate": null,
+        "firstReportedDate": "2024-03-08T00:00:00Z",
+        "flowType": "Standard",
+        "keywords": [
+          "allocation of unearmarked funds"
+        ],
+        "newMoney": false,
+        "method": "Traditional aid",
+        "parentFlowId": null,
+        "status": "paid",
+        "updatedAt": "2025-07-02T15:07:30.611Z",
+        "versionId": 8,
+        "sourceObjects": [
+          {
+            "type": "Organization",
+            "id": "4396",
+            "name": "Office for the Coordination of Humanitarian Affairs",
+            "behavior": "single",
+            "organizationTypes": [
+              "Multilateral Organizations"
+            ],
+            "organizationSubTypes": [
+              "UN Agencies"
+            ],
+            "organizationLevels": [
+              "International Actors"
+            ]
+          },
+          {
+            "type": "Location",
+            "id": "251",
+            "name": "Global",
+            "behavior": "single"
+          },
+          {
+            "type": "UsageYear",
+            "id": "45",
+            "name": "2024",
+            "behavior": "single"
+          }
+        ],
+        "destinationObjects": [
+          {
+            "type": "Plan",
+            "id": "1185",
+            "name": "Afghanistan Humanitarian Needs and Response Plan 2024",
+            "behavior": "single"
+          },
+          {
+            "type": "Organization",
+            "id": "4396",
+            "name": "Office for the Coordination of Humanitarian Affairs",
+            "behavior": "single",
+            "organizationTypes": [
+              "Multilateral Organizations"
+            ],
+            "organizationSubTypes": [
+              "UN Agencies"
+            ],
+            "organizationLevels": [
+              "International Actors"
+            ]
+          },
+          {
+            "type": "Cluster",
+            "id": "7423",
+            "name": "Coordination and Common Services",
+            "behavior": "single"
+          },
+          {
+            "type": "GlobalCluster",
+            "id": "26480",
+            "name": "Coordination and support services",
+            "behavior": "single"
+          },
+          {
+            "type": "Location",
+            "id": "1",
+            "name": "Afghanistan",
+            "behavior": "single"
+          },
+          {
+            "type": "UsageYear",
+            "id": "45",
+            "name": "2024",
+            "behavior": "single"
+          }
+        ],
+        "boundary": "internal",
+        "onBoundary": "single",
+        "reportDetails": [
+          {
+            "sourceType": "Primary",
+            "organization": "Office for the Coordination of Humanitarian Affairs",
+            "reportChannel": "From OCT-OCHA",
+            "date": "2025-07-02T00:00:00.000Z"
+          }
+        ],
+        "refCode": "25:2321:2024"
+      }
+    ]
+  },
+  "meta": {
+    "language": "en",
+    "count": 3
+  }
+}

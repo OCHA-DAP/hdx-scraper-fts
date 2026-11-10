@@ -48,16 +48,24 @@ class NonCountryFunding:
     def generate_location_rows(self, location_id, location, location_type, year, total):
         """Plan rows for one non-country location plus a "Not specified" row
         holding the location's single-location funding not in those plan rows,
-        as is done for country rows"""
-        rows = []
-        not_specified_funding = total
-        if location_id is not None:
+        as is done for country rows. The "Not specified" row can be negative:
+        see docs/decisions/0003-plan-funding-to-no-location.md"""
+        subrows = []
+        if location_id is None:
+            # Plans split by location record their funding to no location
+            for plan in self._plans_by_year.get(year, {}).values():
+                funding = plan.get("noLocationFunding")
+                if not funding:
+                    continue
+                row = self.create_row(location, location_type, year, plan)
+                row["funding"] = funding
+                subrows.append(row)
+        else:
             data = self._downloader.download(
                 f"1/fts/flow/custom-search?locationid={location_id}&year={year}&groupby=plan"
             )
             fund_objects = data["report3"]["fundingTotals"]["objects"]
             if fund_objects:
-                subrows = []
                 for fund_object in fund_objects[0].get("objectsBreakdown", []):
                     planid = fund_object.get("id")
                     funding = fund_object.get("totalFunding")
@@ -77,11 +85,10 @@ class NonCountryFunding:
                     else:
                         row = self.create_row(location, location_type, year, plan)
                     row["funding"] = funding
-                    not_specified_funding -= funding
                     subrows.append(row)
-                rows.extend(sorted(subrows, key=lambda k: k["id"]))
+        rows = sorted(subrows, key=lambda k: k["id"])
         row = self.create_row(location, location_type, year)
-        row["funding"] = not_specified_funding
+        row["funding"] = total - sum(subrow["funding"] for subrow in subrows)
         rows.append(row)
         return rows
 
@@ -153,8 +160,14 @@ class NonCountryFunding:
         for planid, plan in self._plans_by_year.get(year, {}).items():
             countries = plan["countries"]
             # Single-country plans are in country rows. Plan 996 (2020) has one
-            # location, Global, with no iso3, so it is kept
-            if len(countries) == 1 and countries[0]["iso3"]:
+            # location, Global, with no iso3, so it is kept. Plans split by
+            # location are kept: plan 131 (2003) has 1.2m for Zimbabwe and
+            # 309.3m for no location
+            if (
+                len(countries) == 1
+                and countries[0]["iso3"]
+                and not plan.get("countriesByLocation")
+            ):
                 continue
             requirements = (plan.get("requirements") or {}).get("revisedRequirements")
             funding = (plan.get("funding") or {}).get("totalFunding")
@@ -176,7 +189,7 @@ class NonCountryFunding:
     @staticmethod
     def check_total(year, rows, fts_total):
         total = sum(row["funding"] for row in rows if row["funding"])
-        if fts_total and abs(total - fts_total) > fts_total * 0.01:
+        if fts_total and abs(total - fts_total) > abs(fts_total) * 0.01:
             logger.warning(
                 f"{year}: total funding in global file {total} differs from FTS total {fts_total}"
             )

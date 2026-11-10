@@ -6,8 +6,8 @@
 This script connects to the [FTS API](https://api.hpc.tools/docs/v1/) and extracts
 requirements and funding data country by country creating a dataset per country in
 HDX. It reads from the FTS API and makes read/write API calls
-to HDX. It saves 3 temporary files per country each less than 5 KB and these are
-what are uploaded to HDX, and these files are then deleted. Plan overview, country
+to HDX. It saves temporary CSV files per country and globally, uploads them to HDX
+and then deletes them. Plan overview, country
 funding trend, and flow data are fetched from the FTS API; plan IDs are mapped to
 countries; requirements and funding are aggregated by country, cluster, and global
 cluster; COVID-19 specific funding tracks are handled separately; the per-country
@@ -26,21 +26,24 @@ uploaded; and finally a HAPI funding dataset is produced from the global data.
 
 ### API writes
 
-- **Per-country datasets** (~one write per country): each country dataset contains
-  3 files — requirements/funding, cluster-level, and COVID-19 breakdown.
+- **Per-country datasets** (~one write per country): requirements/funding,
+  cluster-level and COVID-19 breakdown files, plus incoming, internal and outgoing
+  flow files covering all years.
 - **Global standard dataset** (1 write): aggregated requirements and funding data
   across all countries.
 - **HAPI funding dataset** (1 write): derived from the global data.
 
 ### Temporary files
 
-- 3 files per country, each less than 5 KB, uploaded to HDX and then deleted.
+- Per-country and global CSV files, uploaded to HDX and then deleted. The all-years
+  flow files reach several MB per country and about 180 MB globally.
 
 ### Uploaded files
 
-- Per-country standard datasets: 3 CSV files per country (requirements/funding,
-  cluster-level, COVID breakdown), each less than 5 KB.
-- Global standard funding dataset.
+- Per-country standard datasets: requirements/funding, cluster-level and COVID
+  breakdown files, and incoming/internal/outgoing flow files.
+- Global standard funding dataset, including `fts_funding_global.csv` with every
+  flow for all years.
 - HAPI funding dataset.
 
 ### Transformations
@@ -59,7 +62,14 @@ uploaded; and finally a HAPI funding dataset is produced from the global data.
    `location`/`locationType`. A
    warning is logged per year if the file's total funding differs from FTS's by
    more than 1%. See `docs/decisions/0002-noncountry-rows-global-file-only.md`.
-6. **HAPI**: non-country rows are skipped. `in_gho` is the country's current GHO
+6. **Flows**: every flow is downloaded year by year and kept once.
+   `fts_funding_global.csv` has all of them, including flows to Global, regions
+   and no location, without `boundary`/`onBoundary`. Country flow files are
+   derived from the same flows, with `boundary` and `onBoundary` recalculated
+   for the country. `srcLocations`/`destLocations` have ISO3 codes for countries
+   and names for Global and regions. See
+   `docs/decisions/0004-flows-all-years-by-year.md`.
+7. **HAPI**: non-country rows are skipped. `in_gho` is the country's current GHO
    status, not the plan's `isPartOfGHO`, so the two can disagree for past years.
    See `docs/decisions/0001-hapi-in-gho-country-based.md`.
 

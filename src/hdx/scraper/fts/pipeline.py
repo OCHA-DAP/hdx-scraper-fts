@@ -23,7 +23,14 @@ logger = logging.getLogger(__name__)
 
 class Pipeline:
     def __init__(
-        self, configuration, downloader, folder, locations, today, start_year=1998
+        self,
+        configuration,
+        downloader,
+        folder,
+        locations,
+        today,
+        start_year=1999,
+        flows_start_year=1990,
     ):
         self._configuration = configuration
         self._downloader = downloader
@@ -36,11 +43,17 @@ class Pipeline:
         self._planidswithonelocation = set()
         self._globalplanids = set()
         self._reqfund = RequirementsFunding(
-            downloader, folder, locations, self._globalplanids, today
+            downloader, folder, locations, self._globalplanids, today, start_year
         )
-        self.get_plans(start_year=start_year)
+        self.get_plans(start_year)
         self._flows = Flows(
-            configuration, downloader, folder, locations, self._planidcodemapping, today
+            configuration,
+            downloader,
+            folder,
+            locations,
+            self._planidcodemapping,
+            today,
+            flows_start_year,
         )
         self._others = self.setup_others(folder, locations)
         self._start_date = default_enddate
@@ -60,8 +73,8 @@ class Pipeline:
         )
         return {"covid": covid, "cluster": cluster, "globalcluster": globalcluster}
 
-    def get_plans(self, start_year=1998):
-        for year in range(self._today.year, start_year, -1):
+    def get_plans(self, start_year):
+        for year in range(self._today.year, start_year - 1, -1):
             data = self._downloader.download(
                 f"2/fts/flow/plan/overview/progress/{year}"
             )
@@ -72,13 +85,21 @@ class Pipeline:
                 dict_of_dicts_add(self._plans_by_year, year, planid, plan)
                 self._plans_by_id[planid] = plan
                 countries = plan["countries"]
-                if countries:
+                # 22 plans in 2000-2006 and 2017 have null countries, e.g. 180
+                # Indian Ocean Earthquake-Tsunami 2005. Their countries are
+                # filled from their requirements and funding by location.
+                by_location = countries is None
+                if by_location:
+                    countries = []
+                    plan["countries"] = countries
+                    plan["countriesByLocation"] = True
+                if countries or by_location:
                     is_global = self._reqfund.add_country_requirements_funding(
                         planid, plan, countries
                     )
                     if is_global:
                         self._globalplanids.add(planid)
-                    if len(countries) == 1:
+                    if len(countries) == 1 and not by_location:
                         self._planidswithonelocation.add(planid)
                     for country in countries:
                         countryiso3 = country["iso3"]
@@ -89,6 +110,9 @@ class Pipeline:
                         )
                         dict_of_lists_add(plans_by_year, year, plan)
                         self._plans_by_year_by_country[countryiso3] = plans_by_year
+
+    def get_flows(self):
+        self._flows.get_flows()
 
     def call_others(self, row):
         requirements_clusters, funding_clusters, notspecified, shared = self._others[
@@ -131,8 +155,9 @@ class Pipeline:
         if resource is None:
             logger.error(f"No requirements or funding data for {countryiso3}")
         else:
-            reqfund_start_date = parse_date(f"{reqfund_start_year}-01-01")
-            start_date = min(start_date, reqfund_start_date)
+            # Flow dates are not used when there is requirements and funding
+            # data: flows 148776 and 147653 (2016) have date 1900-01-01
+            start_date = parse_date(f"{reqfund_start_year}-01-01")
             resources.insert(0, resource)
             self.generate_other_resources(resources, dataset, country)
         dataset._resources = resources
@@ -164,7 +189,7 @@ class Pipeline:
         self._others["covid"].generate_global_resource(dataset)
         self._others["cluster"].generate_global_resource(dataset)
         self._others["globalcluster"].generate_global_resource(dataset)
-        self._flows.generate_global_resources(dataset)
+        self._flows.generate_global_resource(dataset)
         dataset.set_time_period(self._start_date, self._today)
         results["dataset"] = dataset
         return results

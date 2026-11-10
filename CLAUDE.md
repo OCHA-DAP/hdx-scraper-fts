@@ -8,10 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 requirements and funding data country by country, creating a dataset per country in HDX. It
 reads plan overview, country funding trend, and flow data from the FTS API; maps plan IDs to
 countries; aggregates requirements and funding by country, cluster, and global cluster; handles
-COVID-19 specific funding tracks separately; uploads per-country standard datasets (3 small CSV
-files per country: requirements/funding, cluster-level, and COVID breakdown) to HDX; then
-generates and uploads a global standard dataset; and finally produces and uploads a HAPI funding
-dataset derived from the global data.
+COVID-19 specific funding tracks separately; uploads per-country standard datasets
+(requirements/funding, cluster-level and COVID breakdown files, plus all-years incoming,
+internal and outgoing flow files) to HDX; then generates and uploads a global standard
+dataset; and finally produces and uploads a HAPI funding dataset derived from the global data.
 
 ## Commands
 
@@ -55,7 +55,9 @@ The pipeline in `__main__.py`:
        global-cluster-level requirements/funding.
      - `RequirementsFundingCovid` (`requirements_funding_covid.py`) — COVID-19 specific funding
        breakdown, derived from plans spanning 2020 onwards.
-     - `Flows` (`flows.py`) — flow-level data (source/destination objects) per plan.
+     - `Flows` (`flows.py`) — downloads every flow year by year (`get_flows`), writes one
+       global file of distinct flows and derives each country's incoming/internal/outgoing
+       files from them.
      - `NonCountryFunding` (`noncountry_funding.py`) — global-file-only rows for funding to
        non-country locations (Global, regions, unspecified), shared funding and unattributed
        plan requirements and funding, plus a per-year reconciliation warning against FTS's total.
@@ -69,8 +71,12 @@ The pipeline in `__main__.py`:
 
 ### Key design points
 
-- **Temporary files**: 3 files per country, each under 5 KB, are written to a temp folder,
-  uploaded to HDX as dataset resources, then deleted.
+- **Temporary files**: country and global CSVs are written to a temp folder, uploaded to HDX
+  as dataset resources, then deleted. All-years flow files reach MBs per country and ~180 MB
+  globally.
+- **Flows** are fetched by year, not by country, and held in memory (~1.7 GB peak). Country
+  `boundary`/`onBoundary` are recalculated from source/destination locations
+  (see `docs/decisions/0004-flows-all-years-by-year.md`).
 - **Config-driven metadata**: static dataset metadata (title, tags, license, etc.) lives in
   `config/hdx_dataset_static.yaml` and `config/hdx_hapi_dataset_static.yaml`; runtime settings
   (API base URL, notes template) live in `config/project_configuration.yaml`.

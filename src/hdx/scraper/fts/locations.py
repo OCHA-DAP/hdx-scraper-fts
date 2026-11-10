@@ -6,10 +6,13 @@ class Locations:
         self._name_to_iso3 = {}
         self._name_to_id = {}
         self._id_to_iso3 = {}
+        self._noncountry_names = set()
         countries = set()
         for country in downloader.download("1/public/location"):
             countryiso3 = country["iso3"]
             if countryiso3 is None:
+                # Global and regions
+                self._noncountry_names.add(country["name"])
                 continue
             countryid = country["id"]
             countryname = country["name"]
@@ -31,10 +34,18 @@ class Locations:
             countryname = object.get("name")
             if countryname is not None:
                 countryid = self._name_to_id.get(countryname)
-        return countryid
+        if countryid is None:
+            return None
+        return int(countryid)
 
-    def get_countryiso_from_name(self, name):
-        return self._name_to_iso3.get(name)
+    def get_iso3_or_noncountry_name(self, name):
+        """ISO3 for a country, the name for Global or a region, else None"""
+        iso3 = self._name_to_iso3.get(name)
+        if iso3:
+            return iso3
+        if name in self._noncountry_names:
+            return name
+        return None
 
     def get_id_to_iso3(self):
         return self._id_to_iso3
