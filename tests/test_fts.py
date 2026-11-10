@@ -11,12 +11,13 @@ import pytest
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.data.dataset import Dataset
 from hdx.utilities.compare import assert_files_same
-from hdx.utilities.dateparse import parse_date
+from hdx.utilities.dateparse import default_enddate, parse_date
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
 
 from hdx.scraper.fts.dataset_generator import DatasetGenerator
 from hdx.scraper.fts.download import FTSDownload
+from hdx.scraper.fts.flows import earliest_date
 from hdx.scraper.fts.hapi_output import HAPIOutput
 from hdx.scraper.fts.locations import Locations
 from hdx.scraper.fts.noncountry_funding import NonCountryFunding
@@ -69,7 +70,9 @@ class TestFTS:
                 locations,
                 today,
                 start_year=2020,
+                flows_start_year=2020,
             )
+            pipeline.get_flows()
             dataset_generator = DatasetGenerator(today, notes, ("covid-19",))
 
             country = locations.countries[0]
@@ -95,7 +98,7 @@ class TestFTS:
                         "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                     },
                 ],
-                "dataset_date": "[2016-03-31T00:00:00 TO 2020-12-31T23:59:59]",
+                "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
                 "data_update_frequency": "1",
                 "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                 "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
@@ -126,12 +129,12 @@ class TestFTS:
                 },
                 {
                     "name": "fts_incoming_funding_afg.csv",
-                    "description": "FTS Incoming Funding Data for Afghanistan for 2020",
+                    "description": "FTS Incoming Funding Data for Afghanistan for all years",
                     "format": "csv",
                 },
                 {
                     "name": "fts_internal_funding_afg.csv",
-                    "description": "FTS Internal Funding Data for Afghanistan for 2020",
+                    "description": "FTS Internal Funding Data for Afghanistan for all years",
                     "format": "csv",
                 },
             ]
@@ -180,7 +183,7 @@ class TestFTS:
                         "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                     },
                 ],
-                "dataset_date": "[2017-04-05T00:00:00 TO 2020-12-31T23:59:59]",
+                "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
                 "data_update_frequency": "1",
                 "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                 "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
@@ -212,12 +215,12 @@ class TestFTS:
                 },
                 {
                     "name": "fts_incoming_funding_jor.csv",
-                    "description": "FTS Incoming Funding Data for Jordan for 2020",
+                    "description": "FTS Incoming Funding Data for Jordan for all years",
                     "format": "csv",
                 },
                 {
                     "name": "fts_internal_funding_jor.csv",
-                    "description": "FTS Internal Funding Data for Jordan for 2020",
+                    "description": "FTS Internal Funding Data for Jordan for all years",
                     "format": "csv",
                 },
             ]
@@ -267,7 +270,7 @@ class TestFTS:
                         "vocabulary_id": "4e61d464-4943-4e97-973a-84673c1aaa87",
                     },
                 ],
-                "dataset_date": "[2016-02-26T00:00:00 TO 2020-12-31T23:59:59]",
+                "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
                 "data_update_frequency": "1",
                 "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                 "owner_org": "fb7c2910-6080-4b66-8b4f-0be9b6dc4d8e",
@@ -299,17 +302,12 @@ class TestFTS:
                 },
                 {
                     "name": "fts_incoming_funding_pse.csv",
-                    "description": "FTS Incoming Funding Data for occupied Palestinian territory for 2020",
+                    "description": "FTS Incoming Funding Data for occupied Palestinian territory for all years",
                     "format": "csv",
                 },
                 {
                     "name": "fts_internal_funding_pse.csv",
-                    "description": "FTS Internal Funding Data for occupied Palestinian territory for 2020",
-                    "format": "csv",
-                },
-                {
-                    "name": "fts_outgoing_funding_pse.csv",
-                    "description": "FTS Outgoing Funding Data for occupied Palestinian territory for 2020",
+                    "description": "FTS Internal Funding Data for occupied Palestinian territory for all years",
                     "format": "csv",
                 },
             ]
@@ -340,7 +338,7 @@ class TestFTS:
             global_results = pipeline.generate_global_dataset(global_dataset)
             assert global_dataset == {
                 "data_update_frequency": "1",
-                "dataset_date": "[2016-02-26T00:00:00 TO 2020-12-31T23:59:59]",
+                "dataset_date": "[2020-01-01T00:00:00 TO 2020-12-31T23:59:59]",
                 "groups": [{"name": "world"}],
                 "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
                 "name": "global-requirements-and-funding-data",
@@ -394,19 +392,9 @@ class TestFTS:
                     "name": "fts_requirements_funding_globalcluster_global.csv",
                 },
                 {
-                    "description": "FTS Incoming Funding Data globally for 2020",
+                    "description": "FTS Funding Data globally for all years",
                     "format": "csv",
-                    "name": "fts_incoming_funding_global.csv",
-                },
-                {
-                    "description": "FTS Internal Funding Data globally for 2020",
-                    "format": "csv",
-                    "name": "fts_internal_funding_global.csv",
-                },
-                {
-                    "description": "FTS Outgoing Funding Data globally for 2020",
-                    "format": "csv",
-                    "name": "fts_outgoing_funding_global.csv",
+                    "name": "fts_funding_global.csv",
                 },
             ]
             # Fixtures cover only AFG, JOR and PSE, so funding of multi-country plans
@@ -418,9 +406,7 @@ class TestFTS:
                 "fts_requirements_funding_covid_global.csv",
                 "fts_requirements_funding_cluster_global.csv",
                 "fts_requirements_funding_globalcluster_global.csv",
-                "fts_incoming_funding_global.csv",
-                "fts_internal_funding_global.csv",
-                "fts_outgoing_funding_global.csv",
+                "fts_funding_global.csv",
             ):
                 assert_files_same(
                     join("tests", "fixtures", filename),
@@ -758,3 +744,8 @@ class TestFTS:
             assert "differs" not in caplog.text
             NonCountryFunding.check_total(2020, rows, 200)
             assert "2020: total funding in global file 99 differs" in caplog.text
+
+    def test_earliest_date(self):
+        rows = [{"date": "1900-01-01"}, {"date": ""}, {"date": "1992-12-31"}]
+        assert earliest_date(rows, 1990) == parse_date("1992-12-31")
+        assert earliest_date([{"date": "1900-01-01"}], 1990) == default_enddate

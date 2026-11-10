@@ -1,7 +1,9 @@
 import logging
+import sys
+from collections import Counter
 
 from hdx.utilities.dateparse import default_enddate, parse_date
-from hdx.utilities.dictandlist import dict_of_dicts_add, dict_of_lists_add
+from hdx.utilities.dictandlist import dict_of_lists_add
 from hdx.utilities.matching import multiple_replace
 
 from hdx.scraper.fts.resource_generator import ResourceGenerator
@@ -11,15 +13,44 @@ logger = logging.getLogger(__name__)
 srcdestmap = {"sourceObjects": "src", "destinationObjects": "dest"}
 
 
+def sort_rows(rows):
+    rows.sort(key=lambda k: (k["date"], int(k["id"])), reverse=True)
+
+
+def earliest_date(rows, start_year):
+    # Dates are YYYY-MM-DD so compare as strings and parse only the earliest.
+    # Dates before start_year are ignored: flows 148776 and 147653 (2016) have
+    # date 1900-01-01
+    start = str(start_year)
+    date = min((row["date"] for row in rows if row["date"] >= start), default=None)
+    return parse_date(date) if date else default_enddate
+
+
 class Flows(ResourceGenerator):
     def __init__(
-        self, configuration, downloader, folder, locations, planidcodemapping, today
+        self,
+        configuration,
+        downloader,
+        folder,
+        locations,
+        planidcodemapping,
+        today,
+        start_year=1990,
     ):
         super().__init__(downloader, folder)
         self._configuration = configuration
         self._locations = locations
+        self._id_to_iso3 = locations.get_id_to_iso3()
         self._planidcodemapping = planidcodemapping
-        self._latestyear = today.year
+        self._today = today
+        self._start_year = start_year
+        self._all_rows = []
+        self._country_rows = {}
+        self._multiple_counts = Counter()
+        # One str object per distinct value, shared by all rows
+        self._values = {}
+        # Mostly distinct per flow so sharing would save little
+        self._not_shared = ("description", "refCode")
 
     def flatten_objects(self, objs, shortened, newrow):
         objinfo_by_type = {}
@@ -53,9 +84,10 @@ class Flows(ResourceGenerator):
                     "code": "Code",
                 }
                 keyname = multiple_replace(keyname, replacements)
+                multiple = False
                 if "UsageYear" in keyname:
                     values = sorted(values)
-                    newrow[f"{keyname}Start"] = values[0]
+                    newrow[sys.intern(f"{keyname}Start")] = values[0]
                     outputstr = values[-1]
                     keyname = f"{keyname}End"
                 elif any(
@@ -64,96 +96,159 @@ class Flows(ResourceGenerator):
                     if keyname[-1] != "s":
                         keyname = f"{keyname}s"
                     if "Location" in keyname:
-                        iso3s = []
-                        for country in values:
-                            iso3 = self._locations.get_countryiso_from_name(country)
-                            if iso3:
-                                iso3s.append(iso3)
-                        values = iso3s
+                        # Global and regions have no ISO3 so keep their names
+                        locations = []
+                        for location in values:
+                            location = self._locations.get_iso3_or_noncountry_name(
+                                location
+                            )
+                            if location:
+                                locations.append(location)
+                        values = locations
                     outputstr = ",".join(sorted(values))
                 else:
                     if len(values) > 1:
                         outputstr = "Multiple"
-                        logger.error(
-                            f"Multiple used instead of {values} for {keyname} in {plan_id} ({shortened})"
-                        )
+                        multiple = True
                     else:
                         outputstr = values[0]
                 if keyname in self._configuration["country_all_columns_to_keep"]:
-                    newrow[keyname] = outputstr
+                    # Interned so the ~500k rows share one copy of each key
+                    newrow[sys.intern(keyname)] = outputstr
+                    if multiple:
+                        self._multiple_counts[keyname] += 1
         return destPlanId
 
-    def generate_country_resources(self, dataset, country):
-        fund_boundaries_info = {}
-        fund_data = []
-        base_funding_url = f"1/fts/flow/custom-search?locationid={country['id']}&"
-        funding_url = self._downloader.get_url(
-            f"{base_funding_url}year={self._latestyear}"
-        )
-        while funding_url:
-            json = self._downloader.download(url=funding_url, data=False)
-            fund_data.extend(json["data"]["flows"])
-            funding_url = json["meta"].get("nextLink")
+    def get_flows(self):
+        """Download flows year by year, keeping each flow once. A flow's usage
+        years can span several years. Years with no flows are skipped until
+        the current year, after which two empty years in a row end the loop."""
+        seen_ids = set()
+        year = self._start_year
+        empty_years = 0
+        while True:
+            count = 0
+            funding_url = self._downloader.get_url(
+                f"1/fts/flow/custom-search?year={year}&limit=1000"
+            )
+            while funding_url:
+                json = self._downloader.download(url=funding_url, data=False)
+                for flow in json["data"]["flows"]:
+                    count += 1
+                    flowid = flow["id"]
+                    if flowid in seen_ids:
+                        continue
+                    seen_ids.add(flowid)
+                    self.add_flow(flow)
+                funding_url = json["meta"].get("nextLink")
+            logger.info(f"{count} flows for {year}")
+            if count == 0 and year > self._today.year:
+                empty_years += 1
+                if empty_years == 2:
+                    break
+            else:
+                empty_years = 0
+            year += 1
+        # Rows keep the shared strings; only the lookup dict is freed
+        self._values.clear()
+        if self._multiple_counts:
+            counts = ", ".join(
+                f"{keyname}: {count}"
+                for keyname, count in sorted(self._multiple_counts.items())
+            )
+            logger.warning(f"Flows with Multiple instead of several values: {counts}")
 
-        start_date = default_enddate
-        for row in fund_data:
-            newrow = {}
-            destPlanId = None
-            for key in row:
-                if key == "reportDetails":
-                    continue
-                value = row[key]
-                shortened = srcdestmap.get(key)
-                if shortened:
-                    newdestPlanId = self.flatten_objects(value, shortened, newrow)
-                    if newdestPlanId:
-                        destPlanId = int(newdestPlanId)
-                    continue
-                if key == "keywords":
-                    if value:
-                        newrow[key] = ",".join(value)
-                    else:
-                        newrow[key] = ""
-                    continue
-                if key in [
-                    "date",
-                    "firstReportedDate",
-                    "decisionDate",
-                    "createdAt",
-                    "updatedAt",
-                ]:
-                    if value:
-                        datestr = value[:10]
-                        newrow[key] = datestr
-                        date = parse_date(datestr)
-                        start_date = min(start_date, date)
-                    else:
-                        newrow[key] = ""
-                    continue
-                renamed_column = self._configuration["rename_columns"].get(key)
-                if renamed_column:
-                    newrow[renamed_column] = value
-                    continue
-                if key in self._configuration["country_all_columns_to_keep"]:
-                    newrow[key] = value
-            if "originalAmount" not in newrow:
-                newrow["originalAmount"] = ""
-            if "originalCurrency" not in newrow:
-                newrow["originalCurrency"] = ""
-            if "refCode" not in newrow:
-                newrow["refCode"] = ""
-            newrow["destPlanCode"] = self._planidcodemapping.get(destPlanId, "")
-            boundary = row["boundary"]
+    @staticmethod
+    def get_location_ids(objs):
+        return {int(obj["id"]) for obj in objs if obj["type"] == "Location"}
+
+    def add_flow(self, flow):
+        newrow = {}
+        destPlanId = None
+        for key in flow:
+            # boundary and onBoundary are relative to the query (year here), so
+            # they are recalculated per country below
+            if key in ("reportDetails", "boundary", "onBoundary"):
+                continue
+            value = flow[key]
+            shortened = srcdestmap.get(key)
+            if shortened:
+                newdestPlanId = self.flatten_objects(value, shortened, newrow)
+                if newdestPlanId:
+                    destPlanId = int(newdestPlanId)
+                continue
+            if key == "keywords":
+                if value:
+                    newrow[key] = ",".join(value)
+                else:
+                    newrow[key] = ""
+                continue
+            if key in [
+                "date",
+                "firstReportedDate",
+                "decisionDate",
+                "createdAt",
+                "updatedAt",
+            ]:
+                if value:
+                    newrow[key] = value[:10]
+                else:
+                    newrow[key] = ""
+                continue
+            renamed_column = self._configuration["rename_columns"].get(key)
+            if renamed_column:
+                newrow[renamed_column] = value
+                continue
+            if key in self._configuration["country_all_columns_to_keep"]:
+                newrow[key] = value
+        for key in ("originalAmount", "originalCurrency", "refCode"):
+            newrow.setdefault(key, "")
+        newrow["destPlanCode"] = self._planidcodemapping.get(destPlanId, "")
+        for key, value in newrow.items():
+            if isinstance(value, str) and key not in self._not_shared:
+                newrow[key] = self._values.setdefault(value, value)
+        self._all_rows.append(newrow)
+
+        # Rules match FTS's custom-search?locationid= boundary and onBoundary
+        src_ids = self.get_location_ids(flow["sourceObjects"])
+        dest_ids = self.get_location_ids(flow["destinationObjects"])
+        if len(src_ids) > 1 or len(dest_ids) > 1:
+            onboundary = "shared"
+        else:
+            onboundary = "single"
+        for locationid in src_ids | dest_ids:
+            countryiso3 = self._id_to_iso3.get(locationid)
+            if not countryiso3:
+                continue
+            if locationid not in src_ids:
+                boundary = "incoming"
+            elif locationid not in dest_ids:
+                boundary = "outgoing"
+            elif flow["newMoney"]:
+                boundary = "incoming"
+            else:
+                boundary = "internal"
+            dict_of_lists_add(
+                self._country_rows, countryiso3, (boundary, onboundary, newrow)
+            )
+
+    def generate_country_resources(self, dataset, country):
+        countryiso3 = country["iso3"]
+        fund_boundaries_info = {}
+        country_rows = self._country_rows.pop(countryiso3, [])
+        start_date = earliest_date(
+            (row for _, _, row in country_rows), self._start_year
+        )
+        for boundary, onboundary, row in country_rows:
+            newrow = row | {"boundary": boundary, "onBoundary": onboundary}
             dict_of_lists_add(fund_boundaries_info, boundary, newrow)
 
-        countryiso3 = country["iso3"]
         resources = []
         for boundary in sorted(fund_boundaries_info):
-            rows = sorted(
-                fund_boundaries_info[boundary], key=lambda k: k["date"], reverse=True
-            )
+            rows = fund_boundaries_info[boundary]
+            sort_rows(rows)
             filename = f"fts_{boundary}_funding_{countryiso3.lower()}.csv"
-            description = f"FTS {boundary.capitalize()} Funding Data for {country['name']} for {self._latestyear}"
+            description = f"FTS {boundary.capitalize()} Funding Data for {country['name']} for all years"
             success, results = self.generate_resource(
                 dataset,
                 rows,
@@ -165,22 +260,26 @@ class Flows(ResourceGenerator):
             )
             if success:
                 resources.append(results["resource"])
-            dict_of_dicts_add(self._global_rows, boundary, countryiso3, rows)
         return resources, start_date
 
-    def generate_global_resources(self, dataset):
-        for boundary in sorted(self._global_rows):
-            global_rows = self._global_rows[boundary]
-            rows = []
-            for countryiso3 in sorted(global_rows):
-                rows.extend(global_rows[countryiso3])
-            filename = f"fts_{boundary}_funding_global.csv"
-            description = f"FTS {boundary.capitalize()} Funding Data globally for {self._latestyear}"
-            self.generate_resource(
-                dataset,
-                rows,
-                "global",
-                headers=self._configuration["plans_headers"],
-                filename=filename,
-                description=description,
-            )
+    def generate_global_resource(self, dataset):
+        """One file of every flow, including flows to no country (Global,
+        regions, no location). It has no boundary or onBoundary columns as
+        those are relative to a country."""
+        # Rows of countries with no dataset or skipped on resume
+        self._country_rows.clear()
+        rows = self._all_rows
+        sort_rows(rows)
+        headers = [
+            header
+            for header in self._configuration["plans_headers"]
+            if header not in ("boundary", "onBoundary")
+        ]
+        self.generate_resource(
+            dataset,
+            rows,
+            "global",
+            headers=headers,
+            filename="fts_funding_global.csv",
+            description="FTS Funding Data globally for all years",
+        )

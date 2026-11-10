@@ -23,7 +23,14 @@ logger = logging.getLogger(__name__)
 
 class Pipeline:
     def __init__(
-        self, configuration, downloader, folder, locations, today, start_year=1999
+        self,
+        configuration,
+        downloader,
+        folder,
+        locations,
+        today,
+        start_year=1999,
+        flows_start_year=1990,
     ):
         self._configuration = configuration
         self._downloader = downloader
@@ -40,7 +47,13 @@ class Pipeline:
         )
         self.get_plans(start_year)
         self._flows = Flows(
-            configuration, downloader, folder, locations, self._planidcodemapping, today
+            configuration,
+            downloader,
+            folder,
+            locations,
+            self._planidcodemapping,
+            today,
+            flows_start_year,
         )
         self._others = self.setup_others(folder, locations)
         self._start_date = default_enddate
@@ -98,6 +111,9 @@ class Pipeline:
                         dict_of_lists_add(plans_by_year, year, plan)
                         self._plans_by_year_by_country[countryiso3] = plans_by_year
 
+    def get_flows(self):
+        self._flows.get_flows()
+
     def call_others(self, row):
         requirements_clusters, funding_clusters, notspecified, shared = self._others[
             "cluster"
@@ -139,8 +155,9 @@ class Pipeline:
         if resource is None:
             logger.error(f"No requirements or funding data for {countryiso3}")
         else:
-            reqfund_start_date = parse_date(f"{reqfund_start_year}-01-01")
-            start_date = min(start_date, reqfund_start_date)
+            # Flow dates are not used when there is requirements and funding
+            # data: flows 148776 and 147653 (2016) have date 1900-01-01
+            start_date = parse_date(f"{reqfund_start_year}-01-01")
             resources.insert(0, resource)
             self.generate_other_resources(resources, dataset, country)
         dataset._resources = resources
@@ -172,7 +189,7 @@ class Pipeline:
         self._others["covid"].generate_global_resource(dataset)
         self._others["cluster"].generate_global_resource(dataset)
         self._others["globalcluster"].generate_global_resource(dataset)
-        self._flows.generate_global_resources(dataset)
+        self._flows.generate_global_resource(dataset)
         dataset.set_time_period(self._start_date, self._today)
         results["dataset"] = dataset
         return results
