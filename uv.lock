@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.13"
 
 [[package]]
@@ -502,7 +502,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "hdx-python-api", specifier = ">=6.7.8" },
+    { name = "hdx-python-api", specifier = ">=6.7.9" },
     { name = "hdx-python-country", specifier = ">=4.3.1" },
     { name = "hdx-python-utilities", specifier = ">=4.2.7" },
 ]
