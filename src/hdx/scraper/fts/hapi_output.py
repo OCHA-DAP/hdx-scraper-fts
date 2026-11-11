@@ -51,7 +51,9 @@ class HAPIOutput:
                 "Y" if Country.get_gho_status_from_iso3(countryiso3) else "N"
             )
 
-            appeal_code = row.get("code")
+            # Plan 443 (Syria Regional Refugee Response Plan 2014) has no code,
+            # so falls back to its plan id to avoid clashing with "Not specified"
+            appeal_code = row.get("code") or row.get("id")
             if not appeal_code:
                 appeal_code = "Not specified"
             hapi_row["appeal_code"] = appeal_code
