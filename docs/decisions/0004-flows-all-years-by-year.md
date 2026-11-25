@@ -48,11 +48,11 @@ distinct flows (multi-year flows repeat), fetched in 53 min. `boundary` and
   They were blank, so flows to Global could not be told from flows with no
   location. This affects 6,538 country-file rows, mostly donors' outgoing files
   (e.g. 1,208 United States → Global flows).
-- Dataset time periods start at the first requirements and funding year, not
-  the earliest flow date. Flows 148776 and 147653 (2016, CAF) have date
-  1900-01-01, which made the global and CAF datasets start in 1900. A
-  country with flows but no requirements and funding uses its earliest flow
-  date, ignoring dates before the flows start year (1990).
+- Dataset time periods start at the earliest of the first requirements and
+  funding year and the earliest flow date, ignoring flow dates before the flows
+  start year (1990). Flows 148776 and 147653 (2016, CAF) have date 1900-01-01,
+  which would otherwise make the global and CAF datasets start in 1900. They
+  should be reported to FTS.
 
 ## Consequences
 

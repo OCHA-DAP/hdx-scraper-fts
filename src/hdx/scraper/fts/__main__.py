@@ -133,6 +133,7 @@ def main(
             global_dataset.update_from_yaml(
                 script_dir_plus_file(join("config", "hdx_dataset_static.yaml"), main),
             )
+            global_dataset["caveats"] += configuration["global_caveats"]
             global_dataset.create_in_hdx(
                 remove_additional_resources=True,
                 match_resource_order=True,
