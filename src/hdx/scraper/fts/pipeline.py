@@ -160,9 +160,7 @@ class Pipeline:
             # only funding is flow 385136 dated 2026-04-14 with usage year
             # 2027, so a future requirements/funding year is ignored.
             if reqfund_start_year <= self._today.year:
-                start_date = min(
-                    start_date, parse_date(f"{reqfund_start_year}-01-01")
-                )
+                start_date = min(start_date, parse_date(f"{reqfund_start_year}-01-01"))
             resources.insert(0, resource)
             self.generate_other_resources(resources, dataset, country)
         dataset._resources = resources
