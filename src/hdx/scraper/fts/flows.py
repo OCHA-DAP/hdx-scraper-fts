@@ -270,6 +270,7 @@ class Flows(ResourceGenerator):
         self._country_rows.clear()
         rows = self._all_rows
         sort_rows(rows)
+        start_date = earliest_date(rows, self._start_year)
         headers = [
             header
             for header in self._configuration["plans_headers"]
@@ -283,3 +284,4 @@ class Flows(ResourceGenerator):
             filename="fts_funding_global.csv",
             description="FTS Funding Data globally for all years",
         )
+        return start_date
