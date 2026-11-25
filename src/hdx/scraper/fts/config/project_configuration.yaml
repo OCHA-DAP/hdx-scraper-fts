@@ -148,3 +148,7 @@ hapi_headers:
   - resource_hdx_id
   - warning
   - error
+
+global_caveats: |
+
+  The global flows file fts_funding_global.csv (all years, one row per flow, no boundary or onBoundary columns) replaces the former global incoming, internal and outgoing funding files, which covered only the current year. Country incoming, internal and outgoing files cover all years.
